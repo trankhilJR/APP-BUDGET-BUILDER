@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulateur de budget Reddit Ads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F1EC;
+    --surface: #FFFFFF;
+    --ink: #1B2420;
+    --ink-soft: #565F58;
+    --line: #D8D9D1;
+    --ember: #BF4E2C;
+    --ember-soft: #F4E2DA;
+    --moss: #3F5A47;
+    --moss-soft: #E1E9E1;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  header.masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 20px;
+    margin-bottom: 32px;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  header.masthead h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 30px;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  header.masthead p { margin: 0; color: var(--ink-soft); font-size: 14px; }
+
+  .brand-fields {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .brand-fields label {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-soft);
+    margin-bottom: 3px;
+  }
+
+  .brand-fields input {
+    border: none;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 3px 0;
+    width: 170px;
+    color: var(--ink);
+  }
+  .brand-fields input:focus { outline: none; border-color: var(--ember); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .panel h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    margin: 0 0 4px;
+  }
+
+  .panel .hint {
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    margin: 0 0 18px;
+  }
+
+  .field { margin-bottom: 16px; }
+
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 5px;
+    color: var(--ink);
+  }
+
+  .field label .val {
+    font-variant-numeric: tabular-nums;
+    color: var(--ember);
+    font-weight: 600;
+  }
+
+  .field select,
+  .field input[type="number"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .field input[type="range"] {
+    width: 100%;
+    accent-color: var(--ember);
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .divider { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+
+  /* Funnel panel */
+  .funnel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+  }
+
+  .stage-list { display: flex; flex-direction: column; }
+
+  .stage {
+    display: grid;
+    grid-template-columns: 130px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+  }
+  .stage:first-child { border-top: none; }
+
+  .stage .label { font-size: 13px; color: var(--ink-soft); }
+
+  .stage .bar-track {
+    height: 10px;
+    background: var(--moss-soft);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .stage .bar-fill {
+    height: 100%;
+    background: var(--ember);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .stage .figure {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 100px;
+  }
+
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 20px;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .kpi {
+    background: var(--surface);
+    padding: 16px;
+  }
+  .kpi .kpi-label { font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; }
+  .kpi .kpi-value {
+    font-family: 'Fraunces', serif;
+    font-size: 21px;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi.good .kpi-value { color: var(--moss); }
+  .kpi.warn .kpi-value { color: var(--ember); }
+
+  .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+
+  button {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--surface);
+    cursor: pointer;
+  }
+  button.secondary {
+    background: transparent;
+    color: var(--ink);
+  }
+  button:hover { opacity: 0.85; }
+
+  /* Scenarios */
+  .scenarios-panel { margin-top: 24px; }
+
+  table.scenario-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 10px;
+  }
+  table.scenario-table th, table.scenario-table td {
+    text-align: right;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+  table.scenario-table th:first-child, table.scenario-table td:first-child {
+    text-align: left;
+    font-variant-numeric: initial;
+  }
+  table.scenario-table thead th {
+    color: var(--ink-soft);
+    font-weight: 500;
+    border-bottom: 2px solid var(--ink);
+  }
+  table.scenario-table td.remove {
+    text-align: center;
+    cursor: pointer;
+    color: var(--ember);
+    font-weight: 600;
+  }
+
+  .empty-scenarios {
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-style: italic;
+    padding: 10px 0;
+  }
+
+  footer.note {
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+
+  @media print {
+    .field select, .field input, .actions, .brand-fields input { display: none !important; }
+    button { display: none !important; }
+    .wrap { padding: 0; }
+    .layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Simulateur de budget Reddit Ads</h1>
+      <p>Planification de campagne et projection de pipeline</p>
+    </div>
+    <div class="brand-fields">
+      <div>
+        <label>Ton agence</label>
+        <input id="agencyName" type="text" placeholder="Nom de ton agence" value="">
+      </div>
+      <div>
+        <label>Client</label>
+        <input id="clientName" type="text" placeholder="Nom du client" value="">
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- INPUT PANEL -->
+    <div class="panel">
+      <h2>Hypothèses de campagne</h2>
+      <p class="hint">Ajuste les valeurs par défaut selon ce que tu sais du client.</p>
+
+      <div class="field">
+        <label>Budget mensuel <span class="val" id="budgetVal">3 000 €</span></label>
+        <input type="range" id="budget" min="200" max="30000" step="100" value="3000">
+      </div>
+
+      <div class="field">
+        <label>Secteur</label>
+        <select id="industry">
+          <option value="consumer">Grand public / DTC</option>
+          <option value="saas" selected>Tech / SaaS</option>
+          <option value="finance">Finance / Assurance</option>
+          <option value="gaming">Gaming / Loisirs</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Objectif</label>
+          <select id="objective">
+            <option value="traffic">Trafic</option>
+            <option value="conversion" selected>Conversion</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Ciblage</label>
+          <select id="mix">
+            <option value="broad">Large</option>
+            <option value="niche" selected>Niche</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <p class="hint" style="margin-bottom:14px;">Hypothèses du funnel (éditables)</p>
+
+      <div class="field">
+        <label>CPM (coût pour 1000 impressions) <span class="val" id="cpmVal">6,0 €</span></label>
+        <input type="range" id="cpm" min="1" max="15" step="0.1" value="6">
+      </div>
+
+      <div class="field">
+        <label>CTR (taux de clic) <span class="val" id="ctrVal">0,35 %</span></label>
+        <input type="range" id="ctr" min="0.05" max="2" step="0.01" value="0.35">
+      </div>
+
+      <div class="field">
+        <label>Clic → Lead <span class="val" id="c2lVal">5,0 %</span></label>
+        <input type="range" id="c2l" min="0.5" max="30" step="0.5" value="5">
+      </div>
+
+      <div class="field">
+        <label>Lead → Client <span class="val" id="l2cVal">12,0 %</span></label>
+        <input type="range" id="l2c" min="1" max="50" step="1" value="12">
+      </div>
+
+      <div class="field">
+        <label>Valeur moyenne client <span class="val" id="ltvVal">1 200 €</span></label>
+        <input type="range" id="ltv" min="50" max="20000" step="50" value="1200">
+      </div>
+    </div>
+
+    <!-- FUNNEL / OUTPUT -->
+    <div class="panel">
+      <div class="funnel-header">
+        <h2>Projection du pipeline</h2>
+      </div>
+
+      <div class="stage-list" id="stageList"></div>
+
+      <div class="kpi-row" id="kpiRow"></div>
+
+      <div class="actions">
+        <button id="saveScenario">Enregistrer comme scénario</button>
+        <button class="secondary" id="exportCsv">Exporter en CSV</button>
+        <button class="secondary" id="printReport">Exporter en PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCENARIOS -->
+  <div class="panel scenarios-panel">
+    <h2>Comparaison de scénarios</h2>
+    <p class="hint">Enregistre plusieurs scénarios (budgets, ciblages) pour les comparer côte à côte avec ton client.</p>
+    <div id="scenarioTableWrap"><p class="empty-scenarios">Aucun scénario enregistré pour l'instant.</p></div>
+  </div>
+
+  <footer class="note">
+    Les hypothèses de coûts (CPM, CTR) sont des ordres de grandeur de marché à ajuster selon le secteur et la période. Elles ne remplacent pas les données réelles issues d'un compte Reddit Ads actif.
+  </footer>
+
+</div>
+
+<script>
+const presets = {
+  consumer: { cpm: 4,   ctr: 0.45, c2l: 3,  l2c: 8  },
+  saas:     { cpm: 6,   ctr: 0.35, c2l: 5,  l2c: 12 },
+  finance:  { cpm: 6,   ctr: 0.30, c2l: 4,  l2c: 10 },
+  gaming:   { cpm: 2.5, ctr: 0.50, c2l: 2,  l2c: 5  },
+};
+
+const els = {
+  agencyName: document.getElementById('agencyName'),
+  clientName: document.getElementById('clientName'),
+  budget: document.getElementById('budget'),
+  industry: document.getElementById('industry'),
+  objective: document.getElementById('objective'),
+  mix: document.getElementById('mix'),
+  cpm: document.getElementById('cpm'),
+  ctr: document.getElementById('ctr'),
+  c2l: document.getElementById('c2l'),
+  l2c: document.getElementById('l2c'),
+  ltv: document.getElementById('ltv'),
+};
+
+const fmtEUR = n => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+const fmtNum = n => Math.round(n).toLocaleString('fr-FR');
+
+function applyPreset() {
+  const base = presets[els.industry.value];
+  let cpm = base.cpm, c2l = base.c2l, l2c = base.l2c;
+
+  if (els.objective.value === 'conversion') { cpm *= 1.25; l2c *= 1.3; }
+  if (els.mix.value === 'niche') { cpm *= 1.2; c2l *= 1.4; l2c *= 1.2; }
+  else { cpm *= 0.85; }
+
+  els.cpm.value = cpm.toFixed(1);
+  els.ctr.value = base.ctr;
+  els.c2l.value = Math.min(c2l, 30).toFixed(1);
+  els.l2c.value = Math.min(l2c, 50).toFixed(0);
+  syncLabels();
+  compute();
+}
+
+function syncLabels() {
+  document.getElementById('budgetVal').textContent = fmtEUR(+els.budget.value);
+  document.getElementById('cpmVal').textContent = (+els.cpm.value).toFixed(1).replace('.', ',') + ' €';
+  document.getElementById('ctrVal').textContent = (+els.ctr.value).toFixed(2).replace('.', ',') + ' %';
+  document.getElementById('c2lVal').textContent = (+els.c2l.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('l2cVal').textContent = (+els.l2c.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('ltvVal').textContent = fmtEUR(+els.ltv.value);
+}
+
+function currentFunnel() {
+  const budget = +els.budget.value;
+  const cpm = +els.cpm.value;
+  const ctr = +els.ctr.value / 100;
+  const c2l = +els.c2l.value / 100;
+  const l2c = +els.l2c.value / 100;
+  const ltv = +els.ltv.value;
+
+  const impressions = (budget / cpm) * 1000;
+  const clicks = impressions * ctr;
+  const leads = clicks * c2l;
+  const clients = leads * l2c;
+  const revenue = clients * ltv;
+  const cpa = clients > 0 ? budget / clients : 0;
+  const cpl = leads > 0 ? budget / leads : 0;
+  const roas = budget > 0 ? revenue / budget : 0;
+
+  return { budget, impressions, clicks, leads, clients, revenue, cpa, cpl, roas };
+}
+
+function renderFunnel() {
+  const f = currentFunnel();
+  const stages = [
+    { label: 'Impressions', value: f.impressions, ref: f.impressions },
+    { label: 'Clics', value: f.clicks, ref: f.impressions },
+    { label: 'Leads', value: f.leads, ref: f.impressions },
+    { label: 'Clients', value: f.clients, ref: f.impressions },
+  ];
+
+  document.getElementById('stageList').innerHTML = stages.map(s => {
+    const pct = Math.max(2, (s.value / s.ref) * 100);
+    return `
+      <div class="stage">
+        <div class="label">${s.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure">${fmtNum(s.value)}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Coût par lead</div>
+      <div class="kpi-value">${fmtEUR(f.cpl)}</div>
+    </div>
+    <div class="kpi ${f.cpa > 0 && f.cpa < f.budget * 0.3 ? 'good' : 'warn'}">
+      <div class="kpi-label">Coût par client (CPA)</div>
+      <div class="kpi-value">${f.clients > 0 ? fmtEUR(f.cpa) : '—'}</div>
+    </div>
+    <div class="kpi ${f.roas >= 1 ? 'good' : 'warn'}">
+      <div class="kpi-label">ROAS projeté</div>
+      <div class="kpi-value">${f.roas.toFixed(2)}×</div>
+    </div>
+  `;
+}
+
+function compute() {
+  syncLabels();
+  renderFunnel();
+}
+
+[els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.ltv].forEach(el =>
+  el.addEventListener('input', compute)
+);
+[els.industry, els.objective, els.mix].forEach(el =>
+  el.addEventListener('change', applyPreset)
+);
+
+// Scenarios
+let scenarios = [];
+
+function saveScenario() {
+  const f = currentFunnel();
+  scenarios.push({
+    name: `Scénario ${scenarios.length + 1}`,
+    industry: els.industry.options[els.industry.selectedIndex].text,
+    objective: els.objective.options[els.objective.selectedIndex].text,
+    mix: els.mix.options[els.mix.selectedIndex].text,
+    ...f
+  });
+  renderScenarios();
+}
+
+function renderScenarios() {
+  const wrap = document.getElementById('scenarioTableWrap');
+  if (scenarios.length === 0) {
+    wrap.innerHTML = '<p class="empty-scenarios">Aucun scénario enregistré pour l\'instant.</p>';
+    return;
+  }
+  wrap.innerHTML = `
+    <table class="scenario-table">
+      <thead>
+        <tr>
+          <th>Scénario</th>
+          <th>Budget</th>
+          <th>Impressions</th>
+          <th>Clics</th>
+          <th>Leads</th>
+          <th>Clients</th>
+          <th>CPA</th>
+          <th>ROAS</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${scenarios.map((s, i) => `
+          <tr>
+            <td>${s.name}<br><span style="color:var(--ink-soft);font-size:11.5px;">${s.industry} · ${s.objective} · ${s.mix}</span></td>
+            <td>${fmtEUR(s.budget)}</td>
+            <td>${fmtNum(s.impressions)}</td>
+            <td>${fmtNum(s.clicks)}</td>
+            <td>${fmtNum(s.leads)}</td>
+            <td>${fmtNum(s.clients)}</td>
+            <td>${s.clients > 0 ? fmtEUR(s.cpa) : '—'}</td>
+            <td>${s.roas.toFixed(2)}×</td>
+            <td class="remove" onclick="removeScenario(${i})">✕</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function removeScenario(i) {
+  scenarios.splice(i, 1);
+  renderScenarios();
+}
+
+function exportCsv() {
+  if (scenarios.length === 0) saveScenario();
+  const headers = ['Scenario','Secteur','Objectif','Ciblage','Budget','Impressions','Clics','Leads','Clients','CPA','ROAS'];
+  const rows = scenarios.map(s => [
+    s.name, s.industry, s.objective, s.mix,
+    s.budget.toFixed(0), s.impressions.toFixed(0), s.clicks.toFixed(0),
+    s.leads.toFixed(1), s.clients.toFixed(2), s.cpa.toFixed(0), s.roas.toFixed(2)
+  ]);
+  const csv = [headers, ...rows].map(r => r.join(';')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'scenarios-reddit-ads.csv';
+  link.click();
+}
+
+document.getElementById('saveScenario').addEventListener('click', saveScenario);
+document.getElementById('exportCsv').addEventListener('click', exportCsv);
+document.getElementById('printReport').addEventListener('click', () => window.print());
+
+applyPreset();
+</script>
+</body>
+</html>
