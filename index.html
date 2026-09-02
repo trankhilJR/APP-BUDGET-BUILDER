@@ -256,6 +256,49 @@
 
   .divider { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
 
+  /* View switch: Vue simple / Vue Full Funnel */
+  .view-tabs { margin-bottom: 24px; }
+
+  /* Full Funnel view */
+  .ff-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+
+  .kpi-row.ff-kpi-row { grid-template-columns: repeat(5, 1fr); }
+  @media (max-width: 980px) { .kpi-row.ff-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .kpi-row.ff-kpi-row { grid-template-columns: 1fr; } }
+
+  .kpi .kpi-sub { font-size: 11px; color: var(--ink-soft); margin-top: 3px; }
+
+  .stage-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-left: 6px;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .stage-badge.media { background: var(--ember-soft); color: var(--ember); }
+  .stage-badge.sales { background: var(--moss-soft); color: var(--moss); }
+
+  .figure-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 110px; }
+  .cost-label { font-size: 10.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  .ff-recommendation {
+    margin-top: 24px;
+    background: var(--ember-soft);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--ember);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .ff-recommendation h3 { margin: 0 0 6px; font-family: 'Fraunces', serif; font-weight: 500; font-size: 15px; color: var(--ink); }
+  .ff-recommendation p { margin: 0; font-size: 13px; color: var(--ink); line-height: 1.55; }
+
+  .ff-forecast-panel { margin-top: 24px; }
+  #ffForecastSummary { color: var(--ink-soft); font-size: 12.5px; }
+  tr.ff-breakeven td { background: var(--moss-soft); }
+
   /* Advanced settings */
   .advanced-settings { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
   .advanced-settings summary {
@@ -539,6 +582,229 @@
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+  /* Onboarding wizard — choix d'objectif + mini-questionnaire avant la vue détaillée */
+  .onboarding {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 5000;
+    overflow-y: auto;
+    padding: 48px 24px 80px;
+  }
+  .onboarding[hidden] { display: none; }
+  body.onboarding-active { overflow: hidden; }
+
+  .ob-header[hidden] { display: none; }
+  .ob-topbar {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ob-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--ink);
+  }
+  .ob-brand .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--ember);
+    display: inline-block;
+  }
+  .ob-change-link {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .ob-change-link:hover { color: var(--ink); }
+
+  .ob-progress-track {
+    display: flex;
+    gap: 8px;
+    max-width: 620px;
+    margin: 0 auto 44px;
+  }
+  .ob-progress-seg {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+  }
+  .ob-progress-seg.filled { background: var(--ember); }
+
+  .ob-stage { max-width: 900px; margin: 0 auto; text-align: center; }
+
+  .ob-hero-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 36px;
+    margin: 0 0 10px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .ob-hero-sub { color: var(--ink-soft); font-size: 15px; margin: 0 0 36px; }
+  .ob-section-label {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+    font-weight: 600;
+  }
+
+  .ob-objective-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    text-align: left;
+  }
+  @media (max-width: 760px) {
+    .ob-objective-grid { grid-template-columns: 1fr; }
+  }
+  .ob-card-obj {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .ob-card-obj:hover { border-color: var(--ember); transform: translateY(-2px); }
+  .ob-card-obj.recommended { border-color: var(--moss); box-shadow: 0 0 0 1px var(--moss); }
+  .ob-badge-rec {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--moss);
+    color: var(--surface);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .ob-card-icon {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 19px;
+    margin-bottom: 16px;
+    background: var(--ember-soft);
+  }
+  .ob-card-obj h3 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 18px; margin: 0 0 8px; color: var(--ink); }
+  .ob-card-obj p { font-size: 13px; color: var(--ink-soft); margin: 0 0 14px; line-height: 1.5; }
+  .ob-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .ob-tag {
+    font-size: 11px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .ob-start-link { font-size: 13px; font-weight: 600; color: var(--ember); }
+
+  .ob-question-title { font-family: 'Fraunces', serif; font-weight: 500; font-size: 26px; margin: 0 0 8px; color: var(--ink); }
+  .ob-question-sub { color: var(--ink-soft); font-size: 14px; margin: 0 0 28px; }
+  .ob-options { display: flex; flex-direction: column; gap: 10px; max-width: 620px; margin: 0 auto; text-align: left; }
+  .ob-option {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 15px 18px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition: border-color 0.15s ease;
+  }
+  .ob-option:hover { border-color: var(--ember); }
+  .ob-option .ob-option-sub { font-weight: 400; color: var(--ink-soft); font-size: 12.5px; }
+
+  .ob-nav { max-width: 620px; margin: 22px auto 0; display: flex; justify-content: space-between; }
+  .ob-nav button { background: none; border: none; color: var(--ink-soft); font-size: 13px; cursor: pointer; padding: 0; }
+  .ob-nav button:hover { color: var(--ink); }
+
+  .ob-reveal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--moss-soft);
+    color: var(--moss);
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .ob-hero-title .ob-highlight { color: var(--moss); }
+  .ob-bench-card {
+    max-width: 560px;
+    margin: 0 auto 20px;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--ember);
+    border-radius: 6px;
+    padding: 22px 24px;
+  }
+  .ob-card-head { font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; font-weight: 600; }
+  .ob-bench-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+  .ob-bench-row:first-of-type { border-top: none; }
+  .ob-bench-label { font-weight: 600; font-size: 14px; color: var(--ink); flex: 1; }
+  .ob-bench-range { color: var(--ink-soft); font-size: 12px; white-space: nowrap; }
+  .ob-bench-pill { background: var(--moss-soft); color: var(--moss); font-weight: 700; font-size: 13px; padding: 4px 12px; border-radius: 999px; white-space: nowrap; }
+  .ob-source { font-size: 11.5px; color: var(--ink-soft); margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .ob-cta {
+    display: block;
+    max-width: 560px;
+    margin: 0 auto 16px;
+    width: 100%;
+    background: var(--ember);
+    color: #fff;
+    border: 1px solid var(--ember);
+    border-radius: 6px;
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .ob-cta:hover { opacity: 0.9; }
+  .ob-skip-link {
+    display: block;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 13px;
+    cursor: pointer;
+    margin: 0 auto;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .ob-skip-link:hover { color: var(--ink); }
+
+  @media print {
+    .onboarding { display: none !important; }
+  }
+
   /* Presentation mode */
   body.presentation-mode { background: var(--bg); }
   body.presentation-mode .wrap { max-width: 1400px; padding-top: 30px; }
@@ -577,7 +843,8 @@
     }
     .field select, .field input, .actions, .brand-fields input,
     .header-actions, .advanced-settings, .tabs, .visually-hidden-select,
-    .logo-field, .note-input, .col-actions, .toast {
+    .logo-field, .note-input, .col-actions, .toast,
+    .view-tabs, #fullFunnelView {
       display: none !important;
     }
     button { display: none !important; }
@@ -608,6 +875,17 @@
 </head>
 <body>
 
+<div class="onboarding" id="onboarding" hidden>
+  <div class="ob-header" id="obHeader" hidden>
+    <div class="ob-topbar">
+      <div class="ob-brand"><span class="dot"></span> Simulateur Reddit Ads</div>
+      <button type="button" class="ob-change-link" data-action="change-objective">Changer d'objectif</button>
+    </div>
+    <div class="ob-progress-track" id="obProgress"></div>
+  </div>
+  <div class="ob-stage" id="onboardingInner"></div>
+</div>
+
 <section class="cover-page" id="coverPage">
   <div class="cover-inner">
     <img id="coverLogo" class="cover-logo" hidden alt="Logo agence">
@@ -634,6 +912,7 @@
     <div class="masthead-side">
       <div class="header-actions">
         <button type="button" class="icon-toggle" id="themeToggle" aria-label="Basculer le mode sombre">🌙</button>
+        <button type="button" class="secondary" id="reopenOnboardingBtn">✨ Assistant de démarrage</button>
         <button type="button" class="secondary" id="shareBtn">Copier le lien</button>
         <button type="button" class="secondary" id="presentBtn">Mode présentation</button>
       </div>
@@ -659,6 +938,16 @@
     </div>
   </header>
 
+  <div class="tabs view-tabs" data-target="viewSwitch" role="tablist">
+    <button type="button" class="tab-btn" data-value="simple">Vue simple</button>
+    <button type="button" class="tab-btn" data-value="full">Vue Full Funnel</button>
+  </div>
+  <select id="viewSwitch" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+    <option value="simple" selected>Vue simple</option>
+    <option value="full">Vue Full Funnel</option>
+  </select>
+
+  <div id="simpleView">
   <div class="layout">
 
     <!-- INPUT PANEL -->
@@ -768,6 +1057,136 @@
     <div id="scenarioChartWrap"></div>
     <div id="scenarioTableWrap"><p class="empty-scenarios">Aucun scénario enregistré pour l'instant.</p></div>
   </div>
+  </div>
+  <!-- /simpleView -->
+
+  <!-- FULL FUNNEL VIEW -->
+  <div id="fullFunnelView" hidden>
+    <div class="layout">
+      <!-- FULL FUNNEL INPUTS -->
+      <div class="panel" id="ffInputPanel">
+        <h2>Hypothèses du funnel complet</h2>
+        <p class="hint">Modélise un cycle de vente B2B complet, du lead au client signé.</p>
+
+        <div class="field">
+          <label>Mode de planification</label>
+          <div class="tabs" data-target="ffPlanningMode" role="tablist">
+            <button type="button" class="tab-btn" data-value="buildup">Objectif de leads</button>
+            <button type="button" class="tab-btn" data-value="budgetfirst">Budget d'abord</button>
+          </div>
+          <select id="ffPlanningMode" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+            <option value="buildup" selected>Objectif de leads</option>
+            <option value="budgetfirst">Budget d'abord</option>
+          </select>
+        </div>
+        <p class="hint" id="ffPlanningModeHint" style="margin:-8px 0 14px;"></p>
+
+        <div class="field" id="ffTargetLeadsField">
+          <label>Leads visés par mois <span class="val" id="ffTargetLeadsVal">100</span></label>
+          <input type="range" id="ffTargetLeads" min="10" max="2000" step="10" value="100">
+        </div>
+        <div class="field" id="ffBudgetField" hidden>
+          <label>Budget mensuel <span class="val" id="ffBudgetVal">25 000 €</span></label>
+          <input type="range" id="ffBudget" min="500" max="200000" step="500" value="25000">
+        </div>
+
+        <div class="field">
+          <label>Coût par lead (CPL) <span class="val" id="ffCplVal">250 €</span></label>
+          <input type="range" id="ffCpl" min="5" max="1000" step="5" value="250">
+        </div>
+
+        <div class="field" id="ffAudienceField" hidden>
+          <label>Taille de l'audience <span class="val" id="ffAudienceVal">300 000</span></label>
+          <input type="range" id="ffAudience" min="10000" max="2000000" step="10000" value="300000">
+          <p class="hint" style="margin:4px 0 0;">Utilisée pour modéliser les rendements décroissants à budget élevé.</p>
+        </div>
+
+        <hr class="divider">
+        <p class="hint" style="margin-bottom:14px;">Taux de conversion du funnel</p>
+
+        <div class="field">
+          <label>Lead → MQL <span class="val" id="ffL2mVal">40,0 %</span></label>
+          <input type="range" id="ffL2m" min="5" max="90" step="1" value="40">
+          <p class="hint" style="margin:4px 0 0;">Benchmark marché : 30–50 %</p>
+        </div>
+        <div class="field">
+          <label>MQL → SQL <span class="val" id="ffM2sVal">9,0 %</span></label>
+          <input type="range" id="ffM2s" min="2" max="60" step="1" value="9">
+          <p class="hint" style="margin:4px 0 0;">Benchmark marché : 8–10 %</p>
+        </div>
+        <div class="field">
+          <label>SQL → Opportunité <span class="val" id="ffS2oVal">40,0 %</span></label>
+          <input type="range" id="ffS2o" min="5" max="80" step="1" value="40">
+          <p class="hint" style="margin:4px 0 0;">Benchmark marché : 30–50 %</p>
+        </div>
+        <div class="field">
+          <label>Opportunité → Gagné <span class="val" id="ffO2wVal">25,0 %</span></label>
+          <input type="range" id="ffO2w" min="5" max="70" step="1" value="25">
+          <p class="hint" style="margin:4px 0 0;">Benchmark marché : 20–30 %</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="field">
+          <label>Valeur moyenne du deal <span class="val" id="ffDealVal">15 000 €</span></label>
+          <input type="range" id="ffDeal" min="500" max="200000" step="500" value="15000">
+        </div>
+        <div class="field">
+          <label>Cycle de vente (mois) <span class="val" id="ffCycleVal">5</span></label>
+          <input type="range" id="ffCycle" min="1" max="18" step="1" value="5">
+        </div>
+      </div>
+
+      <!-- FULL FUNNEL OUTPUT -->
+      <div class="panel" id="ffOutputPanel">
+        <div class="ff-topbar">
+          <div class="tabs" data-target="ffPlanDuration" role="tablist">
+            <button type="button" class="tab-btn" data-value="1">1 mois</button>
+            <button type="button" class="tab-btn" data-value="3">3 mois</button>
+            <button type="button" class="tab-btn" data-value="6">6 mois</button>
+            <button type="button" class="tab-btn" data-value="12">12 mois</button>
+          </div>
+          <div class="tabs" data-target="ffScenario" role="tablist">
+            <button type="button" class="tab-btn" data-value="bear">Bear</button>
+            <button type="button" class="tab-btn" data-value="base">Base</button>
+            <button type="button" class="tab-btn" data-value="bull">Bull</button>
+          </div>
+        </div>
+        <select id="ffPlanDuration" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="1">1 mois</option>
+          <option value="3">3 mois</option>
+          <option value="6" selected>6 mois</option>
+          <option value="12">12 mois</option>
+        </select>
+        <select id="ffScenario" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="bear">Bear</option>
+          <option value="base" selected>Base</option>
+          <option value="bull">Bull</option>
+        </select>
+
+        <div class="kpi-row ff-kpi-row" id="ffKpiRow"></div>
+
+        <div class="funnel-header" style="margin-top:24px;">
+          <h2>Funnel complet du client</h2>
+        </div>
+        <div class="stage-list" id="ffStageList"></div>
+
+        <div class="ff-recommendation" id="ffRecommendation"></div>
+      </div>
+    </div>
+
+    <!-- FULL FUNNEL FORECAST -->
+    <div class="panel ff-forecast-panel" id="ffForecastPanel">
+      <div class="funnel-header">
+        <h2>Prévision mensuelle</h2>
+        <span id="ffForecastSummary"></span>
+      </div>
+      <div class="table-scroll">
+        <table class="scenario-table" id="ffForecastTable"></table>
+      </div>
+    </div>
+  </div>
+  <!-- /fullFunnelView -->
 
   <footer class="note">
     Les hypothèses de coûts (CPM, CTR) sont des ordres de grandeur de marché à ajuster selon le secteur et la période. Elles ne remplacent pas les données réelles issues d'un compte Reddit Ads actif.
@@ -809,6 +1228,22 @@ const state = {
   ltv: 1200,
   customPresets: {},
   scenarios: [],
+  view: 'simple',
+  fullFunnel: {
+    planningMode: 'buildup',
+    targetLeads: 100,
+    budget: 25000,
+    cpl: 250,
+    audience: 300000,
+    l2m: 40,
+    m2s: 9,
+    s2o: 40,
+    o2w: 25,
+    deal: 15000,
+    cycle: 5,
+    planDuration: 6,
+    scenario: 'base',
+  },
 };
 
 const els = {
@@ -824,6 +1259,25 @@ const els = {
   l2c: document.getElementById('l2c'),
   ltv: document.getElementById('ltv'),
 };
+
+const ffEls = {
+  planningMode: document.getElementById('ffPlanningMode'),
+  targetLeads: document.getElementById('ffTargetLeads'),
+  budget: document.getElementById('ffBudget'),
+  cpl: document.getElementById('ffCpl'),
+  audience: document.getElementById('ffAudience'),
+  l2m: document.getElementById('ffL2m'),
+  m2s: document.getElementById('ffM2s'),
+  s2o: document.getElementById('ffS2o'),
+  o2w: document.getElementById('ffO2w'),
+  deal: document.getElementById('ffDeal'),
+  cycle: document.getElementById('ffCycle'),
+  planDuration: document.getElementById('ffPlanDuration'),
+  scenario: document.getElementById('ffScenario'),
+};
+const viewSwitch = document.getElementById('viewSwitch');
+const simpleView = document.getElementById('simpleView');
+const fullFunnelView = document.getElementById('fullFunnelView');
 
 const themeToggle = document.getElementById('themeToggle');
 const shareBtn = document.getElementById('shareBtn');
@@ -1157,6 +1611,606 @@ document.addEventListener('fullscreenchange', () => {
   if (!document.fullscreenElement && presentationActive) togglePresentation();
 });
 
+/* ---------- Full Funnel engine ---------- */
+function fmtPct(n) { return n.toFixed(1).replace('.', ',') + ' %'; }
+
+const ffScenarioMultiplier = { bear: 0.8, base: 1.0, bull: 1.2 };
+// Real-world sales cycles vary: a cohort's revenue lands across a window around the
+// nominal cycle length rather than all in one month (5% early ... 5% stragglers).
+const ffRevenueDistribution = [
+  { offset: -2, weight: 0.05 },
+  { offset: -1, weight: 0.15 },
+  { offset: 0, weight: 0.40 },
+  { offset: 1, weight: 0.25 },
+  { offset: 2, weight: 0.10 },
+  { offset: 3, weight: 0.05 },
+];
+const ffStageBenchmarks = {
+  l2m: { lo: 30, hi: 50, label: 'Lead → MQL' },
+  m2s: { lo: 8, hi: 10, label: 'MQL → SQL' },
+  s2o: { lo: 30, hi: 50, label: 'SQL → Opportunité' },
+  o2w: { lo: 20, hi: 30, label: 'Opportunité → Gagné' },
+};
+
+// New campaigns need learning time before targeting/bidding is optimized.
+function ffRampFactor(monthIndex) {
+  if (monthIndex === 1) return 0.33;
+  if (monthIndex === 2) return 0.67;
+  return 1;
+}
+
+function ffReadInputs() {
+  return {
+    planningMode: ffEls.planningMode.value,
+    targetLeads: +ffEls.targetLeads.value,
+    budget: +ffEls.budget.value,
+    cpl: +ffEls.cpl.value,
+    audience: +ffEls.audience.value,
+    l2m: +ffEls.l2m.value,
+    m2s: +ffEls.m2s.value,
+    s2o: +ffEls.s2o.value,
+    o2w: +ffEls.o2w.value,
+    deal: +ffEls.deal.value,
+    cycle: +ffEls.cycle.value,
+    planDuration: +ffEls.planDuration.value,
+    scenario: ffEls.scenario.value,
+  };
+}
+
+// Build-Up: you set the lead target, budget follows. Budget-First: you set the budget,
+// leads follow — with a logarithmic saturation curve so lead efficiency decays only once
+// spend starts consuming a meaningful share of the addressable audience.
+function ffSteadyState(cfg) {
+  let leads, budget;
+  if (cfg.planningMode === 'buildup') {
+    leads = cfg.targetLeads;
+    budget = leads * cfg.cpl;
+  } else {
+    budget = cfg.budget;
+    const rawLeads = cfg.cpl > 0 ? budget / cfg.cpl : 0;
+    leads = cfg.audience > 0 ? cfg.audience * Math.log(1 + rawLeads / cfg.audience) : rawLeads;
+  }
+  return { leads, budget };
+}
+
+function ffFunnelFromLeads(leads, cfg) {
+  const mqls = leads * (cfg.l2m / 100);
+  const sqls = mqls * (cfg.m2s / 100);
+  const opportunities = sqls * (cfg.s2o / 100);
+  const closedWon = opportunities * (cfg.o2w / 100);
+  const pipelineValue = opportunities * cfg.deal;
+  const revenue = closedWon * cfg.deal;
+  return { leads, mqls, sqls, opportunities, closedWon, pipelineValue, revenue };
+}
+
+function ffBuildForecast(cfg) {
+  const months = cfg.planDuration;
+  const { leads: steadyLeads, budget: steadyBudget } = ffSteadyState(cfg);
+  const scenarioMult = ffScenarioMultiplier[cfg.scenario] ?? 1;
+
+  const cohorts = [];
+  for (let m = 1; m <= months; m++) {
+    const leads = steadyLeads * ffRampFactor(m) * scenarioMult;
+    const f = ffFunnelFromLeads(leads, cfg);
+    // Spend is the committed monthly budget — it doesn't scale with ramp-up or scenario;
+    // what changes is how many leads/deals that same spend produces.
+    cohorts.push({ month: m, spend: steadyBudget, ...f });
+  }
+
+  const bufferMonths = months + 24;
+  const revenueByMonth = new Array(bufferMonths).fill(0);
+  const wonByMonth = new Array(bufferMonths).fill(0);
+  cohorts.forEach(c => {
+    ffRevenueDistribution.forEach(b => {
+      const targetMonth = c.month + cfg.cycle + b.offset;
+      if (targetMonth >= 1 && targetMonth <= bufferMonths) {
+        revenueByMonth[targetMonth - 1] += c.revenue * b.weight;
+        wonByMonth[targetMonth - 1] += c.closedWon * b.weight;
+      }
+    });
+  });
+
+  let cumSpend = 0, cumRevenue = 0, breakEvenMonth = null;
+  const rows = cohorts.map(c => {
+    cumSpend += c.spend;
+    const revenue = revenueByMonth[c.month - 1] || 0;
+    const won = wonByMonth[c.month - 1] || 0;
+    cumRevenue += revenue;
+    if (breakEvenMonth === null && cumRevenue > cumSpend) breakEvenMonth = c.month;
+    return { ...c, revenue, won, cumSpend, cumRevenue };
+  });
+
+  return { rows, breakEvenMonth, steadyLeads, steadyBudget, months };
+}
+
+function ffSyncLabels() {
+  document.getElementById('ffTargetLeadsVal').textContent = fmtNum(+ffEls.targetLeads.value);
+  document.getElementById('ffBudgetVal').textContent = fmtEUR(+ffEls.budget.value);
+  document.getElementById('ffCplVal').textContent = fmtEUR(+ffEls.cpl.value);
+  document.getElementById('ffAudienceVal').textContent = fmtNum(+ffEls.audience.value);
+  document.getElementById('ffL2mVal').textContent = fmtPct(+ffEls.l2m.value);
+  document.getElementById('ffM2sVal').textContent = fmtPct(+ffEls.m2s.value);
+  document.getElementById('ffS2oVal').textContent = fmtPct(+ffEls.s2o.value);
+  document.getElementById('ffO2wVal').textContent = fmtPct(+ffEls.o2w.value);
+  document.getElementById('ffDealVal').textContent = fmtEUR(+ffEls.deal.value);
+  document.getElementById('ffCycleVal').textContent = ffEls.cycle.value;
+}
+
+function ffUpdatePlanningModeUI() {
+  const mode = ffEls.planningMode.value;
+  document.getElementById('ffTargetLeadsField').hidden = mode !== 'buildup';
+  document.getElementById('ffBudgetField').hidden = mode !== 'budgetfirst';
+  document.getElementById('ffAudienceField').hidden = mode !== 'budgetfirst';
+  document.getElementById('ffPlanningModeHint').textContent = mode === 'buildup'
+    ? 'Renseigne le nombre de leads visé et le CPL ; le budget nécessaire est calculé automatiquement.'
+    : "Renseigne ton budget et le CPL ; le volume de leads est calculé automatiquement, avec des rendements décroissants à budget élevé.";
+}
+
+function ffRenderRecommendation(cfg, funnel) {
+  const el = document.getElementById('ffRecommendation');
+  let worst = null;
+  Object.keys(ffStageBenchmarks).forEach(key => {
+    const b = ffStageBenchmarks[key];
+    const mid = (b.lo + b.hi) / 2;
+    const ratio = cfg[key] / mid;
+    if (ratio < 1 && (!worst || ratio < worst.ratio)) worst = { key, ...b, value: cfg[key], ratio };
+  });
+  if (!worst) {
+    el.innerHTML = `<h3>💡 Funnel équilibré</h3><p>Tes taux de conversion sont dans les fourchettes de marché habituelles à chaque étape. Continue de les affiner à mesure que le compte accumule des données.</p>`;
+    return;
+  }
+  const improvedFunnel = ffFunnelFromLeads(funnel.leads, { ...cfg, [worst.key]: worst.lo });
+  const extraWon = improvedFunnel.closedWon - funnel.closedWon;
+  const extraRevenue = improvedFunnel.revenue - funnel.revenue;
+  el.innerHTML = `
+    <h3>💡 Goulot d'étranglement : ${worst.label}</h3>
+    <p>Ton taux ${worst.label} (${fmtPct(worst.value)}) est en dessous du benchmark marché (${worst.lo}–${worst.hi} %). L'amener à ${worst.lo} % ajouterait environ ${extraWon.toFixed(1)} client(s) gagné(s) et ${fmtEUR(extraRevenue)} de revenu par mois.</p>
+  `;
+}
+
+function ffRenderKpis(cfg, budget, funnel, forecast) {
+  const roas = budget > 0 ? funnel.revenue / budget : 0;
+  const cac = funnel.closedWon > 0 ? budget / funnel.closedWon : 0;
+  const leadToWin = funnel.leads > 0 ? (funnel.closedWon / funnel.leads) * 100 : 0;
+  const paybackLabel = forecast.breakEvenMonth
+    ? `Seuil de rentabilité : mois ${forecast.breakEvenMonth}`
+    : `Seuil de rentabilité : au-delà de ${cfg.planDuration} mois`;
+  const primaryLabel = cfg.planningMode === 'buildup' ? 'Budget requis' : 'Leads générés / mois';
+  const primaryValue = cfg.planningMode === 'buildup' ? fmtEUR(budget) : fmtNum(funnel.leads);
+  const primarySub = cfg.planningMode === 'buildup' ? `${roas.toFixed(2)}× ROAS` : `${fmtEUR(cfg.budget)} de budget`;
+
+  document.getElementById('ffKpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">${primaryLabel}</div>
+      <div class="kpi-value">${primaryValue}</div>
+      <div class="kpi-sub">${primarySub}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Pipeline généré</div>
+      <div class="kpi-value">${fmtEUR(funnel.pipelineValue)}</div>
+      <div class="kpi-sub">${funnel.opportunities.toFixed(1)} opportunité(s)</div>
+    </div>
+    <div class="kpi ${funnel.closedWon > 0 && cac < cfg.deal ? 'good' : 'warn'}">
+      <div class="kpi-label">Coût d'acquisition (CAC)</div>
+      <div class="kpi-value">${funnel.closedWon > 0 ? fmtEUR(cac) : '—'}</div>
+      <div class="kpi-sub">${funnel.closedWon.toFixed(1)} client(s) gagné(s)</div>
+    </div>
+    <div class="kpi ${roas >= 1 ? 'good' : 'warn'}">
+      <div class="kpi-label">Revenu estimé / mois</div>
+      <div class="kpi-value">${fmtEUR(funnel.revenue)}</div>
+      <div class="kpi-sub">${paybackLabel}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Efficacité lead → client</div>
+      <div class="kpi-value">${leadToWin.toFixed(2)} %</div>
+      <div class="kpi-sub">Sur ${fmtNum(funnel.leads)} leads/mois</div>
+    </div>
+  `;
+}
+
+function ffRenderFunnelStages(funnel, budget) {
+  const stages = [
+    { label: 'Leads', value: funnel.leads, badge: 'media' },
+    { label: 'MQLs', value: funnel.mqls, badge: 'sales', cost: funnel.mqls > 0 ? budget / funnel.mqls : null, costLabel: 'Coût/MQL' },
+    { label: 'SQLs', value: funnel.sqls, badge: 'sales', cost: funnel.sqls > 0 ? budget / funnel.sqls : null, costLabel: 'Coût/SQL' },
+    { label: 'Opportunités', value: funnel.opportunities, badge: 'sales', cost: funnel.opportunities > 0 ? budget / funnel.opportunities : null, costLabel: 'Coût/Opp' },
+    { label: 'Gagnés', value: funnel.closedWon, badge: 'sales', cost: funnel.closedWon > 0 ? budget / funnel.closedWon : null, costLabel: 'CAC' },
+  ];
+  const ref = funnel.leads || 1;
+  document.getElementById('ffStageList').innerHTML = stages.map(s => {
+    const pct = Math.max(2, (s.value / ref) * 100);
+    return `
+      <div class="stage">
+        <div class="label">${s.label}<span class="stage-badge ${s.badge}">${s.badge === 'media' ? 'Média' : 'Ventes'}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure-wrap">
+          <div class="figure">${fmtNum(s.value)}</div>
+          ${s.cost != null ? `<div class="cost-label">${s.costLabel} : ${fmtEUR(s.cost)}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function ffRenderForecastTable(forecast, cfg) {
+  const summary = document.getElementById('ffForecastSummary');
+  summary.textContent = forecast.breakEvenMonth
+    ? `Seuil de rentabilité atteint au mois ${forecast.breakEvenMonth} · Cycle de vente : ${cfg.cycle} mois`
+    : `Seuil de rentabilité non atteint sur ${cfg.planDuration} mois · Cycle de vente : ${cfg.cycle} mois`;
+
+  document.getElementById('ffForecastTable').innerHTML = `
+    <thead>
+      <tr>
+        <th style="text-align:left;">Mois</th>
+        <th>Dépense</th>
+        <th>Leads</th>
+        <th>MQLs</th>
+        <th>SQLs</th>
+        <th>Opps</th>
+        <th>Pipeline</th>
+        <th>Gagnés</th>
+        <th>Revenu</th>
+        <th>Dépense cum.</th>
+        <th>Revenu cum.</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${forecast.rows.map(r => `
+        <tr class="${forecast.breakEvenMonth === r.month ? 'ff-breakeven' : ''}">
+          <td style="text-align:left;">M${r.month}${forecast.breakEvenMonth === r.month ? ' 🎯' : ''}</td>
+          <td>${fmtEUR(r.spend)}</td>
+          <td>${fmtNum(r.leads)}</td>
+          <td>${fmtNum(r.mqls)}</td>
+          <td>${fmtNum(r.sqls)}</td>
+          <td>${r.opportunities.toFixed(1)}</td>
+          <td>${fmtEUR(r.pipelineValue)}</td>
+          <td>${r.won.toFixed(1)}</td>
+          <td>${r.revenue > 0 ? fmtEUR(r.revenue) : '—'}</td>
+          <td>${fmtEUR(r.cumSpend)}</td>
+          <td>${fmtEUR(r.cumRevenue)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+function ffSyncStateFromFields() {
+  state.fullFunnel = {
+    planningMode: ffEls.planningMode.value,
+    targetLeads: +ffEls.targetLeads.value,
+    budget: +ffEls.budget.value,
+    cpl: +ffEls.cpl.value,
+    audience: +ffEls.audience.value,
+    l2m: +ffEls.l2m.value,
+    m2s: +ffEls.m2s.value,
+    s2o: +ffEls.s2o.value,
+    o2w: +ffEls.o2w.value,
+    deal: +ffEls.deal.value,
+    cycle: +ffEls.cycle.value,
+    planDuration: +ffEls.planDuration.value,
+    scenario: ffEls.scenario.value,
+  };
+}
+
+function ffHydrateFieldsFromState() {
+  const defaults = {
+    planningMode: 'buildup', targetLeads: 100, budget: 25000, cpl: 250, audience: 300000,
+    l2m: 40, m2s: 9, s2o: 40, o2w: 25, deal: 15000, cycle: 5, planDuration: 6, scenario: 'base',
+  };
+  const d = Object.assign(defaults, state.fullFunnel && typeof state.fullFunnel === 'object' ? state.fullFunnel : {});
+  ffEls.planningMode.value = d.planningMode;
+  ffEls.targetLeads.value = d.targetLeads;
+  ffEls.budget.value = d.budget;
+  ffEls.cpl.value = d.cpl;
+  ffEls.audience.value = d.audience;
+  ffEls.l2m.value = d.l2m;
+  ffEls.m2s.value = d.m2s;
+  ffEls.s2o.value = d.s2o;
+  ffEls.o2w.value = d.o2w;
+  ffEls.deal.value = d.deal;
+  ffEls.cycle.value = d.cycle;
+  ffEls.planDuration.value = d.planDuration;
+  ffEls.scenario.value = d.scenario;
+}
+
+function ffCompute() {
+  ffSyncLabels();
+  ffUpdatePlanningModeUI();
+  const cfg = ffReadInputs();
+  const { leads: baseLeads, budget } = ffSteadyState(cfg);
+  const scenarioMult = ffScenarioMultiplier[cfg.scenario] ?? 1;
+  // The summary snapshot reflects full run-rate performance under the selected
+  // Bear/Base/Bull scenario; budget itself never moves with scenario or ramp.
+  const funnel = ffFunnelFromLeads(baseLeads * scenarioMult, cfg);
+  const forecast = ffBuildForecast(cfg);
+  ffRenderKpis(cfg, budget, funnel, forecast);
+  ffRenderFunnelStages(funnel, budget);
+  ffRenderRecommendation(cfg, funnel);
+  ffRenderForecastTable(forecast, cfg);
+  ffSyncStateFromFields();
+  scheduleSave();
+}
+
+[ffEls.targetLeads, ffEls.budget, ffEls.cpl, ffEls.audience, ffEls.l2m, ffEls.m2s, ffEls.s2o, ffEls.o2w, ffEls.deal, ffEls.cycle].forEach(el =>
+  el.addEventListener('input', ffCompute)
+);
+[ffEls.planningMode, ffEls.planDuration, ffEls.scenario].forEach(el =>
+  el.addEventListener('change', () => { ffCompute(); updateTabActiveStates(); })
+);
+
+/* ---------- View switch (Vue simple / Vue Full Funnel) ---------- */
+function setView(view) {
+  state.view = view === 'full' ? 'full' : 'simple';
+  simpleView.hidden = state.view !== 'simple';
+  fullFunnelView.hidden = state.view !== 'full';
+  updateTabActiveStates();
+  if (state.view === 'full') ffCompute();
+  scheduleSave();
+}
+viewSwitch.addEventListener('change', () => setView(viewSwitch.value));
+
+/* ---------- Onboarding wizard ---------- */
+const objectiveOptions = [
+  {
+    key: 'awareness',
+    icon: '📣',
+    title: 'Notoriété',
+    desc: 'Maximise la portée et les impressions pour construire la reconnaissance de marque.',
+    tags: ['CPM', 'Impressions', 'Portée'],
+    objective: 'traffic',
+    mix: 'broad',
+  },
+  {
+    key: 'leadgen',
+    icon: '🎯',
+    title: 'Génération de leads',
+    desc: 'Construis un plan basé sur le funnel, des leads jusqu’au client.',
+    tags: ['CPL', 'Leads', 'Pipeline'],
+    objective: 'conversion',
+    mix: 'niche',
+    recommended: true,
+  },
+  {
+    key: 'traffic',
+    icon: '👆',
+    title: 'Trafic qualifié',
+    desc: 'Maximise les clics qualifiés vers ton site ou ta landing page.',
+    tags: ['CPC', 'CTR', 'Clics'],
+    objective: 'traffic',
+    mix: 'niche',
+  },
+];
+
+const companySizeOptions = [
+  { key: 'xs', label: '1–10 salariés', budget: 1200 },
+  { key: 's', label: '11–50 salariés', budget: 3000 },
+  { key: 'm', label: '51–200 salariés', budget: 6000 },
+  { key: 'l', label: '201–1 000 salariés', budget: 12000 },
+  { key: 'xl', label: '1 000+ salariés', budget: 20000 },
+];
+
+const industryOnboardingSub = {
+  consumer: 'E-commerce, produits grand public',
+  saas: 'Logiciel, outils B2B',
+  finance: 'Banque, assurance, fintech',
+  gaming: 'Jeux vidéo, divertissement',
+};
+
+const ltvOptions = [
+  { key: 'low', label: 'Moins de 500 €', sub: 'Achat unique / e-commerce', ltv: 300 },
+  { key: 'mid', label: '500 € – 2 000 €', sub: 'Abonnement / panier moyen', ltv: 1200 },
+  { key: 'high', label: '2 000 € – 10 000 €', sub: 'Contrat B2B', ltv: 5000 },
+  { key: 'enterprise', label: '10 000 €+', sub: 'Grand compte', ltv: 15000 },
+];
+
+const obStepOrder = ['objective', 'q1', 'q2', 'q3', 'reveal'];
+let onboarding = { step: 'objective', objectiveKey: null, companySize: null, industry: null, ltvTier: null };
+
+function fmtPct(n) { return n.toFixed(1).replace('.', ',') + ' %'; }
+
+function computeOnboardingResult() {
+  const obj = objectiveOptions.find(o => o.key === onboarding.objectiveKey) || objectiveOptions[1];
+  const sizeOpt = companySizeOptions.find(o => o.key === onboarding.companySize);
+  const budget = sizeOpt ? sizeOpt.budget : state.budget;
+  const industry = onboarding.industry || state.industry;
+  const ltvOpt = ltvOptions.find(o => o.key === onboarding.ltvTier);
+  const ltv = ltvOpt ? ltvOpt.ltv : state.ltv;
+
+  const base = presets[industry];
+  let cpm = base.cpm, c2l = base.c2l, l2c = base.l2c;
+  if (obj.objective === 'conversion') { cpm *= 1.25; l2c *= 1.3; }
+  if (obj.mix === 'niche') { cpm *= 1.2; c2l *= 1.4; l2c *= 1.2; } else { cpm *= 0.85; }
+  const ctr = base.ctr;
+  c2l = Math.min(c2l, 30);
+  l2c = Math.min(l2c, 50);
+
+  const impressions = (budget / cpm) * 1000;
+  const clicks = impressions * (ctr / 100);
+  const leads = clicks * (c2l / 100);
+  const clients = leads * (l2c / 100);
+  const revenue = clients * ltv;
+
+  return { obj, industry, budget, ltv, cpm, ctr, c2l, l2c, revenue, annual: revenue * 12 };
+}
+
+function obProgressBarHtml(filled, total) {
+  let html = '';
+  for (let i = 1; i <= total; i++) html += `<div class="ob-progress-seg${i <= filled ? ' filled' : ''}"></div>`;
+  return html;
+}
+
+function objectiveScreenHtml() {
+  return `
+    <h1 class="ob-hero-title">Simulateur de budget Reddit Ads</h1>
+    <p class="ob-hero-sub">Traduis ton investissement Reddit Ads en pipeline, revenu et portée.</p>
+    <p class="ob-section-label">Choisis ton objectif</p>
+    <div class="ob-objective-grid">
+      ${objectiveOptions.map(o => `
+        <div class="ob-card-obj${o.recommended ? ' recommended' : ''}" data-action="pick-objective" data-key="${o.key}">
+          ${o.recommended ? '<span class="ob-badge-rec">✨ Recommandé</span>' : ''}
+          <div class="ob-card-icon">${o.icon}</div>
+          <h3>${o.title}</h3>
+          <p>${o.desc}</p>
+          <div class="ob-tags">${o.tags.map(t => `<span class="ob-tag">${t}</span>`).join('')}</div>
+          <span class="ob-start-link">Commencer →</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function obNavHtml() {
+  return `
+    <div class="ob-nav">
+      <button type="button" data-action="back">← Retour</button>
+      <button type="button" data-action="skip-question">Passer cette question →</button>
+    </div>
+  `;
+}
+
+function questionScreenHtml({ title, sub, options, pickAction }) {
+  return `
+    <h2 class="ob-question-title">${title}</h2>
+    <p class="ob-question-sub">${sub}</p>
+    <div class="ob-options">
+      ${options.map(o => `
+        <div class="ob-option" data-action="${pickAction}" data-key="${o.key}">
+          <span>${o.label}</span>
+          ${o.sub ? `<span class="ob-option-sub">${o.sub}</span>` : ''}
+        </div>
+      `).join('')}
+    </div>
+    ${obNavHtml()}
+  `;
+}
+
+function q1ScreenHtml() {
+  return questionScreenHtml({
+    title: 'Quelle est la taille de l’entreprise cliente ?',
+    sub: 'Nous aide à calibrer un budget de départ réaliste.',
+    options: companySizeOptions,
+    pickAction: 'pick-size',
+  });
+}
+function q2ScreenHtml() {
+  return questionScreenHtml({
+    title: 'Dans quel secteur ton client opère-t-il ?',
+    sub: 'Détermine les hypothèses de coûts (CPM, CTR) par défaut.',
+    options: Object.keys(industryLabels).map(key => ({ key, label: industryLabels[key], sub: industryOnboardingSub[key] })),
+    pickAction: 'pick-industry',
+  });
+}
+function q3ScreenHtml() {
+  return questionScreenHtml({
+    title: 'Quelle est la valeur moyenne d’un client ?',
+    sub: 'Aussi appelée panier moyen ou valeur vie client.',
+    options: ltvOptions,
+    pickAction: 'pick-ltv',
+  });
+}
+
+function obBenchRow(label, value) {
+  const lo = value * 0.7, hi = value * 1.3;
+  return `
+    <div class="ob-bench-row">
+      <span class="ob-bench-label">${label}</span>
+      <span class="ob-bench-range">Fourchette ${fmtPct(lo)}–${fmtPct(hi)}</span>
+      <span class="ob-bench-pill">${fmtPct(value)}</span>
+    </div>
+  `;
+}
+
+function revealScreenHtml() {
+  const r = computeOnboardingResult();
+  const label = industryLabels[r.industry];
+  return `
+    <div class="ob-reveal-badge">✨ Ton plan est prêt</div>
+    <h1 class="ob-hero-title">Les comptes ${escapeHtml(label)} comme le tien génèrent<br><span class="ob-highlight">${fmtEUR(r.annual)}</span> de pipeline par an.</h1>
+    <p class="ob-hero-sub">Basé sur un budget de ${fmtEUR(r.budget)}/mois et une valeur client de ${fmtEUR(r.ltv)}.</p>
+    <div class="ob-bench-card">
+      <div class="ob-card-head">◎ Benchmarks du funnel · ton profil</div>
+      ${obBenchRow('CTR (taux de clic)', r.ctr)}
+      ${obBenchRow('Clic → Lead', r.c2l)}
+      ${obBenchRow('Lead → Client', r.l2c)}
+      <div class="ob-source">Source : hypothèses de marché Reddit Ads par secteur — à ajuster avec les vrais chiffres de ton compte.</div>
+    </div>
+    <button type="button" class="ob-cta" data-action="apply-benchmarks">Démarrer avec ces hypothèses →</button>
+    <button type="button" class="ob-skip-link" data-action="skip-all">Passer — utiliser les valeurs par défaut</button>
+  `;
+}
+
+function renderOnboarding() {
+  const inner = document.getElementById('onboardingInner');
+  const header = document.getElementById('obHeader');
+  if (onboarding.step === 'objective') {
+    header.hidden = true;
+    inner.innerHTML = objectiveScreenHtml();
+  } else {
+    header.hidden = false;
+    const stepIndex = { q1: 1, q2: 2, q3: 3, reveal: 4 }[onboarding.step];
+    document.getElementById('obProgress').innerHTML = obProgressBarHtml(stepIndex, 4);
+    if (onboarding.step === 'q1') inner.innerHTML = q1ScreenHtml();
+    else if (onboarding.step === 'q2') inner.innerHTML = q2ScreenHtml();
+    else if (onboarding.step === 'q3') inner.innerHTML = q3ScreenHtml();
+    else if (onboarding.step === 'reveal') inner.innerHTML = revealScreenHtml();
+  }
+  document.getElementById('onboarding').scrollTop = 0;
+}
+
+function obGoBack() {
+  const idx = obStepOrder.indexOf(onboarding.step);
+  if (idx > 0) { onboarding.step = obStepOrder[idx - 1]; renderOnboarding(); }
+}
+function obSkipQuestion() {
+  const idx = obStepOrder.indexOf(onboarding.step);
+  if (idx < obStepOrder.length - 1) { onboarding.step = obStepOrder[idx + 1]; renderOnboarding(); }
+}
+
+function showOnboarding() {
+  onboarding = { step: 'objective', objectiveKey: null, companySize: null, industry: null, ltvTier: null };
+  document.getElementById('onboarding').hidden = false;
+  document.body.classList.add('onboarding-active');
+  renderOnboarding();
+}
+function closeOnboarding() {
+  document.getElementById('onboarding').hidden = true;
+  document.body.classList.remove('onboarding-active');
+}
+
+function applyOnboardingResult(useComputed) {
+  if (useComputed) {
+    const r = computeOnboardingResult();
+    els.industry.value = r.industry;
+    els.objective.value = r.obj.objective;
+    els.mix.value = r.obj.mix;
+    els.budget.value = r.budget;
+    els.ltv.value = r.ltv;
+  } else if (onboarding.objectiveKey) {
+    const obj = objectiveOptions.find(o => o.key === onboarding.objectiveKey);
+    if (obj) { els.objective.value = obj.objective; els.mix.value = obj.mix; }
+  }
+  updateTabActiveStates();
+  applyPreset();
+  closeOnboarding();
+  toast('Hypothèses appliquées au tableau de bord');
+}
+
+document.getElementById('onboarding').addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+  const key = el.dataset.key;
+  if (action === 'pick-objective') { onboarding.objectiveKey = key; onboarding.step = 'q1'; renderOnboarding(); }
+  else if (action === 'pick-size') { onboarding.companySize = key; onboarding.step = 'q2'; renderOnboarding(); }
+  else if (action === 'pick-industry') { onboarding.industry = key; onboarding.step = 'q3'; renderOnboarding(); }
+  else if (action === 'pick-ltv') { onboarding.ltvTier = key; onboarding.step = 'reveal'; renderOnboarding(); }
+  else if (action === 'back') { obGoBack(); }
+  else if (action === 'skip-question') { obSkipQuestion(); }
+  else if (action === 'change-objective') { onboarding = { step: 'objective', objectiveKey: null, companySize: null, industry: null, ltvTier: null }; renderOnboarding(); }
+  else if (action === 'apply-benchmarks') { applyOnboardingResult(true); }
+  else if (action === 'skip-all') { applyOnboardingResult(false); }
+});
+document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnboarding);
+
 /* ---------- Scenarios ---------- */
 function saveScenario() {
   const f = currentFunnel();
@@ -1325,6 +2379,7 @@ function hydrateFieldsFromState() {
   els.c2l.value = state.c2l;
   els.l2c.value = state.l2c;
   els.ltv.value = state.ltv;
+  viewSwitch.value = state.view === 'full' ? 'full' : 'simple';
   updateTabActiveStates();
   applyLogo();
 }
@@ -1333,16 +2388,19 @@ const hadSaved = loadSavedState();
 applyCustomPresetsToBase();
 const hadShare = applyShareParam();
 hydrateFieldsFromState();
+ffHydrateFieldsFromState();
 initTheme();
 renderAdvancedPresetsPanel();
 
 if (!hadSaved && !hadShare) {
   applyPreset();
+  showOnboarding();
 } else {
   syncLabels();
   renderFunnel();
 }
 renderScenarios();
+setView(viewSwitch.value);
 saveState();
 
 if (hadShare) toast('Scénario partagé chargé');
