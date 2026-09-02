@@ -19,6 +19,7 @@
     --moss: #3F5A47;
     --moss-soft: #E1E9E1;
     --moss-rgb: 63,90,71;
+    --ember-rgb: 191,78,44;
     --chart-neutral: #565F58;
     --radius: 3px;
     color-scheme: light;
@@ -35,6 +36,7 @@
     --moss: #7FBE98;
     --moss-soft: #1E2A22;
     --moss-rgb: 127,190,152;
+    --ember-rgb: 232,115,74;
     --chart-neutral: #9AA79E;
     color-scheme: dark;
   }
@@ -51,7 +53,7 @@
     transition: background 0.2s ease, color 0.2s ease;
   }
 
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 28px 100px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 68px 28px 100px; }
 
   .visually-hidden-select {
     position: absolute;
@@ -443,7 +445,7 @@
   }
   button:hover { opacity: 0.85; }
 
-  :root[data-theme="dark"] button:not(.secondary):not(.icon-toggle):not(.tab-btn) {
+  :root[data-theme="dark"] button:not(.secondary):not(.icon-toggle):not(.tab-btn):not(.restart-guide-btn) {
     background: var(--ember);
     border-color: var(--ember);
     color: #1A100A;
@@ -453,8 +455,65 @@
     color: var(--ink);
   }
 
+  /* Floating "resume the guided assistant" button — always reachable, top-right */
+  .restart-guide-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--ember);
+    border: 1px solid var(--ember);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(var(--ember-rgb), 0.35);
+    animation: restartGuidePulse 2.6s ease-in-out infinite;
+  }
+  .restart-guide-icon { font-size: 15px; }
+  .restart-guide-btn:hover { opacity: 0.92; animation-play-state: paused; }
+  body.onboarding-active .restart-guide-btn,
+  body.presentation-mode .restart-guide-btn { display: none; }
+  @keyframes restartGuidePulse {
+    0%, 100% { box-shadow: 0 4px 14px rgba(var(--ember-rgb), 0.35); }
+    50% { box-shadow: 0 4px 22px rgba(var(--ember-rgb), 0.65), 0 0 0 6px rgba(var(--ember-rgb), 0.12); }
+  }
+  @media (max-width: 640px) {
+    .restart-guide-btn { top: 12px; right: 12px; padding: 8px 14px; font-size: 12px; }
+  }
+  @media print {
+    .restart-guide-btn { display: none !important; }
+  }
+
   /* Scenarios */
   .scenarios-panel { margin-top: 24px; }
+
+  /* Format recommendation */
+  .format-panel { margin-top: 24px; }
+  .format-panel[hidden] { display: none; }
+  .format-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  @media (max-width: 560px) { .format-cards { grid-template-columns: 1fr; } }
+  .format-card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .format-card.primary { border: 2px solid var(--ember); background: var(--ember-soft); }
+  .format-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+  .format-card-value { font-family: 'Fraunces', serif; font-size: 19px; color: var(--ink); }
+  .format-reason { font-size: 13.5px; color: var(--ink); line-height: 1.55; margin: 0 0 10px; }
+  .format-link { font-size: 13px; font-weight: 600; color: var(--ember); text-decoration: none; }
+  .format-link:hover { text-decoration: underline; }
+  .format-transparency-note { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
 
   .chart-legend {
     display: flex;
@@ -938,6 +997,15 @@
     }
     .cover-meta strong { font-family: 'Fraunces', serif; font-size: 18px; }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -996,39 +1064,42 @@
           <option value="es">ES</option>
         </select>
         <button type="button" class="icon-toggle" id="themeToggle" aria-label="Basculer le mode sombre">🌙</button>
-        <button type="button" class="secondary" id="reopenOnboardingBtn">✨ Assistant de démarrage</button>
-        <button type="button" class="secondary" id="shareBtn">Copier le lien</button>
-        <button type="button" class="secondary" id="presentBtn">Mode présentation</button>
+        <button type="button" class="secondary" id="shareBtn" data-i18n="btnCopyLink">Copier le lien</button>
+        <button type="button" class="secondary" id="presentBtn" data-i18n="btnPresentMode">Mode présentation</button>
       </div>
       <div class="brand-fields">
         <div>
-          <label>Ton agence</label>
+          <label data-i18n="lblAgency">Ton agence</label>
           <input id="agencyName" type="text" placeholder="Nom de ton agence" value="">
         </div>
         <div>
-          <label>Client</label>
+          <label data-i18n="lblClient">Client</label>
           <input id="clientName" type="text" placeholder="Nom du client" value="">
         </div>
         <div class="logo-field">
-          <label>Logo agence</label>
+          <label data-i18n="lblLogo">Logo agence</label>
           <div class="logo-upload">
             <img id="agencyLogoThumb" class="logo-thumb" hidden alt="Logo agence">
-            <label class="logo-btn" for="agencyLogoInput">Choisir…</label>
+            <label class="logo-btn" for="agencyLogoInput" data-i18n="btnChooseFile">Choisir…</label>
             <input type="file" id="agencyLogoInput" accept="image/png,image/jpeg,image/svg+xml" hidden>
             <button type="button" id="removeLogoBtn" class="logo-remove" hidden title="Retirer le logo">✕</button>
           </div>
         </div>
       </div>
     </div>
+    <button type="button" class="restart-guide-btn" id="reopenOnboardingBtn">
+      <span class="restart-guide-icon">✨</span>
+      <span data-i18n="btnRestartGuide">Reprendre le guidage</span>
+    </button>
   </header>
 
   <div class="tabs view-tabs" data-target="viewSwitch" role="tablist">
-    <button type="button" class="tab-btn" data-value="simple">Vue simple</button>
-    <button type="button" class="tab-btn" data-value="full">Vue Full Funnel</button>
+    <button type="button" class="tab-btn" data-value="simple" data-i18n="tabSimpleView">Vue simple</button>
+    <button type="button" class="tab-btn" data-value="full" data-i18n="tabFullFunnelView">Vue Full Funnel</button>
   </div>
   <select id="viewSwitch" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
-    <option value="simple" selected>Vue simple</option>
-    <option value="full">Vue Full Funnel</option>
+    <option value="simple" selected data-i18n="tabSimpleView">Vue simple</option>
+    <option value="full" data-i18n="tabFullFunnelView">Vue Full Funnel</option>
   </select>
 
   <div id="simpleView">
@@ -1036,61 +1107,61 @@
 
     <!-- INPUT PANEL -->
     <div class="panel" id="inputPanel">
-      <h2>Hypothèses de campagne</h2>
-      <p class="hint">Ajuste les valeurs par défaut selon ce que tu sais du client.</p>
+      <h2 data-i18n="panelAssumptionsTitle">Hypothèses de campagne</h2>
+      <p class="hint" data-i18n="hintAssumptions">Ajuste les valeurs par défaut selon ce que tu sais du client.</p>
 
       <div class="field">
-        <label>Budget mensuel <span class="val" id="budgetVal">3 000 €</span></label>
+        <label><span data-i18n="lblBudget">Budget mensuel</span> <span class="val" id="budgetVal">3 000 €</span></label>
         <input type="range" id="budget" min="200" max="30000" step="100" value="3000">
       </div>
 
       <div class="field-row">
         <div class="field">
-          <label>Secteur</label>
+          <label data-i18n="lblSector">Secteur</label>
           <select id="industry">
-            <option value="consumer">Grand public / DTC</option>
-            <option value="saas" selected>Tech / SaaS</option>
-            <option value="finance">Finance / Assurance</option>
-            <option value="gaming">Gaming / Loisirs</option>
+            <option value="consumer" data-i18n="industry_consumer">Grand public / DTC</option>
+            <option value="saas" selected data-i18n="industry_saas">Tech / SaaS</option>
+            <option value="finance" data-i18n="industry_finance">Finance / Assurance</option>
+            <option value="gaming" data-i18n="industry_gaming">Gaming / Loisirs</option>
           </select>
         </div>
         <div class="field">
-          <label>Marché géographique</label>
+          <label data-i18n="lblMarket">Marché géographique</label>
           <select id="market">
-            <option value="fr" selected>France</option>
-            <option value="fr_bech">Belgique / Suisse (FR)</option>
-            <option value="us">États-Unis</option>
-            <option value="uk">Royaume-Uni</option>
-            <option value="es">Espagne</option>
-            <option value="latam">Amérique latine</option>
+            <option value="fr" selected data-i18n="market_fr">France</option>
+            <option value="fr_bech" data-i18n="market_fr_bech">Belgique / Suisse (FR)</option>
+            <option value="us" data-i18n="market_us">États-Unis</option>
+            <option value="uk" data-i18n="market_uk">Royaume-Uni</option>
+            <option value="es" data-i18n="market_es">Espagne</option>
+            <option value="latam" data-i18n="market_latam">Amérique latine</option>
           </select>
         </div>
       </div>
 
       <div class="field">
-        <label>Objectif</label>
+        <label data-i18n="lblObjective">Objectif</label>
         <div class="tabs" data-target="objective" role="tablist">
-          <button type="button" class="tab-btn" data-value="awareness">Notoriété</button>
-          <button type="button" class="tab-btn" data-value="traffic">Trafic</button>
-          <button type="button" class="tab-btn" data-value="conversion">Conversion</button>
+          <button type="button" class="tab-btn" data-value="awareness" data-i18n="ob_obj_awareness_title">Notoriété</button>
+          <button type="button" class="tab-btn" data-value="traffic" data-i18n="ob_obj_traffic_title">Trafic</button>
+          <button type="button" class="tab-btn" data-value="conversion" data-i18n="ob_obj_conversion_title">Conversion</button>
           <button type="button" class="tab-btn" data-value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</button>
         </div>
         <select id="objective" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
-          <option value="awareness">Notoriété</option>
-          <option value="traffic">Trafic</option>
-          <option value="conversion" selected>Conversion</option>
+          <option value="awareness" data-i18n="ob_obj_awareness_title">Notoriété</option>
+          <option value="traffic" data-i18n="ob_obj_traffic_title">Trafic</option>
+          <option value="conversion" selected data-i18n="ob_obj_conversion_title">Conversion</option>
           <option value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</option>
         </select>
       </div>
       <div class="field">
-        <label>Ciblage</label>
+        <label data-i18n="lblTargeting">Ciblage</label>
         <div class="tabs" data-target="mix" role="tablist">
-          <button type="button" class="tab-btn" data-value="broad">Large</button>
-          <button type="button" class="tab-btn" data-value="niche">Niche</button>
+          <button type="button" class="tab-btn" data-value="broad" data-i18n="ob_targeting_broad">Large</button>
+          <button type="button" class="tab-btn" data-value="niche" data-i18n="ob_targeting_niche">Niche</button>
         </div>
         <select id="mix" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
-          <option value="broad">Large</option>
-          <option value="niche" selected>Niche</option>
+          <option value="broad" data-i18n="ob_targeting_broad">Large</option>
+          <option value="niche" selected data-i18n="ob_targeting_niche">Niche</option>
         </select>
       </div>
       <div class="field" id="platformField" hidden>
@@ -1109,25 +1180,26 @@
 
       <hr class="divider">
 
-      <p class="hint" style="margin-bottom:14px;">Hypothèses du funnel (éditables)</p>
+      <p class="hint" style="margin-bottom:14px;" data-i18n="hintFunnelAssumptions">Hypothèses du funnel (éditables)</p>
 
       <div class="field">
-        <label>CPM (coût pour 1000 impressions) <span class="val" id="cpmVal">6,0 €</span></label>
+        <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="cpmVal">6,0 €</span></label>
         <input type="range" id="cpm" min="1" max="15" step="0.1" value="6">
+        <p class="hint" id="cpmEffectiveNote" style="margin:6px 0 0;"></p>
       </div>
 
       <div class="field">
-        <label>CTR (taux de clic) <span class="val" id="ctrVal">0,35 %</span></label>
+        <label><span data-i18n="lblCtr">CTR (taux de clic)</span> <span class="val" id="ctrVal">0,35 %</span></label>
         <input type="range" id="ctr" min="0.05" max="2" step="0.01" value="0.35">
       </div>
 
       <div class="field" id="c2lField">
-        <label>Clic → Lead <span class="val" id="c2lVal">5,0 %</span></label>
+        <label><span data-i18n="ob_bench_c2l">Clic → Lead</span> <span class="val" id="c2lVal">5,0 %</span></label>
         <input type="range" id="c2l" min="0.5" max="30" step="0.5" value="5">
       </div>
 
       <div class="field" id="l2cField">
-        <label>Lead → Client <span class="val" id="l2cVal">12,0 %</span></label>
+        <label><span data-i18n="ob_bench_l2c">Lead → Client</span> <span class="val" id="l2cVal">12,0 %</span></label>
         <input type="range" id="l2c" min="1" max="50" step="1" value="12">
       </div>
 
@@ -1137,15 +1209,30 @@
       </div>
 
       <div class="field" id="ltvField">
-        <label>Valeur moyenne client <span class="val" id="ltvVal">1 200 €</span></label>
+        <label><span data-i18n="lblLtv">Valeur moyenne client</span> <span class="val" id="ltvVal">1 200 €</span></label>
         <input type="range" id="ltv" min="50" max="20000" step="50" value="1200">
       </div>
 
+      <div class="field">
+        <label data-i18n="formatCountLabel">Nombre de formats combinés</label>
+        <div class="tabs" data-target="formatCount" role="tablist">
+          <button type="button" class="tab-btn" data-value="1">1</button>
+          <button type="button" class="tab-btn" data-value="2">2</button>
+          <button type="button" class="tab-btn" data-value="3plus">3+</button>
+        </div>
+        <select id="formatCount" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3plus">3+</option>
+        </select>
+        <p class="hint" id="formatCountHelp" style="margin:8px 0 0;"></p>
+      </div>
+
       <details class="advanced-settings">
-        <summary>Paramètres avancés — presets par secteur</summary>
-        <p class="hint" style="margin:10px 0 12px;">Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.</p>
+        <summary data-i18n="lblAdvancedSettings">Paramètres avancés — presets par secteur</summary>
+        <p class="hint" style="margin:10px 0 12px;" data-i18n="hintAdvancedSettings">Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.</p>
         <div id="presetsEditor" class="presets-editor"></div>
-        <button type="button" class="secondary" id="resetPresetsBtn" style="margin-top:12px;">Réinitialiser les valeurs par défaut</button>
+        <button type="button" class="secondary" id="resetPresetsBtn" style="margin-top:12px;" data-i18n="btnResetPresets">Réinitialiser les valeurs par défaut</button>
       </details>
     </div>
 
@@ -1160,19 +1247,37 @@
       <div class="kpi-row" id="kpiRow"></div>
 
       <div class="actions">
-        <button id="saveScenario">Enregistrer comme scénario</button>
-        <button class="secondary" id="exportCsv">Exporter en CSV</button>
-        <button class="secondary" id="printReport">Exporter en PDF</button>
+        <button id="saveScenario" data-i18n="btnSaveScenario">Enregistrer comme scénario</button>
+        <button class="secondary" id="exportCsv" data-i18n="btnExportCsv">Exporter en CSV</button>
+        <button class="secondary" id="printReport" data-i18n="btnExportPdf">Exporter en PDF</button>
       </div>
     </div>
   </div>
 
+  <!-- FORMAT RECOMMENDATION -->
+  <div class="panel format-panel" id="formatPanel">
+    <h2 data-i18n="formatSectionTitle">Format recommandé</h2>
+    <div class="format-cards">
+      <div class="format-card primary">
+        <span class="format-card-label" data-i18n="formatPrimary">Format principal</span>
+        <span class="format-card-value" id="formatPrimaryLabel"></span>
+      </div>
+      <div class="format-card secondary">
+        <span class="format-card-label" data-i18n="formatSecondary">Format secondaire</span>
+        <span class="format-card-value" id="formatSecondaryLabel"></span>
+      </div>
+    </div>
+    <p class="format-reason" id="formatReasonText"></p>
+    <a class="format-link" id="formatSpecLink" href="#" target="_blank" rel="noopener" data-i18n="formatLinkLabel">Voir les spécifications officielles Reddit →</a>
+    <p class="hint format-transparency-note" data-i18n="formatTransparencyNote">Recommandations basées sur les données publiques Reddit et des benchmarks tiers 2026.</p>
+  </div>
+
   <!-- SCENARIOS -->
   <div class="panel scenarios-panel" id="scenariosPanel">
-    <h2>Comparaison de scénarios</h2>
-    <p class="hint">Enregistre plusieurs scénarios (budgets, ciblages) pour les comparer côte à côte avec ton client.</p>
+    <h2 data-i18n="panelScenariosTitle">Comparaison de scénarios</h2>
+    <p class="hint" data-i18n="hintScenarios">Enregistre plusieurs scénarios (budgets, ciblages) pour les comparer côte à côte avec ton client.</p>
     <div id="scenarioChartWrap"></div>
-    <div id="scenarioTableWrap"><p class="empty-scenarios">Aucun scénario enregistré pour l'instant.</p></div>
+    <div id="scenarioTableWrap"><p class="empty-scenarios" data-i18n="emptyScenarios">Aucun scénario enregistré pour l'instant.</p></div>
   </div>
   </div>
   <!-- /simpleView -->
@@ -1405,6 +1510,75 @@ const translations = {
     ob_target_appinstall_label: "Combien d'installations vises-tu par mois ?",
     ob_reveal_appinstall_lead: 'Avec ce budget, les comptes {industry} génèrent environ',
     ob_reveal_appinstall_sub: "d'installations par mois, pour un budget de {budget}/mois.",
+    btnCopyLink: 'Copier le lien',
+    btnPresentMode: 'Mode présentation',
+    btnExitPresentMode: 'Quitter la présentation',
+    btnRestartGuide: 'Reprendre le guidage',
+    lblAgency: 'Ton agence',
+    lblClient: 'Client',
+    lblLogo: 'Logo agence',
+    btnChooseFile: 'Choisir…',
+    tabSimpleView: 'Vue simple',
+    tabFullFunnelView: 'Vue Full Funnel',
+    panelAssumptionsTitle: 'Hypothèses de campagne',
+    hintAssumptions: 'Ajuste les valeurs par défaut selon ce que tu sais du client.',
+    lblBudget: 'Budget mensuel',
+    lblSector: 'Secteur',
+    lblMarket: 'Marché géographique',
+    lblObjective: 'Objectif',
+    lblTargeting: 'Ciblage',
+    hintFunnelAssumptions: 'Hypothèses du funnel (éditables)',
+    lblCpm: 'CPM (coût pour 1000 impressions)',
+    lblCtr: 'CTR (taux de clic)',
+    lblLtv: 'Valeur moyenne client',
+    lblAdvancedSettings: 'Paramètres avancés — presets par secteur',
+    hintAdvancedSettings: 'Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.',
+    btnResetPresets: 'Réinitialiser les valeurs par défaut',
+    funnelTitlePipeline: 'Projection du pipeline',
+    stageImpressions: 'Impressions',
+    stageClicks: 'Clics',
+    stageLeads: 'Leads',
+    stageClients: 'Clients',
+    kpiCpl: 'Coût par lead',
+    kpiCpa: 'Coût par client (CPA)',
+    kpiRoas: 'ROAS projeté',
+    btnSaveScenario: 'Enregistrer comme scénario',
+    btnExportCsv: 'Exporter en CSV',
+    btnExportPdf: 'Exporter en PDF',
+    panelScenariosTitle: 'Comparaison de scénarios',
+    hintScenarios: 'Enregistre plusieurs scénarios (budgets, ciblages) pour les comparer côte à côte avec ton client.',
+    emptyScenarios: "Aucun scénario enregistré pour l'instant.",
+    legendBudget: 'Budget',
+    legendResult: 'Résultat (CA généré)',
+    thScenario: 'Scénario',
+    thNotes: 'Notes',
+    thBudget: 'Budget',
+    thImpressions: 'Impressions',
+    thClicks: 'Clics',
+    thLeads: 'Leads',
+    thClients: 'Clients',
+    thCpa: 'CPA',
+    thRoas: 'ROAS',
+    placeholderNote: 'Pourquoi ce scénario…',
+    titleDuplicate: 'Dupliquer ce scénario',
+    titleRemove: 'Supprimer',
+    toastAppInstallNoScenario: "Comparaison de scénarios pas encore disponible pour l'objectif Téléchargement d'app",
+    formatSectionTitle: 'Format recommandé',
+    formatPrimary: 'Format principal',
+    formatSecondary: 'Format secondaire',
+    formatLinkLabel: 'Voir les spécifications officielles Reddit →',
+    formatReasonAwareness: 'La vidéo gagne sur les métriques de mémorisation (view-through), pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic.',
+    formatReasonTraffic: 'Les visuels statiques surperforment la vidéo en CTR pour les objectifs orientés clic direct (benchmarks 2026, AdControlCenter).',
+    formatReasonConversion: 'Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats ; activer les commentaires renforce la preuve sociale.',
+    formatReasonAppInstall: "La démonstration produit/gameplay en vidéo est la norme du secteur pour convertir en installation ; le carousel montre plusieurs écrans de l'app.",
+    formatLabel_image: 'Image',
+    formatLabel_video: 'Vidéo',
+    formatLabel_carousel: 'Carousel',
+    formatLabel_freeform: 'Free-form',
+    formatCountLabel: 'Nombre de formats combinés',
+    formatCountHelp: "Combiner plusieurs formats/placements réduit le coût par résultat (donnée Reddit : Feed + Conversation ≈ -12 %). Au-delà de 2 formats, il s'agit d'une estimation prudente à valider par test.",
+    formatTransparencyNote: "Recommandations basées sur les données publiques Reddit (spécifications officielles, statistiques de performance des ads free-form) et des benchmarks tiers 2026 (AdControlCenter). L'accélérateur multi-format au-delà de 2 formats est une estimation, pas un chiffre garanti par Reddit.",
+    formatCpmEffectiveLabel: 'CPM effectif après accélérateur : ',
     footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
   },
   en: {
@@ -1493,6 +1667,75 @@ const translations = {
     ob_target_appinstall_label: 'How many installs are you aiming for per month?',
     ob_reveal_appinstall_lead: 'With this budget, {industry} accounts generate about',
     ob_reveal_appinstall_sub: 'installs per month, for a budget of {budget}/month.',
+    btnCopyLink: 'Copy link',
+    btnPresentMode: 'Presentation mode',
+    btnExitPresentMode: 'Exit presentation',
+    btnRestartGuide: 'Resume the guide',
+    lblAgency: 'Your agency',
+    lblClient: 'Client',
+    lblLogo: 'Agency logo',
+    btnChooseFile: 'Choose…',
+    tabSimpleView: 'Simple view',
+    tabFullFunnelView: 'Full Funnel view',
+    panelAssumptionsTitle: 'Campaign assumptions',
+    hintAssumptions: 'Adjust the default values based on what you know about the client.',
+    lblBudget: 'Monthly budget',
+    lblSector: 'Industry',
+    lblMarket: 'Geographic market',
+    lblObjective: 'Objective',
+    lblTargeting: 'Targeting',
+    hintFunnelAssumptions: 'Funnel assumptions (editable)',
+    lblCpm: 'CPM (cost per 1,000 impressions)',
+    lblCtr: 'CTR (click-through rate)',
+    lblLtv: 'Average customer value',
+    lblAdvancedSettings: 'Advanced settings — presets by industry',
+    hintAdvancedSettings: "Adjust the default CPM and CTR for each industry using the real numbers from your clients' Reddit Ads Manager accounts.",
+    btnResetPresets: 'Reset to default values',
+    funnelTitlePipeline: 'Pipeline projection',
+    stageImpressions: 'Impressions',
+    stageClicks: 'Clicks',
+    stageLeads: 'Leads',
+    stageClients: 'Customers',
+    kpiCpl: 'Cost per lead',
+    kpiCpa: 'Cost per customer (CPA)',
+    kpiRoas: 'Projected ROAS',
+    btnSaveScenario: 'Save as scenario',
+    btnExportCsv: 'Export as CSV',
+    btnExportPdf: 'Export as PDF',
+    panelScenariosTitle: 'Scenario comparison',
+    hintScenarios: 'Save several scenarios (budgets, targeting) to compare them side by side with your client.',
+    emptyScenarios: 'No scenario saved yet.',
+    legendBudget: 'Budget',
+    legendResult: 'Result (revenue generated)',
+    thScenario: 'Scenario',
+    thNotes: 'Notes',
+    thBudget: 'Budget',
+    thImpressions: 'Impressions',
+    thClicks: 'Clicks',
+    thLeads: 'Leads',
+    thClients: 'Customers',
+    thCpa: 'CPA',
+    thRoas: 'ROAS',
+    placeholderNote: 'Why this scenario…',
+    titleDuplicate: 'Duplicate this scenario',
+    titleRemove: 'Remove',
+    toastAppInstallNoScenario: 'Scenario comparison is not yet available for the App Installs objective',
+    formatSectionTitle: 'Recommended format',
+    formatPrimary: 'Primary format',
+    formatSecondary: 'Secondary format',
+    formatLinkLabel: 'View official Reddit specs →',
+    formatReasonAwareness: 'Video wins on view-through/recall metrics, which matters for a CPM-billed objective chasing reach rather than clicks.',
+    formatReasonTraffic: 'Static visuals outperform video on CTR for click-driven objectives, per 2026 benchmarks compiled by AdControlCenter.',
+    formatReasonConversion: 'Reddit reports free-form ads drive +28% average CTR vs other formats; enabling comments strengthens social proof before the action.',
+    formatReasonAppInstall: 'Video product/gameplay demos are the mobile UA industry standard for driving installs; carousel lets you show several app screens.',
+    formatLabel_image: 'Image',
+    formatLabel_video: 'Video',
+    formatLabel_carousel: 'Carousel',
+    formatLabel_freeform: 'Free-form',
+    formatCountLabel: 'Number of combined formats',
+    formatCountHelp: 'Combining several formats/placements lowers cost per result (Reddit data: Feed + Conversation ≈ -12%). Beyond 2 formats this is a conservative estimate to validate via A/B testing.',
+    formatTransparencyNote: 'Recommendations based on public Reddit data (official specs, free-form ad performance stats) and third-party 2026 benchmarks (AdControlCenter). The multi-format accelerator beyond 2 formats is an estimate, not a figure guaranteed by Reddit.',
+    formatCpmEffectiveLabel: 'Effective CPM after accelerator: ',
     footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
   },
   es: {
@@ -1581,6 +1824,75 @@ const translations = {
     ob_target_appinstall_label: '¿Cuántas instalaciones quieres conseguir al mes?',
     ob_reveal_appinstall_lead: 'Con este presupuesto, las cuentas de {industry} generan aproximadamente',
     ob_reveal_appinstall_sub: 'instalaciones al mes, con un presupuesto de {budget}/mes.',
+    btnCopyLink: 'Copiar enlace',
+    btnPresentMode: 'Modo presentación',
+    btnExitPresentMode: 'Salir de la presentación',
+    btnRestartGuide: 'Retomar la guía',
+    lblAgency: 'Tu agencia',
+    lblClient: 'Cliente',
+    lblLogo: 'Logo de la agencia',
+    btnChooseFile: 'Elegir…',
+    tabSimpleView: 'Vista simple',
+    tabFullFunnelView: 'Vista Full Funnel',
+    panelAssumptionsTitle: 'Hipótesis de campaña',
+    hintAssumptions: 'Ajusta los valores por defecto según lo que sepas del cliente.',
+    lblBudget: 'Presupuesto mensual',
+    lblSector: 'Sector',
+    lblMarket: 'Mercado geográfico',
+    lblObjective: 'Objetivo',
+    lblTargeting: 'Segmentación',
+    hintFunnelAssumptions: 'Hipótesis del funnel (editables)',
+    lblCpm: 'CPM (coste por 1000 impresiones)',
+    lblCtr: 'CTR (tasa de clics)',
+    lblLtv: 'Valor medio del cliente',
+    lblAdvancedSettings: 'Ajustes avanzados — presets por sector',
+    hintAdvancedSettings: 'Ajusta el CPM y el CTR por defecto de cada sector con las cifras reales de las cuentas de Reddit Ads Manager de tus clientes.',
+    btnResetPresets: 'Restablecer valores por defecto',
+    funnelTitlePipeline: 'Proyección del pipeline',
+    stageImpressions: 'Impresiones',
+    stageClicks: 'Clics',
+    stageLeads: 'Leads',
+    stageClients: 'Clientes',
+    kpiCpl: 'Coste por lead',
+    kpiCpa: 'Coste por cliente (CPA)',
+    kpiRoas: 'ROAS proyectado',
+    btnSaveScenario: 'Guardar como escenario',
+    btnExportCsv: 'Exportar a CSV',
+    btnExportPdf: 'Exportar a PDF',
+    panelScenariosTitle: 'Comparación de escenarios',
+    hintScenarios: 'Guarda varios escenarios (presupuestos, segmentación) para compararlos lado a lado con tu cliente.',
+    emptyScenarios: 'Aún no hay ningún escenario guardado.',
+    legendBudget: 'Presupuesto',
+    legendResult: 'Resultado (ingresos generados)',
+    thScenario: 'Escenario',
+    thNotes: 'Notas',
+    thBudget: 'Presupuesto',
+    thImpressions: 'Impresiones',
+    thClicks: 'Clics',
+    thLeads: 'Leads',
+    thClients: 'Clientes',
+    thCpa: 'CPA',
+    thRoas: 'ROAS',
+    placeholderNote: 'Por qué este escenario…',
+    titleDuplicate: 'Duplicar este escenario',
+    titleRemove: 'Eliminar',
+    toastAppInstallNoScenario: 'La comparación de escenarios aún no está disponible para el objetivo Descargas de app',
+    formatSectionTitle: 'Formato recomendado',
+    formatPrimary: 'Formato principal',
+    formatSecondary: 'Formato secundario',
+    formatLinkLabel: 'Ver especificaciones oficiales de Reddit →',
+    formatReasonAwareness: 'El vídeo gana en métricas de recuerdo (view-through), relevante para un objetivo facturado por CPM que busca alcance más que clics.',
+    formatReasonTraffic: 'Los visuales estáticos superan al vídeo en CTR para objetivos orientados al clic directo, según los benchmarks 2026 de AdControlCenter.',
+    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos; activar los comentarios refuerza la prueba social antes de la acción.',
+    formatReasonAppInstall: 'La demostración en vídeo del producto/gameplay es el estándar del sector UA móvil para convertir en instalación; el carrusel permite mostrar varias pantallas de la app.',
+    formatLabel_image: 'Imagen',
+    formatLabel_video: 'Video',
+    formatLabel_carousel: 'Carrusel',
+    formatLabel_freeform: 'Free-form',
+    formatCountLabel: 'Número de formatos combinados',
+    formatCountHelp: 'Combinar varios formatos/ubicaciones reduce el coste por resultado (dato de Reddit: Feed + Conversación ≈ -12%). Más allá de 2 formatos es una estimación prudente a validar con pruebas A/B.',
+    formatTransparencyNote: 'Recomendaciones basadas en datos públicos de Reddit (especificaciones oficiales, estadísticas de rendimiento de los anuncios free-form) y benchmarks de terceros 2026 (AdControlCenter). El acelerador multi-formato más allá de 2 formatos es una estimación, no una cifra garantizada por Reddit.',
+    formatCpmEffectiveLabel: 'CPM efectivo tras el acelerador: ',
     footer_note: 'Benchmarks de Reddit Ads 2026 recopilados de fuentes públicas (AdBacklog, Benly, StackMatix, Marketing LTB) — ajusta con los datos reales de la cuenta de Reddit Ads Manager del cliente en cuanto estén disponibles.',
   },
 };
@@ -1631,6 +1943,28 @@ const objectiveMultipliers = {
 // Multiplicateur de plateforme sur le taux clic -> installation : iOS coûte 2-3,5x plus
 // cher qu'Android en CPI (LTV/concurrence plus fortes), donc un taux effectif plus faible.
 const platformC2iMultipliers = { ios: 0.4, android: 1.5, blended: 1 };
+
+// Recommandation de format publicitaire par objectif (specs et stats officielles Reddit).
+const formatRecommendations = {
+  awareness:  { primary: 'video', secondary: 'image', reasonKey: 'formatReasonAwareness' },
+  traffic:    { primary: 'image', secondary: 'carousel', reasonKey: 'formatReasonTraffic' },
+  conversion: { primary: 'freeform', secondary: 'carousel', reasonKey: 'formatReasonConversion' },
+  appInstall: { primary: 'video', secondary: 'carousel', reasonKey: 'formatReasonAppInstall' },
+};
+const formatLinks = {
+  image: 'https://business.reddithelp.com/s/article/image-ad-specifications',
+  video: 'https://business.reddithelp.com/s/article/video-ad-specifications',
+  carousel: 'https://business.reddithelp.com/s/article/carousel-ad-specifications',
+  freeform: 'https://business.reddithelp.com/s/article/Free-form-Ads',
+};
+function formatLabel(key) { return t('formatLabel_' + key); }
+// Accélérateur multi-format/placement : ancré sur la donnée Reddit publique pour 2 formats
+// (Feed + Conversation ≈ -12%) ; au-delà, estimation prudente à rendements décroissants.
+function formatCountMultiplier(value) {
+  if (value === '2') return 0.90;
+  if (value === '3plus') return 0.825;
+  return 1.0;
+}
 
 // Coefficients de marché géographique, appliqués au CPM (le marché le plus cher/mature en tête).
 const marketMultipliers = {
@@ -1690,6 +2024,7 @@ const state = {
   l2c: 12,
   c2i: 20,
   platform: 'blended',
+  formatCount: '1',
   ltv: 1200,
   customPresets: {},
   scenarios: [],
@@ -1725,6 +2060,7 @@ const els = {
   l2c: document.getElementById('l2c'),
   c2i: document.getElementById('c2i'),
   platform: document.getElementById('platform'),
+  formatCount: document.getElementById('formatCount'),
   ltv: document.getElementById('ltv'),
 };
 
@@ -1846,7 +2182,13 @@ function applyLangToUi() {
   if (langSwitch.value !== state.lang) langSwitch.value = state.lang;
   updateTabActiveStates();
   applyDataI18n();
-  if (els.objective && els.objective.value === 'appInstall') renderFunnel();
+  if (els.objective && els.objective.value) {
+    updateObjectiveFieldsVisibility();
+    syncLabels();
+    renderFunnel();
+  }
+  renderScenarios();
+  presentBtn.textContent = presentationActive ? t('btnExitPresentMode') : t('btnPresentMode');
   if (!document.getElementById('onboarding').hidden) renderOnboarding();
 }
 langSwitch.addEventListener('change', () => {
@@ -1911,7 +2253,19 @@ function updateObjectiveFieldsVisibility() {
   document.getElementById('l2cField').hidden = isAppInstall;
   document.getElementById('ltvField').hidden = isAppInstall;
   document.getElementById('c2iField').hidden = !isAppInstall;
-  document.getElementById('funnelTitle').textContent = isAppInstall ? t('funnelTitleAppInstall') : 'Projection du pipeline';
+  document.getElementById('funnelTitle').textContent = isAppInstall ? t('funnelTitleAppInstall') : t('funnelTitlePipeline');
+  renderFormatRecommendation();
+}
+
+function renderFormatRecommendation() {
+  const rec = formatRecommendations[els.objective.value];
+  const panel = document.getElementById('formatPanel');
+  if (!rec) { panel.hidden = true; return; }
+  panel.hidden = false;
+  document.getElementById('formatPrimaryLabel').textContent = formatLabel(rec.primary);
+  document.getElementById('formatSecondaryLabel').textContent = formatLabel(rec.secondary);
+  document.getElementById('formatReasonText').textContent = t(rec.reasonKey);
+  document.getElementById('formatSpecLink').href = formatLinks[rec.primary] || '#';
 }
 
 function applyPreset() {
@@ -1939,11 +2293,21 @@ function syncLabels() {
   document.getElementById('l2cVal').textContent = (+els.l2c.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('c2iVal').textContent = (+els.c2i.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('ltvVal').textContent = fmtEUR(+els.ltv.value);
+
+  const mult = formatCountMultiplier(els.formatCount.value);
+  const cpmNote = document.getElementById('cpmEffectiveNote');
+  if (mult < 1) {
+    const effectiveCpm = (+els.cpm.value * mult).toFixed(1).replace('.', ',') + ' €';
+    cpmNote.textContent = t('formatCpmEffectiveLabel') + effectiveCpm;
+  } else {
+    cpmNote.textContent = '';
+  }
+  document.getElementById('formatCountHelp').textContent = t('formatCountHelp');
 }
 
 function currentFunnel() {
   const budget = +els.budget.value;
-  const cpm = +els.cpm.value;
+  const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
   const ctr = +els.ctr.value / 100;
   const c2l = +els.c2l.value / 100;
   const l2c = +els.l2c.value / 100;
@@ -1963,7 +2327,7 @@ function currentFunnel() {
 
 function currentFunnelAppInstall() {
   const budget = +els.budget.value;
-  const cpm = +els.cpm.value;
+  const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
   const ctr = +els.ctr.value / 100;
   const c2i = +els.c2i.value / 100;
   const platformMult = platformC2iMultipliers[els.platform.value] ?? 1;
@@ -1980,13 +2344,14 @@ function currentFunnelAppInstall() {
 let prevKpiStatus = { cpa: null, roas: null };
 
 function renderFunnel() {
-  if (els.objective.value === 'appInstall') { renderFunnelAppInstall(); return; }
+  const objective = els.objective.value;
+  if (objective === 'appInstall') { renderFunnelAppInstall(); return; }
   const f = currentFunnel();
   const stages = [
-    { label: 'Impressions', value: f.impressions, ref: f.impressions },
-    { label: 'Clics', value: f.clicks, ref: f.impressions },
-    { label: 'Leads', value: f.leads, ref: f.impressions },
-    { label: 'Clients', value: f.clients, ref: f.impressions },
+    { label: t('stageImpressions'), value: f.impressions, ref: f.impressions },
+    { label: t('stageClicks'), value: f.clicks, ref: f.impressions },
+    { label: t('stageLeads'), value: f.leads, ref: f.impressions },
+    { label: t('stageClients'), value: f.clients, ref: f.impressions },
   ];
 
   document.getElementById('stageList').innerHTML = stages.map(s => {
@@ -2006,15 +2371,15 @@ function renderFunnel() {
 
   document.getElementById('kpiRow').innerHTML = `
     <div class="kpi">
-      <div class="kpi-label">Coût par lead</div>
+      <div class="kpi-label">${t('kpiCpl')}</div>
       <div class="kpi-value">${fmtEUR(f.cpl)}</div>
     </div>
     <div class="kpi ${cpaGood ? 'good' : 'warn'}${flipCpa ? ' kpi-flip' : ''}">
-      <div class="kpi-label">Coût par client (CPA)</div>
+      <div class="kpi-label">${t('kpiCpa')}</div>
       <div class="kpi-value">${f.clients > 0 ? fmtEUR(f.cpa) : '—'}</div>
     </div>
     <div class="kpi ${roasGood ? 'good' : 'warn'}${flipRoas ? ' kpi-flip' : ''}">
-      <div class="kpi-label">ROAS projeté</div>
+      <div class="kpi-label">${t('kpiRoas')}</div>
       <div class="kpi-value">${f.roas.toFixed(2)}×</div>
     </div>
   `;
@@ -2033,8 +2398,8 @@ function appInstallCpiBenchmark() {
 function renderFunnelAppInstall() {
   const f = currentFunnelAppInstall();
   const stages = [
-    { label: 'Impressions', value: f.impressions, ref: f.impressions },
-    { label: 'Clics', value: f.clicks, ref: f.impressions },
+    { label: t('stageImpressions'), value: f.impressions, ref: f.impressions },
+    { label: t('stageClicks'), value: f.clicks, ref: f.impressions },
     { label: t('stageInstalls'), value: f.installs, ref: f.impressions },
   ];
 
@@ -2062,7 +2427,7 @@ function renderFunnelAppInstall() {
       <div class="kpi-value">${f.installs > 0 ? fmtEUR(f.cpi) : '—'}</div>
     </div>
     <div class="kpi">
-      <div class="kpi-label"><span data-i18n="fieldC2i">Clic → Installation</span></div>
+      <div class="kpi-label"><span>${t('fieldC2i')}</span></div>
       <div class="kpi-value">${(+els.c2i.value).toFixed(1)} %</div>
     </div>
   `;
@@ -2082,6 +2447,7 @@ function syncStateFromFields() {
   state.l2c = +els.l2c.value;
   state.c2i = +els.c2i.value;
   state.platform = els.platform.value;
+  state.formatCount = els.formatCount.value;
   state.ltv = +els.ltv.value;
   state.agencyName = els.agencyName.value;
   state.clientName = els.clientName.value;
@@ -2101,6 +2467,7 @@ function compute() {
   el.addEventListener('change', () => { applyPreset(); updateTabActiveStates(); })
 );
 els.platform.addEventListener('change', () => { updateTabActiveStates(); compute(); });
+els.formatCount.addEventListener('change', () => { updateTabActiveStates(); compute(); });
 [els.agencyName, els.clientName].forEach(el =>
   el.addEventListener('input', () => { syncStateFromFields(); scheduleSave(); })
 );
@@ -2166,7 +2533,7 @@ let presentationActive = false;
 function togglePresentation() {
   presentationActive = !presentationActive;
   document.body.classList.toggle('presentation-mode', presentationActive);
-  presentBtn.textContent = presentationActive ? 'Quitter la présentation' : 'Mode présentation';
+  presentBtn.textContent = presentationActive ? t('btnExitPresentMode') : t('btnPresentMode');
   if (presentationActive && document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(() => {});
   } else if (!presentationActive && document.fullscreenElement && document.exitFullscreen) {
@@ -2999,12 +3366,12 @@ document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnb
 /* ---------- Scenarios ---------- */
 function saveScenario() {
   if (els.objective.value === 'appInstall') {
-    toast("Comparaison de scénarios pas encore disponible pour l'objectif Téléchargement d'app");
+    toast(t('toastAppInstallNoScenario'));
     return;
   }
   const f = currentFunnel();
   state.scenarios.push({
-    name: `Scénario ${state.scenarios.length + 1}`,
+    name: `${t('thScenario')} ${state.scenarios.length + 1}`,
     notes: '',
     industry: els.industry.options[els.industry.selectedIndex].text,
     objective: els.objective.options[els.objective.selectedIndex].text,
@@ -3036,8 +3403,8 @@ function renderScenarioChart() {
   const max = Math.max(1, ...scenarios.flatMap(s => [s.budget, s.revenue]));
   wrap.innerHTML = `
     <div class="chart-legend">
-      <span class="legend-item"><span class="swatch swatch-budget"></span>Budget</span>
-      <span class="legend-item"><span class="swatch swatch-revenue"></span>Résultat (CA généré)</span>
+      <span class="legend-item"><span class="swatch swatch-budget"></span>${t('legendBudget')}</span>
+      <span class="legend-item"><span class="swatch swatch-revenue"></span>${t('legendResult')}</span>
     </div>
     <div class="scenario-chart">
       ${scenarios.map(s => `
@@ -3064,7 +3431,7 @@ function renderScenarios() {
   const scenarios = state.scenarios;
   renderScenarioChart();
   if (scenarios.length === 0) {
-    wrap.innerHTML = '<p class="empty-scenarios">Aucun scénario enregistré pour l\'instant.</p>';
+    wrap.innerHTML = `<p class="empty-scenarios">${t('emptyScenarios')}</p>`;
     return;
   }
   wrap.innerHTML = `
@@ -3072,15 +3439,15 @@ function renderScenarios() {
       <table class="scenario-table">
         <thead>
           <tr>
-            <th>Scénario</th>
-            <th>Notes</th>
-            <th>Budget</th>
-            <th>Impressions</th>
-            <th>Clics</th>
-            <th>Leads</th>
-            <th>Clients</th>
-            <th>CPA</th>
-            <th>ROAS</th>
+            <th>${t('thScenario')}</th>
+            <th>${t('thNotes')}</th>
+            <th>${t('thBudget')}</th>
+            <th>${t('thImpressions')}</th>
+            <th>${t('thClicks')}</th>
+            <th>${t('thLeads')}</th>
+            <th>${t('thClients')}</th>
+            <th>${t('thCpa')}</th>
+            <th>${t('thRoas')}</th>
             <th class="col-actions"></th>
             <th class="col-actions"></th>
           </tr>
@@ -3090,7 +3457,7 @@ function renderScenarios() {
             <tr>
               <td>${escapeHtml(s.name)}<br><span class="scenario-meta">${escapeHtml(s.industry)} · ${escapeHtml(s.objective)} · ${escapeHtml(s.mix)}</span></td>
               <td class="notes-cell">
-                <textarea class="note-input" data-i="${i}" rows="2" placeholder="Pourquoi ce scénario…">${escapeHtml(s.notes || '')}</textarea>
+                <textarea class="note-input" data-i="${i}" rows="2" placeholder="${escapeHtml(t('placeholderNote'))}">${escapeHtml(s.notes || '')}</textarea>
                 <div class="note-print">${escapeHtml(s.notes || '')}</div>
               </td>
               <td>${fmtEUR(s.budget)}</td>
@@ -3100,8 +3467,8 @@ function renderScenarios() {
               <td>${fmtNum(s.clients)}</td>
               <td>${s.clients > 0 ? fmtEUR(s.cpa) : '—'}</td>
               <td>${s.roas.toFixed(2)}×</td>
-              <td class="col-actions dup" onclick="duplicateScenario(${i})" title="Dupliquer ce scénario">⧉</td>
-              <td class="col-actions remove" onclick="removeScenario(${i})" title="Supprimer">✕</td>
+              <td class="col-actions dup" onclick="duplicateScenario(${i})" title="${escapeHtml(t('titleDuplicate'))}">⧉</td>
+              <td class="col-actions remove" onclick="removeScenario(${i})" title="${escapeHtml(t('titleRemove'))}">✕</td>
             </tr>
           `).join('')}
         </tbody>
@@ -3170,6 +3537,7 @@ function hydrateFieldsFromState() {
   els.l2c.value = state.l2c;
   els.c2i.value = state.c2i || 20;
   els.platform.value = state.platform || 'blended';
+  els.formatCount.value = state.formatCount || '1';
   els.ltv.value = state.ltv;
   viewSwitch.value = state.view === 'full' ? 'full' : 'simple';
   updateObjectiveFieldsVisibility();
