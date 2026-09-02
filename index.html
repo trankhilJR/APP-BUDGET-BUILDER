@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Simulateur de budget Reddit Ads</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23BF4E2C'/%3E%3Crect x='13' y='34' width='10' height='18' rx='2' fill='white'/%3E%3Crect x='27' y='23' width='10' height='29' rx='2' fill='white'/%3E%3Crect x='41' y='12' width='10' height='40' rx='2' fill='white'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -17,7 +18,25 @@
     --ember-soft: #F4E2DA;
     --moss: #3F5A47;
     --moss-soft: #E1E9E1;
+    --moss-rgb: 63,90,71;
+    --chart-neutral: #565F58;
     --radius: 3px;
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #14171A;
+    --surface: #1D2124;
+    --ink: #ECEFEC;
+    --ink-soft: #9AA79E;
+    --line: #2E3336;
+    --ember: #E8734A;
+    --ember-soft: #3A2620;
+    --moss: #7FBE98;
+    --moss-soft: #1E2A22;
+    --moss-rgb: 127,190,152;
+    --chart-neutral: #9AA79E;
+    color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
@@ -29,9 +48,19 @@
     font-family: 'Inter', sans-serif;
     font-size: 15px;
     line-height: 1.5;
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 40px 28px 100px; }
+
+  .visually-hidden-select {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0; padding: 0; margin: -1px;
+  }
 
   header.masthead {
     display: flex;
@@ -44,6 +73,17 @@
     flex-wrap: wrap;
   }
 
+  .masthead-title { display: flex; align-items: center; gap: 14px; }
+
+  .masthead-logo {
+    width: 44px; height: 44px;
+    object-fit: contain;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 3px;
+  }
+
   header.masthead h1 {
     font-family: 'Fraunces', serif;
     font-weight: 500;
@@ -54,10 +94,25 @@
 
   header.masthead p { margin: 0; color: var(--ink-soft); font-size: 14px; }
 
+  .masthead-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  .icon-toggle {
+    width: 38px; height: 38px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+
   .brand-fields {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .brand-fields label {
@@ -67,7 +122,7 @@
     margin-bottom: 3px;
   }
 
-  .brand-fields input {
+  .brand-fields input[type="text"] {
     border: none;
     border-bottom: 1px solid var(--line);
     background: transparent;
@@ -77,7 +132,31 @@
     width: 170px;
     color: var(--ink);
   }
-  .brand-fields input:focus { outline: none; border-color: var(--ember); }
+  .brand-fields input[type="text"]:focus { outline: none; border-color: var(--ember); }
+
+  .logo-field .logo-upload { display: flex; align-items: center; gap: 8px; }
+  .logo-thumb {
+    width: 26px; height: 26px;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .logo-btn {
+    font-size: 12px;
+    color: var(--ink);
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    padding: 3px 0;
+  }
+  .logo-remove {
+    border: none;
+    background: none;
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+  }
 
   .layout {
     display: grid;
@@ -145,7 +224,76 @@
 
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+  /* Tab / pill selector — scrolls horizontally on narrow screens instead of wrapping */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--surface);
+  }
+
   .divider { border: none; border-top: 1px solid var(--line); margin: 20px 0; }
+
+  /* Advanced settings */
+  .advanced-settings { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .advanced-settings summary {
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .presets-editor { margin-top: 10px; }
+  .preset-row {
+    display: grid;
+    grid-template-columns: 1fr 84px 84px;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+  }
+  .preset-row:first-child { border-top: none; }
+  .preset-label { font-size: 12.5px; color: var(--ink-soft); }
+  .preset-input-label {
+    font-size: 10px;
+    color: var(--ink-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .preset-input {
+    padding: 5px 6px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--ink);
+    font-size: 12.5px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+  }
 
   /* Funnel panel */
   .funnel-header {
@@ -153,6 +301,8 @@
     justify-content: space-between;
     align-items: baseline;
     margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .stage-list { display: flex; flex-direction: column; }
@@ -214,6 +364,20 @@
   .kpi.good .kpi-value { color: var(--moss); }
   .kpi.warn .kpi-value { color: var(--ember); }
 
+  /* Micro-animation: draws the eye when a KPI flips from "warn" to "good" */
+  @keyframes kpiFlip {
+    0%   { box-shadow: 0 0 0 0 rgba(var(--moss-rgb), 0); }
+    35%  { box-shadow: 0 0 0 6px rgba(var(--moss-rgb), 0.22); transform: scale(1.04); }
+    100% { box-shadow: 0 0 0 0 rgba(var(--moss-rgb), 0); transform: scale(1); }
+  }
+  @keyframes kpiValuePop {
+    0%   { text-shadow: 0 0 0 rgba(var(--moss-rgb), 0); }
+    40%  { text-shadow: 0 0 14px rgba(var(--moss-rgb), 0.45); }
+    100% { text-shadow: 0 0 0 rgba(var(--moss-rgb), 0); }
+  }
+  .kpi.kpi-flip { animation: kpiFlip 0.7s ease; }
+  .kpi.kpi-flip .kpi-value { animation: kpiValuePop 0.7s ease; }
+
   .actions { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
 
   button {
@@ -233,14 +397,69 @@
   }
   button:hover { opacity: 0.85; }
 
+  :root[data-theme="dark"] button:not(.secondary):not(.icon-toggle):not(.tab-btn) {
+    background: var(--ember);
+    border-color: var(--ember);
+    color: #1A100A;
+  }
+  :root[data-theme="dark"] button.secondary {
+    border-color: var(--line);
+    color: var(--ink);
+  }
+
   /* Scenarios */
   .scenarios-panel { margin-top: 24px; }
+
+  .chart-legend {
+    display: flex;
+    gap: 18px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 14px 0 12px;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .swatch-budget { background: var(--chart-neutral); }
+  .swatch-revenue { background: var(--ember); }
+
+  .scenario-chart { display: flex; flex-direction: column; gap: 16px; }
+  .chart-row { display: grid; grid-template-columns: 130px 1fr; gap: 14px; align-items: center; }
+  .chart-row-label {
+    font-size: 12.5px;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chart-bars { display: flex; flex-direction: column; gap: 5px; }
+  .chart-bar-track {
+    position: relative;
+    height: 17px;
+    background: var(--bg);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .chart-bar { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+  .chart-bar.budget { background: var(--chart-neutral); }
+  .chart-bar.revenue { background: var(--ember); }
+  .chart-bar-value {
+    position: absolute;
+    right: 6px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   table.scenario-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13.5px;
     margin-top: 10px;
+    min-width: 760px;
   }
   table.scenario-table th, table.scenario-table td {
     text-align: right;
@@ -248,7 +467,8 @@
     border-bottom: 1px solid var(--line);
     font-variant-numeric: tabular-nums;
   }
-  table.scenario-table th:first-child, table.scenario-table td:first-child {
+  table.scenario-table th:first-child, table.scenario-table td:first-child,
+  table.scenario-table th:nth-child(2), table.scenario-table td:nth-child(2) {
     text-align: left;
     font-variant-numeric: initial;
   }
@@ -263,6 +483,28 @@
     color: var(--ember);
     font-weight: 600;
   }
+  table.scenario-table td.dup {
+    text-align: center;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .scenario-meta { color: var(--ink-soft); font-size: 11.5px; }
+
+  .notes-cell { min-width: 160px; }
+  .note-input {
+    width: 100%;
+    min-width: 150px;
+    resize: vertical;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .note-print { display: none; }
 
   .empty-scenarios {
     color: var(--ink-soft);
@@ -279,30 +521,140 @@
     padding-top: 14px;
   }
 
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translate(-50%, 16px);
+    background: var(--ink);
+    color: var(--surface);
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s ease;
+    z-index: 10000;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* Presentation mode */
+  body.presentation-mode { background: var(--bg); }
+  body.presentation-mode .wrap { max-width: 1400px; padding-top: 30px; }
+  body.presentation-mode .layout { grid-template-columns: 1fr; }
+  body.presentation-mode #inputPanel,
+  body.presentation-mode .scenarios-panel,
+  body.presentation-mode footer.note,
+  body.presentation-mode header.masthead .brand-fields,
+  body.presentation-mode #funnelPanel .actions {
+    display: none;
+  }
+  body.presentation-mode header.masthead h1 { font-size: clamp(28px, 5vw, 52px); }
+  body.presentation-mode #funnelPanel { padding: 48px; }
+  body.presentation-mode .stage { padding: 22px 0; }
+  body.presentation-mode .stage .label { font-size: 16px; }
+  body.presentation-mode .stage .figure { font-size: clamp(28px, 4vw, 46px); min-width: auto; }
+  body.presentation-mode .stage .bar-track { height: 20px; }
+  body.presentation-mode .kpi-value { font-size: clamp(22px, 3vw, 36px); }
+  body.presentation-mode .kpi-label { font-size: 14px; }
+
+  /* Print cover page */
+  .cover-page { display: none; }
+
   @media print {
-    .field select, .field input, .actions, .brand-fields input { display: none !important; }
+    :root, :root[data-theme="dark"] {
+      --bg: #F0F1EC;
+      --surface: #FFFFFF;
+      --ink: #1B2420;
+      --ink-soft: #565F58;
+      --line: #D8D9D1;
+      --ember: #BF4E2C;
+      --ember-soft: #F4E2DA;
+      --moss: #3F5A47;
+      --moss-soft: #E1E9E1;
+      --chart-neutral: #565F58;
+    }
+    .field select, .field input, .actions, .brand-fields input,
+    .header-actions, .advanced-settings, .tabs, .visually-hidden-select,
+    .logo-field, .note-input, .col-actions, .toast {
+      display: none !important;
+    }
     button { display: none !important; }
     .wrap { padding: 0; }
     .layout { grid-template-columns: 1fr; }
+    .note-print { display: block; font-size: 11px; white-space: pre-wrap; color: var(--ink-soft); }
+
+    .cover-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      page-break-after: always;
+      text-align: center;
+    }
+    .cover-logo { max-width: 140px; max-height: 140px; object-fit: contain; margin-bottom: 28px; }
+    .cover-title { font-family: 'Fraunces', serif; font-size: 32px; margin: 0 0 8px; }
+    .cover-subtitle { color: var(--ink-soft); margin: 0 0 40px; font-size: 15px; }
+    .cover-meta { display: flex; gap: 40px; }
+    .cover-meta-label {
+      display: block; font-size: 11px; color: var(--ink-soft);
+      margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .cover-meta strong { font-family: 'Fraunces', serif; font-size: 18px; }
   }
 </style>
 </head>
 <body>
+
+<section class="cover-page" id="coverPage">
+  <div class="cover-inner">
+    <img id="coverLogo" class="cover-logo" hidden alt="Logo agence">
+    <h1 class="cover-title">Simulateur de budget Reddit Ads</h1>
+    <p class="cover-subtitle">Proposition de plan média</p>
+    <div class="cover-meta">
+      <div><span class="cover-meta-label">Client</span><strong id="coverClient">—</strong></div>
+      <div><span class="cover-meta-label">Agence</span><strong id="coverAgency">—</strong></div>
+      <div><span class="cover-meta-label">Date</span><strong id="coverDate">—</strong></div>
+    </div>
+  </div>
+</section>
+
 <div class="wrap">
 
   <header class="masthead">
-    <div>
-      <h1>Simulateur de budget Reddit Ads</h1>
-      <p>Planification de campagne et projection de pipeline</p>
-    </div>
-    <div class="brand-fields">
+    <div class="masthead-title">
+      <img id="mastheadLogo" class="masthead-logo" hidden alt="Logo agence">
       <div>
-        <label>Ton agence</label>
-        <input id="agencyName" type="text" placeholder="Nom de ton agence" value="">
+        <h1>Simulateur de budget Reddit Ads</h1>
+        <p>Planification de campagne et projection de pipeline</p>
       </div>
-      <div>
-        <label>Client</label>
-        <input id="clientName" type="text" placeholder="Nom du client" value="">
+    </div>
+    <div class="masthead-side">
+      <div class="header-actions">
+        <button type="button" class="icon-toggle" id="themeToggle" aria-label="Basculer le mode sombre">🌙</button>
+        <button type="button" class="secondary" id="shareBtn">Copier le lien</button>
+        <button type="button" class="secondary" id="presentBtn">Mode présentation</button>
+      </div>
+      <div class="brand-fields">
+        <div>
+          <label>Ton agence</label>
+          <input id="agencyName" type="text" placeholder="Nom de ton agence" value="">
+        </div>
+        <div>
+          <label>Client</label>
+          <input id="clientName" type="text" placeholder="Nom du client" value="">
+        </div>
+        <div class="logo-field">
+          <label>Logo agence</label>
+          <div class="logo-upload">
+            <img id="agencyLogoThumb" class="logo-thumb" hidden alt="Logo agence">
+            <label class="logo-btn" for="agencyLogoInput">Choisir…</label>
+            <input type="file" id="agencyLogoInput" accept="image/png,image/jpeg,image/svg+xml" hidden>
+            <button type="button" id="removeLogoBtn" class="logo-remove" hidden title="Retirer le logo">✕</button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -310,7 +662,7 @@
   <div class="layout">
 
     <!-- INPUT PANEL -->
-    <div class="panel">
+    <div class="panel" id="inputPanel">
       <h2>Hypothèses de campagne</h2>
       <p class="hint">Ajuste les valeurs par défaut selon ce que tu sais du client.</p>
 
@@ -332,14 +684,22 @@
       <div class="field-row">
         <div class="field">
           <label>Objectif</label>
-          <select id="objective">
+          <div class="tabs" data-target="objective" role="tablist">
+            <button type="button" class="tab-btn" data-value="traffic">Trafic</button>
+            <button type="button" class="tab-btn" data-value="conversion">Conversion</button>
+          </div>
+          <select id="objective" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
             <option value="traffic">Trafic</option>
             <option value="conversion" selected>Conversion</option>
           </select>
         </div>
         <div class="field">
           <label>Ciblage</label>
-          <select id="mix">
+          <div class="tabs" data-target="mix" role="tablist">
+            <button type="button" class="tab-btn" data-value="broad">Large</button>
+            <button type="button" class="tab-btn" data-value="niche">Niche</button>
+          </div>
+          <select id="mix" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
             <option value="broad">Large</option>
             <option value="niche" selected>Niche</option>
           </select>
@@ -374,10 +734,17 @@
         <label>Valeur moyenne client <span class="val" id="ltvVal">1 200 €</span></label>
         <input type="range" id="ltv" min="50" max="20000" step="50" value="1200">
       </div>
+
+      <details class="advanced-settings">
+        <summary>Paramètres avancés — presets par secteur</summary>
+        <p class="hint" style="margin:10px 0 12px;">Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.</p>
+        <div id="presetsEditor" class="presets-editor"></div>
+        <button type="button" class="secondary" id="resetPresetsBtn" style="margin-top:12px;">Réinitialiser les valeurs par défaut</button>
+      </details>
     </div>
 
     <!-- FUNNEL / OUTPUT -->
-    <div class="panel">
+    <div class="panel" id="funnelPanel">
       <div class="funnel-header">
         <h2>Projection du pipeline</h2>
       </div>
@@ -395,9 +762,10 @@
   </div>
 
   <!-- SCENARIOS -->
-  <div class="panel scenarios-panel">
+  <div class="panel scenarios-panel" id="scenariosPanel">
     <h2>Comparaison de scénarios</h2>
     <p class="hint">Enregistre plusieurs scénarios (budgets, ciblages) pour les comparer côte à côte avec ton client.</p>
+    <div id="scenarioChartWrap"></div>
     <div id="scenarioTableWrap"><p class="empty-scenarios">Aucun scénario enregistré pour l'instant.</p></div>
   </div>
 
@@ -408,11 +776,39 @@
 </div>
 
 <script>
-const presets = {
+const STORAGE_KEY = 'redditBudgetBuilder:v1';
+
+const defaultPresets = {
   consumer: { cpm: 4,   ctr: 0.45, c2l: 3,  l2c: 8  },
   saas:     { cpm: 6,   ctr: 0.35, c2l: 5,  l2c: 12 },
   finance:  { cpm: 6,   ctr: 0.30, c2l: 4,  l2c: 10 },
   gaming:   { cpm: 2.5, ctr: 0.50, c2l: 2,  l2c: 5  },
+};
+const industryLabels = {
+  consumer: 'Grand public / DTC',
+  saas: 'Tech / SaaS',
+  finance: 'Finance / Assurance',
+  gaming: 'Gaming / Loisirs',
+};
+
+let presets = JSON.parse(JSON.stringify(defaultPresets));
+
+const state = {
+  theme: 'light',
+  agencyName: '',
+  clientName: '',
+  agencyLogo: null,
+  budget: 3000,
+  industry: 'saas',
+  objective: 'conversion',
+  mix: 'niche',
+  cpm: 6,
+  ctr: 0.35,
+  c2l: 5,
+  l2c: 12,
+  ltv: 1200,
+  customPresets: {},
+  scenarios: [],
 };
 
 const els = {
@@ -429,9 +825,142 @@ const els = {
   ltv: document.getElementById('ltv'),
 };
 
+const themeToggle = document.getElementById('themeToggle');
+const shareBtn = document.getElementById('shareBtn');
+const presentBtn = document.getElementById('presentBtn');
+const agencyLogoInput = document.getElementById('agencyLogoInput');
+const agencyLogoThumb = document.getElementById('agencyLogoThumb');
+const mastheadLogo = document.getElementById('mastheadLogo');
+const removeLogoBtn = document.getElementById('removeLogoBtn');
+
 const fmtEUR = n => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 const fmtNum = n => Math.round(n).toLocaleString('fr-FR');
 
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function csvField(v) {
+  const s = String(v ?? '');
+  if (/[;"\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function toast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.className = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+}
+
+/* ---------- Persistence ---------- */
+let saveTimer = null;
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 250);
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* storage full or blocked */ }
+}
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    Object.assign(state, JSON.parse(raw));
+    return true;
+  } catch (e) { return false; }
+}
+function applyShareParam() {
+  try {
+    const params = new URLSearchParams(location.search);
+    const s = params.get('s');
+    if (!s) return false;
+    const decoded = JSON.parse(decodeURIComponent(atob(s)));
+    Object.assign(state, decoded);
+    return true;
+  } catch (e) { return false; }
+}
+function buildShareState() {
+  return {
+    budget: state.budget, industry: state.industry, objective: state.objective, mix: state.mix,
+    cpm: state.cpm, ctr: state.ctr, c2l: state.c2l, l2c: state.l2c, ltv: state.ltv,
+    agencyName: state.agencyName, clientName: state.clientName,
+  };
+}
+function copyShareLink() {
+  syncStateFromFields();
+  const payload = btoa(encodeURIComponent(JSON.stringify(buildShareState())));
+  const url = `${location.origin}${location.pathname}?s=${payload}`;
+  const done = () => toast('Lien copié dans le presse-papiers');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(() => window.prompt('Copie ce lien :', url));
+  } else {
+    window.prompt('Copie ce lien :', url);
+  }
+}
+
+/* ---------- Theme ---------- */
+function initTheme() {
+  document.documentElement.setAttribute('data-theme', state.theme === 'dark' ? 'dark' : 'light');
+  themeToggle.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+  themeToggle.setAttribute('aria-label', state.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre');
+}
+
+/* ---------- Logo ---------- */
+function applyLogo() {
+  const has = !!state.agencyLogo;
+  mastheadLogo.hidden = !has;
+  agencyLogoThumb.hidden = !has;
+  removeLogoBtn.hidden = !has;
+  if (has) {
+    mastheadLogo.src = state.agencyLogo;
+    agencyLogoThumb.src = state.agencyLogo;
+  }
+}
+
+/* ---------- Advanced presets ---------- */
+function applyCustomPresetsToBase() {
+  presets = JSON.parse(JSON.stringify(defaultPresets));
+  Object.keys(state.customPresets || {}).forEach(key => {
+    if (presets[key]) Object.assign(presets[key], state.customPresets[key]);
+  });
+}
+function renderAdvancedPresetsPanel() {
+  const wrap = document.getElementById('presetsEditor');
+  wrap.innerHTML = Object.keys(defaultPresets).map(key => `
+    <div class="preset-row">
+      <span class="preset-label">${industryLabels[key]}</span>
+      <label class="preset-input-label">CPM (€)
+        <input type="number" step="0.1" min="0.1" class="preset-input" data-key="${key}" data-field="cpm" value="${presets[key].cpm}">
+      </label>
+      <label class="preset-input-label">CTR (%)
+        <input type="number" step="0.01" min="0.01" class="preset-input" data-key="${key}" data-field="ctr" value="${presets[key].ctr}">
+      </label>
+    </div>
+  `).join('');
+}
+
+/* ---------- Tabs (objective / mix) ---------- */
+function updateTabActiveStates() {
+  document.querySelectorAll('.tabs').forEach(group => {
+    const select = document.getElementById(group.dataset.target);
+    if (!select) return;
+    group.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.value === select.value);
+    });
+  });
+}
+
+/* ---------- Core computation ---------- */
 function applyPreset() {
   const base = presets[els.industry.value];
   let cpm = base.cpm, c2l = base.c2l, l2c = base.l2c;
@@ -477,6 +1006,8 @@ function currentFunnel() {
   return { budget, impressions, clicks, leads, clients, revenue, cpa, cpl, roas };
 }
 
+let prevKpiStatus = { cpa: null, roas: null };
+
 function renderFunnel() {
   const f = currentFunnel();
   const stages = [
@@ -496,99 +1027,261 @@ function renderFunnel() {
       </div>`;
   }).join('');
 
+  const cpaGood = f.clients > 0 && f.cpa < f.budget * 0.3;
+  const roasGood = f.roas >= 1;
+  const flipCpa = prevKpiStatus.cpa === false && cpaGood === true;
+  const flipRoas = prevKpiStatus.roas === false && roasGood === true;
+
   document.getElementById('kpiRow').innerHTML = `
     <div class="kpi">
       <div class="kpi-label">Coût par lead</div>
       <div class="kpi-value">${fmtEUR(f.cpl)}</div>
     </div>
-    <div class="kpi ${f.cpa > 0 && f.cpa < f.budget * 0.3 ? 'good' : 'warn'}">
+    <div class="kpi ${cpaGood ? 'good' : 'warn'}${flipCpa ? ' kpi-flip' : ''}">
       <div class="kpi-label">Coût par client (CPA)</div>
       <div class="kpi-value">${f.clients > 0 ? fmtEUR(f.cpa) : '—'}</div>
     </div>
-    <div class="kpi ${f.roas >= 1 ? 'good' : 'warn'}">
+    <div class="kpi ${roasGood ? 'good' : 'warn'}${flipRoas ? ' kpi-flip' : ''}">
       <div class="kpi-label">ROAS projeté</div>
       <div class="kpi-value">${f.roas.toFixed(2)}×</div>
     </div>
   `;
+
+  prevKpiStatus = { cpa: cpaGood, roas: roasGood };
+}
+
+function syncStateFromFields() {
+  state.budget = +els.budget.value;
+  state.industry = els.industry.value;
+  state.objective = els.objective.value;
+  state.mix = els.mix.value;
+  state.cpm = +els.cpm.value;
+  state.ctr = +els.ctr.value;
+  state.c2l = +els.c2l.value;
+  state.l2c = +els.l2c.value;
+  state.ltv = +els.ltv.value;
+  state.agencyName = els.agencyName.value;
+  state.clientName = els.clientName.value;
 }
 
 function compute() {
   syncLabels();
   renderFunnel();
+  syncStateFromFields();
+  scheduleSave();
 }
 
 [els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.ltv].forEach(el =>
   el.addEventListener('input', compute)
 );
 [els.industry, els.objective, els.mix].forEach(el =>
-  el.addEventListener('change', applyPreset)
+  el.addEventListener('change', () => { applyPreset(); updateTabActiveStates(); })
+);
+[els.agencyName, els.clientName].forEach(el =>
+  el.addEventListener('input', () => { syncStateFromFields(); scheduleSave(); })
 );
 
-// Scenarios
-let scenarios = [];
+document.querySelectorAll('.tabs').forEach(group => {
+  const select = document.getElementById(group.dataset.target);
+  group.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      select.value = btn.dataset.value;
+      select.dispatchEvent(new Event('change'));
+    });
+  });
+});
 
+document.getElementById('presetsEditor').addEventListener('input', e => {
+  if (!e.target.classList.contains('preset-input')) return;
+  const key = e.target.dataset.key, field = e.target.dataset.field;
+  state.customPresets[key] = state.customPresets[key] || {};
+  state.customPresets[key][field] = +e.target.value;
+  applyCustomPresetsToBase();
+  if (els.industry.value === key) applyPreset(); else scheduleSave();
+});
+document.getElementById('resetPresetsBtn').addEventListener('click', () => {
+  state.customPresets = {};
+  applyCustomPresetsToBase();
+  renderAdvancedPresetsPanel();
+  applyPreset();
+  toast('Presets réinitialisés aux valeurs par défaut');
+});
+
+themeToggle.addEventListener('click', () => {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  initTheme();
+  scheduleSave();
+});
+shareBtn.addEventListener('click', copyShareLink);
+
+agencyLogoInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    toast('Logo trop lourd (2 Mo max)');
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    state.agencyLogo = reader.result;
+    applyLogo();
+    scheduleSave();
+  };
+  reader.readAsDataURL(file);
+});
+removeLogoBtn.addEventListener('click', () => {
+  state.agencyLogo = null;
+  agencyLogoInput.value = '';
+  applyLogo();
+  scheduleSave();
+});
+
+/* ---------- Presentation mode ---------- */
+let presentationActive = false;
+function togglePresentation() {
+  presentationActive = !presentationActive;
+  document.body.classList.toggle('presentation-mode', presentationActive);
+  presentBtn.textContent = presentationActive ? 'Quitter la présentation' : 'Mode présentation';
+  if (presentationActive && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else if (!presentationActive && document.fullscreenElement && document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+presentBtn.addEventListener('click', togglePresentation);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && presentationActive) togglePresentation();
+});
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && presentationActive) togglePresentation();
+});
+
+/* ---------- Scenarios ---------- */
 function saveScenario() {
   const f = currentFunnel();
-  scenarios.push({
-    name: `Scénario ${scenarios.length + 1}`,
+  state.scenarios.push({
+    name: `Scénario ${state.scenarios.length + 1}`,
+    notes: '',
     industry: els.industry.options[els.industry.selectedIndex].text,
     objective: els.objective.options[els.objective.selectedIndex].text,
     mix: els.mix.options[els.mix.selectedIndex].text,
     ...f
   });
   renderScenarios();
+  scheduleSave();
+}
+
+function duplicateScenario(i) {
+  const copy = JSON.parse(JSON.stringify(state.scenarios[i]));
+  copy.name = copy.name + ' (copie)';
+  state.scenarios.splice(i + 1, 0, copy);
+  renderScenarios();
+  scheduleSave();
+}
+
+function removeScenario(i) {
+  state.scenarios.splice(i, 1);
+  renderScenarios();
+  scheduleSave();
+}
+
+function renderScenarioChart() {
+  const wrap = document.getElementById('scenarioChartWrap');
+  const scenarios = state.scenarios;
+  if (scenarios.length === 0) { wrap.innerHTML = ''; return; }
+  const max = Math.max(1, ...scenarios.flatMap(s => [s.budget, s.revenue]));
+  wrap.innerHTML = `
+    <div class="chart-legend">
+      <span class="legend-item"><span class="swatch swatch-budget"></span>Budget</span>
+      <span class="legend-item"><span class="swatch swatch-revenue"></span>Résultat (CA généré)</span>
+    </div>
+    <div class="scenario-chart">
+      ${scenarios.map(s => `
+        <div class="chart-row">
+          <div class="chart-row-label" title="${escapeHtml(s.name)}">${escapeHtml(s.name)}</div>
+          <div class="chart-bars">
+            <div class="chart-bar-track">
+              <div class="chart-bar budget" style="width:${Math.max(2, (s.budget / max) * 100)}%"></div>
+              <span class="chart-bar-value">${fmtEUR(s.budget)}</span>
+            </div>
+            <div class="chart-bar-track">
+              <div class="chart-bar revenue" style="width:${Math.max(2, (s.revenue / max) * 100)}%"></div>
+              <span class="chart-bar-value">${fmtEUR(s.revenue)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
 function renderScenarios() {
   const wrap = document.getElementById('scenarioTableWrap');
+  const scenarios = state.scenarios;
+  renderScenarioChart();
   if (scenarios.length === 0) {
     wrap.innerHTML = '<p class="empty-scenarios">Aucun scénario enregistré pour l\'instant.</p>';
     return;
   }
   wrap.innerHTML = `
-    <table class="scenario-table">
-      <thead>
-        <tr>
-          <th>Scénario</th>
-          <th>Budget</th>
-          <th>Impressions</th>
-          <th>Clics</th>
-          <th>Leads</th>
-          <th>Clients</th>
-          <th>CPA</th>
-          <th>ROAS</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        ${scenarios.map((s, i) => `
+    <div class="table-scroll">
+      <table class="scenario-table">
+        <thead>
           <tr>
-            <td>${s.name}<br><span style="color:var(--ink-soft);font-size:11.5px;">${s.industry} · ${s.objective} · ${s.mix}</span></td>
-            <td>${fmtEUR(s.budget)}</td>
-            <td>${fmtNum(s.impressions)}</td>
-            <td>${fmtNum(s.clicks)}</td>
-            <td>${fmtNum(s.leads)}</td>
-            <td>${fmtNum(s.clients)}</td>
-            <td>${s.clients > 0 ? fmtEUR(s.cpa) : '—'}</td>
-            <td>${s.roas.toFixed(2)}×</td>
-            <td class="remove" onclick="removeScenario(${i})">✕</td>
+            <th>Scénario</th>
+            <th>Notes</th>
+            <th>Budget</th>
+            <th>Impressions</th>
+            <th>Clics</th>
+            <th>Leads</th>
+            <th>Clients</th>
+            <th>CPA</th>
+            <th>ROAS</th>
+            <th class="col-actions"></th>
+            <th class="col-actions"></th>
           </tr>
-        `).join('')}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          ${scenarios.map((s, i) => `
+            <tr>
+              <td>${escapeHtml(s.name)}<br><span class="scenario-meta">${escapeHtml(s.industry)} · ${escapeHtml(s.objective)} · ${escapeHtml(s.mix)}</span></td>
+              <td class="notes-cell">
+                <textarea class="note-input" data-i="${i}" rows="2" placeholder="Pourquoi ce scénario…">${escapeHtml(s.notes || '')}</textarea>
+                <div class="note-print">${escapeHtml(s.notes || '')}</div>
+              </td>
+              <td>${fmtEUR(s.budget)}</td>
+              <td>${fmtNum(s.impressions)}</td>
+              <td>${fmtNum(s.clicks)}</td>
+              <td>${fmtNum(s.leads)}</td>
+              <td>${fmtNum(s.clients)}</td>
+              <td>${s.clients > 0 ? fmtEUR(s.cpa) : '—'}</td>
+              <td>${s.roas.toFixed(2)}×</td>
+              <td class="col-actions dup" onclick="duplicateScenario(${i})" title="Dupliquer ce scénario">⧉</td>
+              <td class="col-actions remove" onclick="removeScenario(${i})" title="Supprimer">✕</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
   `;
 }
 
-function removeScenario(i) {
-  scenarios.splice(i, 1);
-  renderScenarios();
-}
+document.getElementById('scenarioTableWrap').addEventListener('input', e => {
+  if (!e.target.classList.contains('note-input')) return;
+  const i = +e.target.dataset.i;
+  if (!state.scenarios[i]) return;
+  state.scenarios[i].notes = e.target.value;
+  const printEl = e.target.nextElementSibling;
+  if (printEl) printEl.textContent = e.target.value;
+  scheduleSave();
+});
 
 function exportCsv() {
-  if (scenarios.length === 0) saveScenario();
-  const headers = ['Scenario','Secteur','Objectif','Ciblage','Budget','Impressions','Clics','Leads','Clients','CPA','ROAS'];
-  const rows = scenarios.map(s => [
-    s.name, s.industry, s.objective, s.mix,
+  if (state.scenarios.length === 0) saveScenario();
+  const headers = ['Scenario', 'Notes', 'Secteur', 'Objectif', 'Ciblage', 'Budget', 'Impressions', 'Clics', 'Leads', 'Clients', 'CPA', 'ROAS'];
+  const rows = state.scenarios.map(s => [
+    csvField(s.name), csvField(s.notes || ''), csvField(s.industry), csvField(s.objective), csvField(s.mix),
     s.budget.toFixed(0), s.impressions.toFixed(0), s.clicks.toFixed(0),
     s.leads.toFixed(1), s.clients.toFixed(2), s.cpa.toFixed(0), s.roas.toFixed(2)
   ]);
@@ -600,11 +1293,59 @@ function exportCsv() {
   link.click();
 }
 
+function preparePrint() {
+  document.getElementById('coverClient').textContent = state.clientName || '—';
+  document.getElementById('coverAgency').textContent = state.agencyName || '—';
+  document.getElementById('coverDate').textContent = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const coverLogo = document.getElementById('coverLogo');
+  if (state.agencyLogo) {
+    coverLogo.src = state.agencyLogo;
+    coverLogo.hidden = false;
+  } else {
+    coverLogo.hidden = true;
+  }
+}
+
 document.getElementById('saveScenario').addEventListener('click', saveScenario);
 document.getElementById('exportCsv').addEventListener('click', exportCsv);
-document.getElementById('printReport').addEventListener('click', () => window.print());
+document.getElementById('printReport').addEventListener('click', () => { preparePrint(); window.print(); });
 
-applyPreset();
+/* ---------- Boot ---------- */
+function hydrateFieldsFromState() {
+  if (!Array.isArray(state.scenarios)) state.scenarios = [];
+  if (!state.customPresets || typeof state.customPresets !== 'object') state.customPresets = {};
+  els.agencyName.value = state.agencyName || '';
+  els.clientName.value = state.clientName || '';
+  els.budget.value = state.budget;
+  els.industry.value = state.industry;
+  els.objective.value = state.objective;
+  els.mix.value = state.mix;
+  els.cpm.value = state.cpm;
+  els.ctr.value = state.ctr;
+  els.c2l.value = state.c2l;
+  els.l2c.value = state.l2c;
+  els.ltv.value = state.ltv;
+  updateTabActiveStates();
+  applyLogo();
+}
+
+const hadSaved = loadSavedState();
+applyCustomPresetsToBase();
+const hadShare = applyShareParam();
+hydrateFieldsFromState();
+initTheme();
+renderAdvancedPresetsPanel();
+
+if (!hadSaved && !hadShare) {
+  applyPreset();
+} else {
+  syncLabels();
+  renderFunnel();
+}
+renderScenarios();
+saveState();
+
+if (hadShare) toast('Scénario partagé chargé');
 </script>
 </body>
 </html>
