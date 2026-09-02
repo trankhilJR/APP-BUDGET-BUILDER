@@ -234,6 +234,9 @@
     padding-bottom: 2px;
   }
   .tabs::-webkit-scrollbar { display: none; }
+  /* Variant for narrow sidebars where a long label (e.g. "iOS + Android (mixte)")
+     shouldn't be clipped by horizontal scroll — wraps onto a second row instead. */
+  .tabs.tabs-wrap { flex-wrap: wrap; overflow: visible; }
 
   .tab-btn {
     flex: 0 0 auto;
@@ -672,7 +675,7 @@
 
   .ob-objective-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 18px;
     text-align: left;
   }
@@ -1070,11 +1073,13 @@
           <button type="button" class="tab-btn" data-value="awareness">Notoriété</button>
           <button type="button" class="tab-btn" data-value="traffic">Trafic</button>
           <button type="button" class="tab-btn" data-value="conversion">Conversion</button>
+          <button type="button" class="tab-btn" data-value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</button>
         </div>
         <select id="objective" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
           <option value="awareness">Notoriété</option>
           <option value="traffic">Trafic</option>
           <option value="conversion" selected>Conversion</option>
+          <option value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</option>
         </select>
       </div>
       <div class="field">
@@ -1086,6 +1091,19 @@
         <select id="mix" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
           <option value="broad">Large</option>
           <option value="niche" selected>Niche</option>
+        </select>
+      </div>
+      <div class="field" id="platformField" hidden>
+        <label data-i18n="fieldPlatform">Plateforme</label>
+        <div class="tabs tabs-wrap" data-target="platform" role="tablist">
+          <button type="button" class="tab-btn" data-value="ios" data-i18n="platformIos">iOS</button>
+          <button type="button" class="tab-btn" data-value="android" data-i18n="platformAndroid">Android</button>
+          <button type="button" class="tab-btn" data-value="blended" data-i18n="platformBlended">iOS + Android (mixte)</button>
+        </div>
+        <select id="platform" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="ios">iOS</option>
+          <option value="android">Android</option>
+          <option value="blended" selected>iOS + Android (mixte)</option>
         </select>
       </div>
 
@@ -1103,17 +1121,22 @@
         <input type="range" id="ctr" min="0.05" max="2" step="0.01" value="0.35">
       </div>
 
-      <div class="field">
+      <div class="field" id="c2lField">
         <label>Clic → Lead <span class="val" id="c2lVal">5,0 %</span></label>
         <input type="range" id="c2l" min="0.5" max="30" step="0.5" value="5">
       </div>
 
-      <div class="field">
+      <div class="field" id="l2cField">
         <label>Lead → Client <span class="val" id="l2cVal">12,0 %</span></label>
         <input type="range" id="l2c" min="1" max="50" step="1" value="12">
       </div>
 
-      <div class="field">
+      <div class="field" id="c2iField" hidden>
+        <label><span data-i18n="fieldC2i">Clic → Installation</span> <span class="val" id="c2iVal">20,0 %</span></label>
+        <input type="range" id="c2i" min="1" max="60" step="0.5" value="20">
+      </div>
+
+      <div class="field" id="ltvField">
         <label>Valeur moyenne client <span class="val" id="ltvVal">1 200 €</span></label>
         <input type="range" id="ltv" min="50" max="20000" step="50" value="1200">
       </div>
@@ -1129,7 +1152,7 @@
     <!-- FUNNEL / OUTPUT -->
     <div class="panel" id="funnelPanel">
       <div class="funnel-header">
-        <h2>Projection du pipeline</h2>
+        <h2 id="funnelTitle">Projection du pipeline</h2>
       </div>
 
       <div class="stage-list" id="stageList"></div>
@@ -1306,6 +1329,8 @@ const translations = {
     ob_obj_traffic_desc: 'Maximise les clics qualifiés vers ton site ou ta landing page.',
     ob_obj_conversion_title: 'Génération de conversion',
     ob_obj_conversion_desc: "Construis un plan basé sur le funnel, des leads jusqu'au client.",
+    objAppInstall: "Téléchargement d'app",
+    objAppInstallDesc: "Générer des installations de ton application mobile.",
     ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impressions', ob_tag_reach: 'Portée',
     ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clics',
     ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
@@ -1342,10 +1367,12 @@ const translations = {
     ob_targeting_broad: 'Large', ob_targeting_broad_sub: 'Portée maximale, CPM plus bas, ciblage moins précis',
     ob_ltv_title: "Quelle est la valeur moyenne d'un client ?",
     ob_ltv_sub: 'Aussi appelée panier moyen ou valeur vie client.',
-    ltv_low: 'Moins de 500 €', ltv_low_sub: 'Achat unique / e-commerce',
-    ltv_mid: '500 € – 2 000 €', ltv_mid_sub: 'Abonnement / panier moyen',
-    ltv_high: '2 000 € – 10 000 €', ltv_high_sub: 'Contrat B2B',
-    ltv_enterprise: '10 000 €+', ltv_enterprise_sub: 'Grand compte',
+    ltv_t1: 'Moins de 30 €', ltv_t1_sub: 'Achat impulsif (petit e-commerce)',
+    ltv_t2: '30 € – 80 €', ltv_t2_sub: 'Panier moyen e-commerce standard',
+    ltv_t3: '80 € – 250 €', ltv_t3_sub: 'Achat réfléchi (mode, beauté, high-tech léger)',
+    ltv_t4: '250 € – 800 €', ltv_t4_sub: 'Gros achat B2C (électroménager, voyage)',
+    ltv_t5: '800 € – 3 000 €', ltv_t5_sub: 'Produit premium / abonnement annuel',
+    ltv_t6: '3 000 €+', ltv_t6_sub: 'B2B ou grand compte',
     ob_realdata_title: 'As-tu déjà des données de coûts réels sur Reddit Ads ?',
     ob_realdata_sub: 'Ou une plateforme social/programmatic similaire.',
     ob_realdata_yes: 'Oui', ob_realdata_no: 'Non',
@@ -1367,6 +1394,17 @@ const translations = {
     ob_apply_cta: 'Démarrer avec ces hypothèses',
     ob_skip_all: 'Passer — utiliser les valeurs par défaut',
     toast_applied: 'Hypothèses appliquées au tableau de bord',
+    funnelTitleAppInstall: "Projection — Téléchargement d'app",
+    stageInstalls: 'Installations',
+    fieldC2i: 'Clic → Installation',
+    fieldPlatform: 'Plateforme',
+    platformIos: 'iOS',
+    platformAndroid: 'Android',
+    platformBlended: 'iOS + Android (mixte)',
+    kpiCpi: "Coût par installation (CPI)",
+    ob_target_appinstall_label: "Combien d'installations vises-tu par mois ?",
+    ob_reveal_appinstall_lead: 'Avec ce budget, les comptes {industry} génèrent environ',
+    ob_reveal_appinstall_sub: "d'installations par mois, pour un budget de {budget}/mois.",
     footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
   },
   en: {
@@ -1379,6 +1417,8 @@ const translations = {
     ob_obj_traffic_desc: 'Maximize qualified clicks to your site or landing page.',
     ob_obj_conversion_title: 'Conversion generation',
     ob_obj_conversion_desc: 'Build a funnel-backed plan, from leads to closed customers.',
+    objAppInstall: 'App installs',
+    objAppInstallDesc: 'Drive installs of your mobile app.',
     ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impressions', ob_tag_reach: 'Reach',
     ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clicks',
     ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
@@ -1415,10 +1455,12 @@ const translations = {
     ob_targeting_broad: 'Broad', ob_targeting_broad_sub: 'Maximum reach, lower CPM, less precise targeting',
     ob_ltv_title: "What's the average value of a customer?",
     ob_ltv_sub: 'Also known as average order value or customer lifetime value.',
-    ltv_low: 'Under €500', ltv_low_sub: 'One-off purchase / e-commerce',
-    ltv_mid: '€500 – €2,000', ltv_mid_sub: 'Subscription / average basket',
-    ltv_high: '€2,000 – €10,000', ltv_high_sub: 'B2B contract',
-    ltv_enterprise: '€10,000+', ltv_enterprise_sub: 'Enterprise account',
+    ltv_t1: 'Under €30', ltv_t1_sub: 'Impulse purchase (small e-commerce)',
+    ltv_t2: '€30 – €80', ltv_t2_sub: 'Standard e-commerce basket',
+    ltv_t3: '€80 – €250', ltv_t3_sub: 'Considered purchase (fashion, beauty, light tech)',
+    ltv_t4: '€250 – €800', ltv_t4_sub: 'Big-ticket B2C (appliances, travel)',
+    ltv_t5: '€800 – €3,000', ltv_t5_sub: 'Premium product / annual subscription',
+    ltv_t6: '€3,000+', ltv_t6_sub: 'B2B or enterprise account',
     ob_realdata_title: 'Do you already have real Reddit Ads cost data?',
     ob_realdata_sub: 'Or from a similar social/programmatic platform.',
     ob_realdata_yes: 'Yes', ob_realdata_no: 'No',
@@ -1440,6 +1482,17 @@ const translations = {
     ob_apply_cta: 'Start with these assumptions',
     ob_skip_all: 'Skip — use default values',
     toast_applied: 'Assumptions applied to the dashboard',
+    funnelTitleAppInstall: 'Projection — App installs',
+    stageInstalls: 'Installs',
+    fieldC2i: 'Click → Install',
+    fieldPlatform: 'Platform',
+    platformIos: 'iOS',
+    platformAndroid: 'Android',
+    platformBlended: 'iOS + Android (blended)',
+    kpiCpi: 'Cost per install (CPI)',
+    ob_target_appinstall_label: 'How many installs are you aiming for per month?',
+    ob_reveal_appinstall_lead: 'With this budget, {industry} accounts generate about',
+    ob_reveal_appinstall_sub: 'installs per month, for a budget of {budget}/month.',
     footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
   },
   es: {
@@ -1452,6 +1505,8 @@ const translations = {
     ob_obj_traffic_desc: 'Maximiza los clics cualificados hacia tu sitio o landing page.',
     ob_obj_conversion_title: 'Generación de conversión',
     ob_obj_conversion_desc: 'Construye un plan basado en el funnel, desde leads hasta clientes.',
+    objAppInstall: 'Descargas de app',
+    objAppInstallDesc: 'Generar descargas de tu app móvil.',
     ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impresiones', ob_tag_reach: 'Alcance',
     ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clics',
     ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
@@ -1488,10 +1543,12 @@ const translations = {
     ob_targeting_broad: 'Amplio', ob_targeting_broad_sub: 'Alcance máximo, CPM más bajo, segmentación menos precisa',
     ob_ltv_title: '¿Cuál es el valor medio de un cliente?',
     ob_ltv_sub: 'También llamado ticket medio o valor de vida del cliente.',
-    ltv_low: 'Menos de 500 €', ltv_low_sub: 'Compra única / e-commerce',
-    ltv_mid: '500 € – 2.000 €', ltv_mid_sub: 'Suscripción / ticket medio',
-    ltv_high: '2.000 € – 10.000 €', ltv_high_sub: 'Contrato B2B',
-    ltv_enterprise: '10.000 €+', ltv_enterprise_sub: 'Gran cuenta',
+    ltv_t1: 'Menos de 30 €', ltv_t1_sub: 'Compra impulsiva (e-commerce pequeño)',
+    ltv_t2: '30 € – 80 €', ltv_t2_sub: 'Ticket medio de e-commerce estándar',
+    ltv_t3: '80 € – 250 €', ltv_t3_sub: 'Compra meditada (moda, belleza, tech ligero)',
+    ltv_t4: '250 € – 800 €', ltv_t4_sub: 'Compra grande B2C (electrodomésticos, viajes)',
+    ltv_t5: '800 € – 3.000 €', ltv_t5_sub: 'Producto premium / suscripción anual',
+    ltv_t6: '3.000 €+', ltv_t6_sub: 'B2B o gran cuenta',
     ob_realdata_title: '¿Ya tienes datos de coste reales en Reddit Ads?',
     ob_realdata_sub: 'O de una plataforma social/programática similar.',
     ob_realdata_yes: 'Sí', ob_realdata_no: 'No',
@@ -1513,6 +1570,17 @@ const translations = {
     ob_apply_cta: 'Empezar con estas hipótesis',
     ob_skip_all: 'Saltar — usar valores por defecto',
     toast_applied: 'Hipótesis aplicadas al panel',
+    funnelTitleAppInstall: 'Proyección — Descargas de app',
+    stageInstalls: 'Instalaciones',
+    fieldC2i: 'Clic → Instalación',
+    fieldPlatform: 'Plataforma',
+    platformIos: 'iOS',
+    platformAndroid: 'Android',
+    platformBlended: 'iOS + Android (mixto)',
+    kpiCpi: 'Coste por instalación (CPI)',
+    ob_target_appinstall_label: '¿Cuántas instalaciones quieres conseguir al mes?',
+    ob_reveal_appinstall_lead: 'Con este presupuesto, las cuentas de {industry} generan aproximadamente',
+    ob_reveal_appinstall_sub: 'instalaciones al mes, con un presupuesto de {budget}/mes.',
     footer_note: 'Benchmarks de Reddit Ads 2026 recopilados de fuentes públicas (AdBacklog, Benly, StackMatix, Marketing LTB) — ajusta con los datos reales de la cuenta de Reddit Ads Manager del cliente en cuanto estén disponibles.',
   },
 };
@@ -1525,16 +1593,22 @@ function t(key, vars) {
 }
 function industryLabelI18n(key) { return t('industry_' + key); }
 function industryLabelSubI18n(key) { return t('industry_' + key + '_sub'); }
+// Applies translations to any element carrying data-i18n — used for the small set of
+// dashboard strings (App Install objective/fields) that are translated outside the brief.
+function applyDataI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+}
 
 // Benchmarks Reddit Ads 2026 (AdBacklog, Benly, StackMatix, AdControlCenter, Marketing LTB, SHNO).
 // Chiffres sources en USD ; convertis en EUR ici avec un taux approximatif (voir USD_TO_EUR)
 // puis affinés par le multiplicateur de marché géographique choisi dans le brief/dashboard.
 const USD_TO_EUR = 0.92;
+// c2i = taux clic -> installation, dérivé des CPI 2026 par vertical croisés avec un CPC Reddit ~1$.
 const defaultPresets = {
-  consumer: { cpm: +(3.0 * USD_TO_EUR).toFixed(1), ctr: 0.60, c2l: 3, l2c: 8,  freq: 3, eng: 1.2 },
-  saas:     { cpm: +(5.0 * USD_TO_EUR).toFixed(1), ctr: 0.40, c2l: 5, l2c: 12, freq: 4, eng: 0.8 },
-  finance:  { cpm: +(7.0 * USD_TO_EUR).toFixed(1), ctr: 0.30, c2l: 4, l2c: 10, freq: 4, eng: 0.6 },
-  gaming:   { cpm: +(2.0 * USD_TO_EUR).toFixed(1), ctr: 0.70, c2l: 2, l2c: 5,  freq: 3, eng: 2.0 },
+  consumer: { cpm: +(3.0 * USD_TO_EUR).toFixed(1), ctr: 0.60, c2l: 3, l2c: 8,  freq: 3, eng: 1.2, c2i: 16 },
+  saas:     { cpm: +(5.0 * USD_TO_EUR).toFixed(1), ctr: 0.40, c2l: 5, l2c: 12, freq: 4, eng: 0.8, c2i: 32 },
+  finance:  { cpm: +(7.0 * USD_TO_EUR).toFixed(1), ctr: 0.30, c2l: 4, l2c: 10, freq: 4, eng: 0.6, c2i: 12 },
+  gaming:   { cpm: +(2.0 * USD_TO_EUR).toFixed(1), ctr: 0.70, c2l: 2, l2c: 5,  freq: 3, eng: 2.0, c2i: 20 },
 };
 const industryLabels = {
   consumer: 'Grand public / DTC',
@@ -1549,7 +1623,14 @@ const objectiveMultipliers = {
   awareness:  { cpm: 0.80, ctr: 1.00, c2l: 1.00, l2c: 1.00 },
   traffic:    { cpm: 0.90, ctr: 1.15, c2l: 1.00, l2c: 1.00 },
   conversion: { cpm: 1.25, ctr: 0.85, c2l: 1.00, l2c: 1.30 },
+  // Même logique d'enchère CPC que "conversion", mais Reddit priorise cet objectif
+  // différemment -> CPM un peu moins cher. c2l/l2c/eng/freq ne s'appliquent pas
+  // au modèle app install (funnel impressions -> clics -> installations).
+  appInstall: { cpm: 1.10, ctr: 0.90, c2l: 1.00, l2c: 1.00 },
 };
+// Multiplicateur de plateforme sur le taux clic -> installation : iOS coûte 2-3,5x plus
+// cher qu'Android en CPI (LTV/concurrence plus fortes), donc un taux effectif plus faible.
+const platformC2iMultipliers = { ios: 0.4, android: 1.5, blended: 1 };
 
 // Coefficients de marché géographique, appliqués au CPM (le marché le plus cher/mature en tête).
 const marketMultipliers = {
@@ -1607,6 +1688,8 @@ const state = {
   ctr: 0.35,
   c2l: 5,
   l2c: 12,
+  c2i: 20,
+  platform: 'blended',
   ltv: 1200,
   customPresets: {},
   scenarios: [],
@@ -1640,6 +1723,8 @@ const els = {
   ctr: document.getElementById('ctr'),
   c2l: document.getElementById('c2l'),
   l2c: document.getElementById('l2c'),
+  c2i: document.getElementById('c2i'),
+  platform: document.getElementById('platform'),
   ltv: document.getElementById('ltv'),
 };
 
@@ -1760,6 +1845,8 @@ function applyLangToUi() {
   if (footerNote) footerNote.textContent = t('footer_note');
   if (langSwitch.value !== state.lang) langSwitch.value = state.lang;
   updateTabActiveStates();
+  applyDataI18n();
+  if (els.objective && els.objective.value === 'appInstall') renderFunnel();
   if (!document.getElementById('onboarding').hidden) renderOnboarding();
 }
 langSwitch.addEventListener('change', () => {
@@ -1814,12 +1901,32 @@ function updateTabActiveStates() {
 }
 
 /* ---------- Core computation ---------- */
+// L'objectif "Téléchargement d'app" a son propre modèle (impressions -> clics ->
+// installations, enchère CPC) : pas de leads/clients/LTV, un champ clic->install
+// (c2i) à la place, et un multiplicateur de plateforme (iOS/Android/mixte).
+function updateObjectiveFieldsVisibility() {
+  const isAppInstall = els.objective.value === 'appInstall';
+  document.getElementById('platformField').hidden = !isAppInstall;
+  document.getElementById('c2lField').hidden = isAppInstall;
+  document.getElementById('l2cField').hidden = isAppInstall;
+  document.getElementById('ltvField').hidden = isAppInstall;
+  document.getElementById('c2iField').hidden = !isAppInstall;
+  document.getElementById('funnelTitle').textContent = isAppInstall ? t('funnelTitleAppInstall') : 'Projection du pipeline';
+}
+
 function applyPreset() {
-  const a = computeFunnelAssumptions(els.industry.value, els.objective.value, els.mix.value, els.market.value);
+  const objective = els.objective.value;
+  const a = computeFunnelAssumptions(els.industry.value, objective, els.mix.value, els.market.value);
   els.cpm.value = a.cpm.toFixed(1);
   els.ctr.value = a.ctr.toFixed(2);
-  els.c2l.value = a.c2l.toFixed(1);
-  els.l2c.value = a.l2c.toFixed(0);
+  if (objective === 'appInstall') {
+    const base = presets[els.industry.value];
+    els.c2i.value = (base.c2i || 20).toFixed(1);
+  } else {
+    els.c2l.value = a.c2l.toFixed(1);
+    els.l2c.value = a.l2c.toFixed(0);
+  }
+  updateObjectiveFieldsVisibility();
   syncLabels();
   compute();
 }
@@ -1830,6 +1937,7 @@ function syncLabels() {
   document.getElementById('ctrVal').textContent = (+els.ctr.value).toFixed(2).replace('.', ',') + ' %';
   document.getElementById('c2lVal').textContent = (+els.c2l.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('l2cVal').textContent = (+els.l2c.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('c2iVal').textContent = (+els.c2i.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('ltvVal').textContent = fmtEUR(+els.ltv.value);
 }
 
@@ -1853,9 +1961,26 @@ function currentFunnel() {
   return { budget, impressions, clicks, leads, clients, revenue, cpa, cpl, roas };
 }
 
+function currentFunnelAppInstall() {
+  const budget = +els.budget.value;
+  const cpm = +els.cpm.value;
+  const ctr = +els.ctr.value / 100;
+  const c2i = +els.c2i.value / 100;
+  const platformMult = platformC2iMultipliers[els.platform.value] ?? 1;
+
+  const impressions = (budget / cpm) * 1000;
+  const clicks = impressions * ctr;
+  const installs = clicks * c2i * platformMult;
+  const cpc = clicks > 0 ? budget / clicks : 0;
+  const cpi = installs > 0 ? budget / installs : 0;
+
+  return { budget, impressions, clicks, installs, cpc, cpi };
+}
+
 let prevKpiStatus = { cpa: null, roas: null };
 
 function renderFunnel() {
+  if (els.objective.value === 'appInstall') { renderFunnelAppInstall(); return; }
   const f = currentFunnel();
   const stages = [
     { label: 'Impressions', value: f.impressions, ref: f.impressions },
@@ -1897,6 +2022,54 @@ function renderFunnel() {
   prevKpiStatus = { cpa: cpaGood, roas: roasGood };
 }
 
+// Benchmarks marché indicatifs pour le CPI (Grand public ~6$, SaaS/outils ~3$,
+// Finance ~8$, Gaming ~5$, convertis en EUR) : un CPI qui s'en écarte fortement
+// mérite d'être signalé au client, sans être forcément faux pour autant.
+function appInstallCpiBenchmark() {
+  const byIndustry = { consumer: 6, saas: 3, finance: 8, gaming: 5 };
+  return (byIndustry[els.industry.value] ?? 5) * USD_TO_EUR;
+}
+
+function renderFunnelAppInstall() {
+  const f = currentFunnelAppInstall();
+  const stages = [
+    { label: 'Impressions', value: f.impressions, ref: f.impressions },
+    { label: 'Clics', value: f.clicks, ref: f.impressions },
+    { label: t('stageInstalls'), value: f.installs, ref: f.impressions },
+  ];
+
+  document.getElementById('stageList').innerHTML = stages.map(s => {
+    const pct = Math.max(2, (s.value / s.ref) * 100);
+    return `
+      <div class="stage">
+        <div class="label">${s.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure">${fmtNum(s.value)}</div>
+      </div>`;
+  }).join('');
+
+  const benchmark = appInstallCpiBenchmark();
+  const cpiGood = f.installs > 0 && f.cpi <= benchmark * 1.5;
+  const flipCpi = prevKpiStatus.cpi === false && cpiGood === true;
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">CPC</div>
+      <div class="kpi-value">${f.clicks > 0 ? fmtEUR(f.cpc) : '—'}</div>
+    </div>
+    <div class="kpi ${cpiGood ? 'good' : 'warn'}${flipCpi ? ' kpi-flip' : ''}">
+      <div class="kpi-label">${t('kpiCpi')}</div>
+      <div class="kpi-value">${f.installs > 0 ? fmtEUR(f.cpi) : '—'}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label"><span data-i18n="fieldC2i">Clic → Installation</span></div>
+      <div class="kpi-value">${(+els.c2i.value).toFixed(1)} %</div>
+    </div>
+  `;
+
+  prevKpiStatus = { ...prevKpiStatus, cpi: cpiGood };
+}
+
 function syncStateFromFields() {
   state.budget = +els.budget.value;
   state.industry = els.industry.value;
@@ -1907,6 +2080,8 @@ function syncStateFromFields() {
   state.ctr = +els.ctr.value;
   state.c2l = +els.c2l.value;
   state.l2c = +els.l2c.value;
+  state.c2i = +els.c2i.value;
+  state.platform = els.platform.value;
   state.ltv = +els.ltv.value;
   state.agencyName = els.agencyName.value;
   state.clientName = els.clientName.value;
@@ -1919,12 +2094,13 @@ function compute() {
   scheduleSave();
 }
 
-[els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.ltv].forEach(el =>
+[els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.c2i, els.ltv].forEach(el =>
   el.addEventListener('input', compute)
 );
 [els.industry, els.market, els.objective, els.mix].forEach(el =>
   el.addEventListener('change', () => { applyPreset(); updateTabActiveStates(); })
 );
+els.platform.addEventListener('change', () => { updateTabActiveStates(); compute(); });
 [els.agencyName, els.clientName].forEach(el =>
   el.addEventListener('input', () => { syncStateFromFields(); scheduleSave(); })
 );
@@ -2351,14 +2527,17 @@ function obObjectiveOptions() {
     { key: 'awareness', icon: '📣', title: t('ob_obj_awareness_title'), desc: t('ob_obj_awareness_desc'), tags: [t('ob_tag_cpm'), t('ob_tag_impressions'), t('ob_tag_reach')] },
     { key: 'traffic', icon: '👆', title: t('ob_obj_traffic_title'), desc: t('ob_obj_traffic_desc'), tags: [t('ob_tag_cpc'), t('ob_tag_ctr'), t('ob_tag_clicks')] },
     { key: 'conversion', icon: '🎯', title: t('ob_obj_conversion_title'), desc: t('ob_obj_conversion_desc'), tags: [t('ob_tag_cpl'), t('ob_tag_leads'), t('ob_tag_pipeline')], recommended: true },
+    { key: 'appInstall', icon: '📲', title: t('objAppInstall'), desc: t('objAppInstallDesc'), tags: ['CPC', t('kpiCpi'), t('stageInstalls')] },
   ];
 }
 function obLtvOptions() {
   return [
-    { key: 'low', label: t('ltv_low'), sub: t('ltv_low_sub'), ltv: 300 },
-    { key: 'mid', label: t('ltv_mid'), sub: t('ltv_mid_sub'), ltv: 1200 },
-    { key: 'high', label: t('ltv_high'), sub: t('ltv_high_sub'), ltv: 5000 },
-    { key: 'enterprise', label: t('ltv_enterprise'), sub: t('ltv_enterprise_sub'), ltv: 15000 },
+    { key: 't1', label: t('ltv_t1'), sub: t('ltv_t1_sub'), ltv: 25 },
+    { key: 't2', label: t('ltv_t2'), sub: t('ltv_t2_sub'), ltv: 60 },
+    { key: 't3', label: t('ltv_t3'), sub: t('ltv_t3_sub'), ltv: 150 },
+    { key: 't4', label: t('ltv_t4'), sub: t('ltv_t4_sub'), ltv: 400 },
+    { key: 't5', label: t('ltv_t5'), sub: t('ltv_t5_sub'), ltv: 1200 },
+    { key: 't6', label: t('ltv_t6'), sub: t('ltv_t6_sub'), ltv: 5000 },
   ];
 }
 
@@ -2405,6 +2584,9 @@ function computeOnboardingResult() {
     if (onboarding.ctrObserved > 0) ctr = onboarding.ctrObserved;
   }
 
+  const c2i = base.c2i || 20;
+  const platformMult = platformC2iMultipliers.blended; // le brief ne demande pas la plateforme, réglable ensuite au dashboard
+
   let budget;
   if (onboarding.startingPoint === 'target' && onboarding.targetValue > 0) {
     const target = onboarding.targetValue;
@@ -2414,6 +2596,12 @@ function computeOnboardingResult() {
     } else if (objective === 'traffic') {
       // budget = (visites / 0.95 / ctr) / 1000 × cpm
       const impressionsNeeded = (target / 0.95) / (ctr / 100);
+      budget = (impressionsNeeded / 1000) * cpm;
+    } else if (objective === 'appInstall') {
+      // budget = installations / (c2i × plateforme) -> clics -> impressions -> budget
+      const effectiveC2i = (c2i * platformMult) / 100;
+      const clicksNeeded = effectiveC2i > 0 ? target / effectiveC2i : 0;
+      const impressionsNeeded = ctr > 0 ? clicksNeeded / (ctr / 100) : 0;
       budget = (impressionsNeeded / 1000) * cpm;
     } else {
       // conversion : on remonte clients/leads -> clics -> impressions -> budget
@@ -2427,16 +2615,22 @@ function computeOnboardingResult() {
   }
 
   const ltvOpt = obLtvOptions().find(o => o.key === onboarding.ltvTier);
-  const ltv = objective === 'conversion' ? (ltvOpt ? ltvOpt.ltv : 1200) : 1200;
+  const ltv = objective === 'conversion' ? (ltvOpt ? ltvOpt.ltv : 150) : 150;
 
   const impressions = cpm > 0 ? (budget / cpm) * 1000 : 0;
   const clicks = impressions * (ctr / 100);
-  const leads = clicks * (c2l / 100);
-  const clients = leads * (l2c / 100);
-  const revenue = clients * ltv;
   const reach = (base.freq || 3) > 0 ? impressions / (base.freq || 3) : impressions;
 
-  return { objective, industry, market: marketValue, mix, cpm, ctr, c2l, l2c, budget, ltv, impressions, reach, clicks, leads, clients, revenue, annual: revenue * 12 };
+  let leads = 0, clients = 0, revenue = 0, installs = 0;
+  if (objective === 'appInstall') {
+    installs = clicks * (c2i / 100) * platformMult;
+  } else {
+    leads = clicks * (c2l / 100);
+    clients = leads * (l2c / 100);
+    revenue = clients * ltv;
+  }
+
+  return { objective, industry, market: marketValue, mix, cpm, ctr, c2l, l2c, c2i, budget, ltv, impressions, reach, clicks, leads, clients, revenue, installs, annual: revenue * 12 };
 }
 
 function obProgressBarHtml(filled, total) {
@@ -2574,6 +2768,13 @@ function startingScreenHtml() {
           <input type="number" id="obTargetInput" min="10" step="10" value="${onboarding.targetValue || 500}">
         </div>
       `;
+    } else if (objective === 'appInstall') {
+      subField = `
+        <div class="ob-field">
+          <label class="ob-field-label">${t('ob_target_appinstall_label')}</label>
+          <input type="number" id="obTargetInput" min="10" step="10" value="${onboarding.targetValue || 300}">
+        </div>
+      `;
     } else {
       const kind = onboarding.targetKind || 'leads';
       subField = `
@@ -2644,6 +2845,9 @@ function obRevealHeadline(r) {
   if (r.objective === 'traffic') {
     return { lead: t('ob_reveal_traffic_lead', { industry }), highlight: `${fmtNum(r.clicks)}`, sub: t('ob_reveal_traffic_sub', { industry, budget }) };
   }
+  if (r.objective === 'appInstall') {
+    return { lead: t('ob_reveal_appinstall_lead', { industry }), highlight: `${fmtNum(r.installs)}`, sub: t('ob_reveal_appinstall_sub', { industry, budget }) };
+  }
   return { lead: t('ob_reveal_conversion_lead', { industry }), highlight: fmtEUR(r.annual), sub: t('ob_reveal_conversion_sub', { industry, budget, ltv: fmtEUR(r.ltv) }) };
 }
 
@@ -2657,8 +2861,8 @@ function revealScreenHtml() {
     <div class="ob-bench-card">
       <div class="ob-card-head">◎ ${t('ob_bench_title')}</div>
       ${obBenchRow(t('ob_bench_ctr'), r.ctr)}
-      ${obBenchRow(t('ob_bench_c2l'), r.c2l)}
-      ${obBenchRow(t('ob_bench_l2c'), r.l2c)}
+      ${r.objective === 'appInstall' ? obBenchRow(t('fieldC2i'), r.c2i) : obBenchRow(t('ob_bench_c2l'), r.c2l)}
+      ${r.objective === 'appInstall' ? '' : obBenchRow(t('ob_bench_l2c'), r.l2c)}
       <div class="ob-source">${t('ob_source')}</div>
     </div>
     <button type="button" class="ob-cta" data-action="apply-benchmarks">${t('ob_apply_cta')} →</button>
@@ -2802,6 +3006,10 @@ document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnb
 
 /* ---------- Scenarios ---------- */
 function saveScenario() {
+  if (els.objective.value === 'appInstall') {
+    toast("Comparaison de scénarios pas encore disponible pour l'objectif Téléchargement d'app");
+    return;
+  }
   const f = currentFunnel();
   state.scenarios.push({
     name: `Scénario ${state.scenarios.length + 1}`,
@@ -2968,8 +3176,11 @@ function hydrateFieldsFromState() {
   els.ctr.value = state.ctr;
   els.c2l.value = state.c2l;
   els.l2c.value = state.l2c;
+  els.c2i.value = state.c2i || 20;
+  els.platform.value = state.platform || 'blended';
   els.ltv.value = state.ltv;
   viewSwitch.value = state.view === 'full' ? 'full' : 'simple';
+  updateObjectiveFieldsVisibility();
   updateTabActiveStates();
   applyLogo();
   applyLangToUi();
