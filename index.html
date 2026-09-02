@@ -344,6 +344,20 @@
   }
 
   /* Funnel panel */
+  .funnel-topbar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+  .objective-select-wrap {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 999px;
+    padding: 7px 14px 7px 12px;
+  }
+  .objective-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--ember); flex: none; }
+  .objective-select {
+    border: none; background: transparent; appearance: none; -webkit-appearance: none;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; color: var(--ink);
+    cursor: pointer; padding-right: 4px;
+  }
+  .objective-select:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 4px; }
+  .objective-chevron { color: var(--ink-soft); font-size: 10px; pointer-events: none; }
   .funnel-header {
     display: flex;
     justify-content: space-between;
@@ -398,6 +412,22 @@
     border-radius: var(--radius);
     overflow: hidden;
   }
+  .kpi-row.kpi-row-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 640px) { .kpi-row.kpi-row-4 { grid-template-columns: repeat(2, 1fr); } }
+
+  .scaling-chart { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .scaling-chart-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+  .scaling-chart-head h3 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 15px; margin: 0; }
+  .scaling-chart-insight { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
+  .scaling-svg-point { fill: var(--ember); }
+  .scaling-svg-line { fill: none; stroke: var(--ember); stroke-width: 2; }
+  .scaling-svg-band { fill: rgba(var(--ember-rgb), 0.12); }
+  .scaling-svg-grid { stroke: var(--line); stroke-width: 1; }
+  .scaling-svg-axis-label { fill: var(--ink-soft); font-size: 10px; font-family: 'Inter', sans-serif; }
+  .scaling-svg-marker { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 3 3; }
+  .scaling-svg-callout { fill: var(--ink); font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; }
+  .scaling-svg-callout-bg { fill: var(--surface); stroke: var(--line); }
+  .scaling-svg { width: 100%; height: auto; display: block; }
 
   .kpi {
     background: var(--surface);
@@ -1111,6 +1141,23 @@
       <p class="hint" data-i18n="hintAssumptions">Ajuste les valeurs par défaut selon ce que tu sais du client.</p>
 
       <div class="field">
+        <label data-i18n="lblPlanDuration">Durée du plan</label>
+        <div class="tabs tabs-wrap" data-target="planDuration" role="tablist">
+          <button type="button" class="tab-btn" data-value="1" data-i18n="planDuration1">1 mois</button>
+          <button type="button" class="tab-btn" data-value="3" data-i18n="planDuration3">3 mois</button>
+          <button type="button" class="tab-btn" data-value="6" data-i18n="planDuration6">6 mois</button>
+          <button type="button" class="tab-btn" data-value="12" data-i18n="planDuration12">12 mois</button>
+        </div>
+        <select id="planDuration" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="1" selected data-i18n="planDuration1">1 mois</option>
+          <option value="3" data-i18n="planDuration3">3 mois</option>
+          <option value="6" data-i18n="planDuration6">6 mois</option>
+          <option value="12" data-i18n="planDuration12">12 mois</option>
+        </select>
+        <p class="hint" id="programTotalNote" style="margin:8px 0 0;"></p>
+      </div>
+
+      <div class="field" id="budgetField">
         <label><span data-i18n="lblBudget">Budget mensuel</span> <span class="val" id="budgetVal">3 000 €</span></label>
         <input type="range" id="budget" min="200" max="30000" step="100" value="3000">
       </div>
@@ -1139,21 +1186,6 @@
       </div>
 
       <div class="field">
-        <label data-i18n="lblObjective">Objectif</label>
-        <div class="tabs" data-target="objective" role="tablist">
-          <button type="button" class="tab-btn" data-value="awareness" data-i18n="ob_obj_awareness_title">Notoriété</button>
-          <button type="button" class="tab-btn" data-value="traffic" data-i18n="ob_obj_traffic_title">Trafic</button>
-          <button type="button" class="tab-btn" data-value="conversion" data-i18n="ob_obj_conversion_title">Conversion</button>
-          <button type="button" class="tab-btn" data-value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</button>
-        </div>
-        <select id="objective" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
-          <option value="awareness" data-i18n="ob_obj_awareness_title">Notoriété</option>
-          <option value="traffic" data-i18n="ob_obj_traffic_title">Trafic</option>
-          <option value="conversion" selected data-i18n="ob_obj_conversion_title">Conversion</option>
-          <option value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</option>
-        </select>
-      </div>
-      <div class="field">
         <label data-i18n="lblTargeting">Ciblage</label>
         <div class="tabs" data-target="mix" role="tablist">
           <button type="button" class="tab-btn" data-value="broad" data-i18n="ob_targeting_broad">Large</button>
@@ -1178,6 +1210,36 @@
         </select>
       </div>
 
+      <div id="awarenessFields" hidden>
+        <div class="field">
+          <label data-i18n="lblPlanningMode">Mode de planification</label>
+          <div class="tabs" data-target="awarenessPlanningMode" role="tablist">
+            <button type="button" class="tab-btn" data-value="targetReach" data-i18n="planningModeTargetReach">Target Reach</button>
+            <button type="button" class="tab-btn" data-value="budgetFirst" data-i18n="planningModeBudgetFirst">Budget-First</button>
+          </div>
+          <select id="awarenessPlanningMode" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+            <option value="targetReach" selected>Target Reach</option>
+            <option value="budgetFirst">Budget-First</option>
+          </select>
+          <p class="hint" id="planningModeHint" style="margin:8px 0 0;"></p>
+        </div>
+
+        <div class="field">
+          <label data-i18n="lblAudienceSize">Taille de l'audience</label>
+          <input type="number" id="audienceSize" min="1000" step="1000" value="300000">
+        </div>
+
+        <div class="field" id="reachTargetField">
+          <label><span data-i18n="lblReachTarget">Reach cible</span> <span class="val" id="reachTargetVal">30 %</span></label>
+          <input type="range" id="reachTarget" min="1" max="100" step="1" value="30">
+        </div>
+
+        <div class="field">
+          <label><span data-i18n="lblFrequency">Fréquence (par mois)</span> <span class="val" id="frequencyVal">4</span></label>
+          <input type="range" id="frequency" min="1" max="20" step="1" value="4">
+        </div>
+      </div>
+
       <hr class="divider">
 
       <p class="hint" style="margin-bottom:14px;" data-i18n="hintFunnelAssumptions">Hypothèses du funnel (éditables)</p>
@@ -1188,7 +1250,7 @@
         <p class="hint" id="cpmEffectiveNote" style="margin:6px 0 0;"></p>
       </div>
 
-      <div class="field">
+      <div class="field" id="ctrField">
         <label><span data-i18n="lblCtr">CTR (taux de clic)</span> <span class="val" id="ctrVal">0,35 %</span></label>
         <input type="range" id="ctr" min="0.05" max="2" step="0.01" value="0.35">
       </div>
@@ -1238,6 +1300,18 @@
 
     <!-- FUNNEL / OUTPUT -->
     <div class="panel" id="funnelPanel">
+      <div class="funnel-topbar">
+        <div class="objective-select-wrap">
+          <span class="objective-dot" id="objectiveDot"></span>
+          <select id="objective" class="objective-select">
+            <option value="awareness" data-i18n="ob_obj_awareness_title">Notoriété</option>
+            <option value="traffic" data-i18n="ob_obj_traffic_title">Trafic</option>
+            <option value="conversion" selected data-i18n="ob_obj_conversion_title">Conversion</option>
+            <option value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</option>
+          </select>
+          <span class="objective-chevron" aria-hidden="true">▾</span>
+        </div>
+      </div>
       <div class="funnel-header">
         <h2 id="funnelTitle">Projection du pipeline</h2>
       </div>
@@ -1245,6 +1319,22 @@
       <div class="stage-list" id="stageList"></div>
 
       <div class="kpi-row" id="kpiRow"></div>
+
+      <div class="scaling-chart" id="scalingChartCard" hidden>
+        <div class="scaling-chart-head">
+          <h3 data-i18n="scalingChartTitle">Courbe de mise à l'échelle du budget</h3>
+          <div class="tabs" data-target="scalingChartMetric" role="tablist">
+            <button type="button" class="tab-btn" data-value="impressions" data-i18n="scalingChartImpressions">Impressions</button>
+            <button type="button" class="tab-btn" data-value="reach" data-i18n="scalingChartReach">Reach</button>
+          </div>
+          <select id="scalingChartMetric" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+            <option value="impressions" selected>Impressions</option>
+            <option value="reach">Reach</option>
+          </select>
+        </div>
+        <div id="scalingChartSvgWrap"></div>
+        <p class="hint scaling-chart-insight" id="scalingChartInsight"></p>
+      </div>
 
       <div class="actions">
         <button id="saveScenario" data-i18n="btnSaveScenario">Enregistrer comme scénario</button>
@@ -1522,6 +1612,12 @@ const translations = {
     tabFullFunnelView: 'Vue Full Funnel',
     panelAssumptionsTitle: 'Hypothèses de campagne',
     hintAssumptions: 'Ajuste les valeurs par défaut selon ce que tu sais du client.',
+    lblPlanDuration: 'Durée du plan',
+    planDuration1: '1 mois',
+    planDuration3: '3 mois',
+    planDuration6: '6 mois',
+    planDuration12: '12 mois',
+    programTotalLabel: 'Total programme ({months} mois) : ',
     lblBudget: 'Budget mensuel',
     lblSector: 'Secteur',
     lblMarket: 'Marché géographique',
@@ -1531,6 +1627,26 @@ const translations = {
     lblCpm: 'CPM (coût pour 1000 impressions)',
     lblCtr: 'CTR (taux de clic)',
     lblLtv: 'Valeur moyenne client',
+    lblPlanningMode: 'Mode de planification',
+    planningModeTargetReach: 'Target Reach',
+    planningModeBudgetFirst: 'Budget-First',
+    planningModeHintTargetReach: "Tu fixes l'audience, le reach et la fréquence — le budget nécessaire est calculé.",
+    planningModeHintBudgetFirst: "Tu fixes un budget cible — le reach et les impressions accessibles à ce CPM/fréquence sont calculés. Le reach est plafonné à l'audience disponible.",
+    lblAudienceSize: "Taille de l'audience",
+    lblReachTarget: 'Reach cible',
+    lblFrequency: 'Fréquence (par mois)',
+    stageAudience: 'Audience',
+    stageReached: 'Reach',
+    kpiRequiredBudget: 'Budget requis',
+    kpiImpressions: 'Impressions',
+    kpiUniqueReach: 'Reach unique',
+    kpiCostPerReached: 'Coût par personne touchée',
+    scalingChartTitle: "Courbe de mise à l'échelle du budget",
+    scalingChartImpressions: 'Impressions',
+    scalingChartReach: 'Reach',
+    scalingChartInsight: '+20 % de budget ({budget}) apporterait ~{pct} % {metric} en plus.',
+    scalingChartInsightImpressions: "d'impressions",
+    scalingChartInsightReach: 'de reach',
     lblAdvancedSettings: 'Paramètres avancés — presets par secteur',
     hintAdvancedSettings: 'Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.',
     btnResetPresets: 'Réinitialiser les valeurs par défaut',
@@ -1563,6 +1679,7 @@ const translations = {
     titleDuplicate: 'Dupliquer ce scénario',
     titleRemove: 'Supprimer',
     toastAppInstallNoScenario: "Comparaison de scénarios pas encore disponible pour l'objectif Téléchargement d'app",
+    toastScenarioUnavailable: "Comparaison de scénarios pas encore disponible pour cet objectif",
     formatSectionTitle: 'Format recommandé',
     formatPrimary: 'Format principal',
     formatSecondary: 'Format secondaire',
@@ -1679,6 +1796,12 @@ const translations = {
     tabFullFunnelView: 'Full Funnel view',
     panelAssumptionsTitle: 'Campaign assumptions',
     hintAssumptions: 'Adjust the default values based on what you know about the client.',
+    lblPlanDuration: 'Plan duration',
+    planDuration1: '1 month',
+    planDuration3: '3 months',
+    planDuration6: '6 months',
+    planDuration12: '12 months',
+    programTotalLabel: 'Program total ({months} months): ',
     lblBudget: 'Monthly budget',
     lblSector: 'Industry',
     lblMarket: 'Geographic market',
@@ -1688,6 +1811,26 @@ const translations = {
     lblCpm: 'CPM (cost per 1,000 impressions)',
     lblCtr: 'CTR (click-through rate)',
     lblLtv: 'Average customer value',
+    lblPlanningMode: 'Planning mode',
+    planningModeTargetReach: 'Target Reach',
+    planningModeBudgetFirst: 'Budget-First',
+    planningModeHintTargetReach: 'You set audience, reach and frequency — the required budget is calculated.',
+    planningModeHintBudgetFirst: 'You set a target budget — the reach and impressions it can buy at this CPM/frequency are calculated. Reach is capped at the available audience.',
+    lblAudienceSize: 'Audience size',
+    lblReachTarget: 'Reach target',
+    lblFrequency: 'Frequency (per month)',
+    stageAudience: 'Audience',
+    stageReached: 'Reach',
+    kpiRequiredBudget: 'Required budget',
+    kpiImpressions: 'Impressions',
+    kpiUniqueReach: 'Unique reach',
+    kpiCostPerReached: 'Cost per reached',
+    scalingChartTitle: 'Budget scaling curve',
+    scalingChartImpressions: 'Impressions',
+    scalingChartReach: 'Reach',
+    scalingChartInsight: '+20% budget ({budget}) would deliver ~{pct}% more {metric}.',
+    scalingChartInsightImpressions: 'impressions',
+    scalingChartInsightReach: 'reach',
     lblAdvancedSettings: 'Advanced settings — presets by industry',
     hintAdvancedSettings: "Adjust the default CPM and CTR for each industry using the real numbers from your clients' Reddit Ads Manager accounts.",
     btnResetPresets: 'Reset to default values',
@@ -1720,6 +1863,7 @@ const translations = {
     titleDuplicate: 'Duplicate this scenario',
     titleRemove: 'Remove',
     toastAppInstallNoScenario: 'Scenario comparison is not yet available for the App Installs objective',
+    toastScenarioUnavailable: 'Scenario comparison is not yet available for this objective',
     formatSectionTitle: 'Recommended format',
     formatPrimary: 'Primary format',
     formatSecondary: 'Secondary format',
@@ -1836,6 +1980,12 @@ const translations = {
     tabFullFunnelView: 'Vista Full Funnel',
     panelAssumptionsTitle: 'Hipótesis de campaña',
     hintAssumptions: 'Ajusta los valores por defecto según lo que sepas del cliente.',
+    lblPlanDuration: 'Duración del plan',
+    planDuration1: '1 mes',
+    planDuration3: '3 meses',
+    planDuration6: '6 meses',
+    planDuration12: '12 meses',
+    programTotalLabel: 'Total del programa ({months} meses): ',
     lblBudget: 'Presupuesto mensual',
     lblSector: 'Sector',
     lblMarket: 'Mercado geográfico',
@@ -1845,6 +1995,26 @@ const translations = {
     lblCpm: 'CPM (coste por 1000 impresiones)',
     lblCtr: 'CTR (tasa de clics)',
     lblLtv: 'Valor medio del cliente',
+    lblPlanningMode: 'Modo de planificación',
+    planningModeTargetReach: 'Target Reach',
+    planningModeBudgetFirst: 'Budget-First',
+    planningModeHintTargetReach: 'Fijas audiencia, reach y frecuencia — se calcula el presupuesto necesario.',
+    planningModeHintBudgetFirst: 'Fijas un presupuesto objetivo — se calculan el reach y las impresiones que puede comprar a este CPM/frecuencia. El reach queda limitado a la audiencia disponible.',
+    lblAudienceSize: 'Tamaño de la audiencia',
+    lblReachTarget: 'Reach objetivo',
+    lblFrequency: 'Frecuencia (por mes)',
+    stageAudience: 'Audiencia',
+    stageReached: 'Reach',
+    kpiRequiredBudget: 'Presupuesto necesario',
+    kpiImpressions: 'Impresiones',
+    kpiUniqueReach: 'Reach único',
+    kpiCostPerReached: 'Coste por persona alcanzada',
+    scalingChartTitle: 'Curva de escalado del presupuesto',
+    scalingChartImpressions: 'Impresiones',
+    scalingChartReach: 'Reach',
+    scalingChartInsight: '+20% de presupuesto ({budget}) generaría ~{pct}% más de {metric}.',
+    scalingChartInsightImpressions: 'impresiones',
+    scalingChartInsightReach: 'reach',
     lblAdvancedSettings: 'Ajustes avanzados — presets por sector',
     hintAdvancedSettings: 'Ajusta el CPM y el CTR por defecto de cada sector con las cifras reales de las cuentas de Reddit Ads Manager de tus clientes.',
     btnResetPresets: 'Restablecer valores por defecto',
@@ -1877,6 +2047,7 @@ const translations = {
     titleDuplicate: 'Duplicar este escenario',
     titleRemove: 'Eliminar',
     toastAppInstallNoScenario: 'La comparación de escenarios aún no está disponible para el objetivo Descargas de app',
+    toastScenarioUnavailable: 'La comparación de escenarios aún no está disponible para este objetivo',
     formatSectionTitle: 'Formato recomendado',
     formatPrimary: 'Formato principal',
     formatSecondary: 'Formato secundario',
@@ -2025,6 +2196,11 @@ const state = {
   c2i: 20,
   platform: 'blended',
   formatCount: '1',
+  planDuration: '1',
+  awarenessPlanningMode: 'targetReach',
+  audienceSize: 300000,
+  reachTarget: 30,
+  frequency: 4,
   ltv: 1200,
   customPresets: {},
   scenarios: [],
@@ -2061,7 +2237,13 @@ const els = {
   c2i: document.getElementById('c2i'),
   platform: document.getElementById('platform'),
   formatCount: document.getElementById('formatCount'),
+  planDuration: document.getElementById('planDuration'),
   ltv: document.getElementById('ltv'),
+  awarenessPlanningMode: document.getElementById('awarenessPlanningMode'),
+  audienceSize: document.getElementById('audienceSize'),
+  reachTarget: document.getElementById('reachTarget'),
+  frequency: document.getElementById('frequency'),
+  scalingChartMetric: document.getElementById('scalingChartMetric'),
 };
 
 const ffEls = {
@@ -2093,6 +2275,9 @@ const mastheadLogo = document.getElementById('mastheadLogo');
 const removeLogoBtn = document.getElementById('removeLogoBtn');
 
 const fmtEUR = n => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+// Pour les coûts unitaires très faibles (ex. coût par personne touchée en awareness, souvent
+// < 1 €) : arrondir à 0 décimale afficherait "0 €" pour tout, donc plus de décimales sous 10 €.
+const fmtEURPrecise = n => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: n < 10 ? 3 : 0 });
 const fmtNum = n => Math.round(n).toLocaleString('fr-FR');
 
 function escapeHtml(str) {
@@ -2186,6 +2371,7 @@ function applyLangToUi() {
     updateObjectiveFieldsVisibility();
     syncLabels();
     renderFunnel();
+    updateProgramTotal();
   }
   renderScenarios();
   presentBtn.textContent = presentationActive ? t('btnExitPresentMode') : t('btnPresentMode');
@@ -2246,15 +2432,49 @@ function updateTabActiveStates() {
 // L'objectif "Téléchargement d'app" a son propre modèle (impressions -> clics ->
 // installations, enchère CPC) : pas de leads/clients/LTV, un champ clic->install
 // (c2i) à la place, et un multiplicateur de plateforme (iOS/Android/mixte).
+// Couleur du point indicateur devant le dropdown d'objectif (repère visuel rapide).
+const objectiveDotColors = { awareness: '#3F5A47', traffic: '#2563EB', conversion: '#BF4E2C', appInstall: '#7C3AED' };
+function updateObjectiveDot() {
+  document.getElementById('objectiveDot').style.background = objectiveDotColors[els.objective.value] || 'var(--ember)';
+}
+
 function updateObjectiveFieldsVisibility() {
-  const isAppInstall = els.objective.value === 'appInstall';
+  updateObjectiveDot();
+  const objective = els.objective.value;
+  const isAppInstall = objective === 'appInstall';
+  const isAwareness = objective === 'awareness';
   document.getElementById('platformField').hidden = !isAppInstall;
-  document.getElementById('c2lField').hidden = isAppInstall;
-  document.getElementById('l2cField').hidden = isAppInstall;
-  document.getElementById('ltvField').hidden = isAppInstall;
+  document.getElementById('c2lField').hidden = isAppInstall || isAwareness;
+  document.getElementById('l2cField').hidden = isAppInstall || isAwareness;
+  document.getElementById('ltvField').hidden = isAppInstall || isAwareness;
   document.getElementById('c2iField').hidden = !isAppInstall;
+  document.getElementById('ctrField').hidden = isAwareness;
+  document.getElementById('awarenessFields').hidden = !isAwareness;
+  if (isAwareness) updateAwarenessModeVisibility();
+  else document.getElementById('budgetField').hidden = false;
+  document.getElementById('scalingChartCard').hidden = !isAwareness;
   document.getElementById('funnelTitle').textContent = isAppInstall ? t('funnelTitleAppInstall') : t('funnelTitlePipeline');
   renderFormatRecommendation();
+}
+
+// En mode Target Reach, le budget est un résultat calculé (champ masqué) ; en Budget-First,
+// c'est le reach qui devient un résultat (le slider de reach cible est masqué).
+function updateAwarenessModeVisibility() {
+  const isBudgetFirst = els.awarenessPlanningMode.value === 'budgetFirst';
+  document.getElementById('budgetField').hidden = !isBudgetFirst;
+  document.getElementById('reachTargetField').hidden = isBudgetFirst;
+  document.getElementById('planningModeHint').textContent = t(isBudgetFirst ? 'planningModeHintBudgetFirst' : 'planningModeHintTargetReach');
+}
+
+// La durée du plan ne recalcule pas les hypothèses mensuelles (CPM, taux, etc.) : elle affiche
+// juste le budget total du programme (mensuel × durée), comme dans l'outil de référence.
+let lastComputedBudget = 0;
+function planDurationMonths() { return +els.planDuration.value || 1; }
+function updateProgramTotal() {
+  const months = planDurationMonths();
+  const note = document.getElementById('programTotalNote');
+  if (months <= 1) { note.textContent = ''; return; }
+  note.textContent = t('programTotalLabel', { months }) + fmtEUR(lastComputedBudget * months);
 }
 
 function renderFormatRecommendation() {
@@ -2293,6 +2513,8 @@ function syncLabels() {
   document.getElementById('l2cVal').textContent = (+els.l2c.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('c2iVal').textContent = (+els.c2i.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('ltvVal').textContent = fmtEUR(+els.ltv.value);
+  document.getElementById('reachTargetVal').textContent = (+els.reachTarget.value).toFixed(0) + ' %';
+  document.getElementById('frequencyVal').textContent = (+els.frequency.value).toFixed(0);
 
   const mult = formatCountMultiplier(els.formatCount.value);
   const cpmNote = document.getElementById('cpmEffectiveNote');
@@ -2345,7 +2567,9 @@ let prevKpiStatus = { cpa: null, roas: null };
 
 function renderFunnel() {
   const objective = els.objective.value;
+  document.getElementById('kpiRow').className = 'kpi-row';
   if (objective === 'appInstall') { renderFunnelAppInstall(); return; }
+  if (objective === 'awareness') { renderFunnelAwareness(); return; }
   const f = currentFunnel();
   const stages = [
     { label: t('stageImpressions'), value: f.impressions, ref: f.impressions },
@@ -2385,6 +2609,8 @@ function renderFunnel() {
   `;
 
   prevKpiStatus = { cpa: cpaGood, roas: roasGood };
+  lastComputedBudget = f.budget;
+  updateProgramTotal();
 }
 
 // Benchmarks marché indicatifs pour le CPI (Grand public ~6$, SaaS/outils ~3$,
@@ -2433,6 +2659,154 @@ function renderFunnelAppInstall() {
   `;
 
   prevKpiStatus = { ...prevKpiStatus, cpi: cpiGood };
+  lastComputedBudget = f.budget;
+  updateProgramTotal();
+}
+
+// Modèle Notoriété : deux modes de planification (méthodologie fournie par l'agence).
+// Target Reach : on fixe audience/reach/fréquence, le budget nécessaire est calculé.
+// Budget-First : on fixe le budget, le reach accessible à ce CPM/fréquence est calculé
+// (plafonné à l'audience disponible — au-delà, le budget supplémentaire n'achète plus
+// de reach net, seulement de la fréquence).
+function currentFunnelAwareness(overrideBudget) {
+  const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
+  const audience = +els.audienceSize.value;
+  const reachPct = +els.reachTarget.value / 100;
+  const frequency = +els.frequency.value;
+  const mode = overrideBudget != null ? 'budgetFirst' : els.awarenessPlanningMode.value;
+  let budget, reached, impressions;
+  if (mode === 'budgetFirst') {
+    budget = overrideBudget != null ? overrideBudget : +els.budget.value;
+    impressions = (budget / cpm) * 1000;
+    reached = Math.min(impressions / frequency, audience);
+  } else {
+    reached = audience * reachPct;
+    impressions = reached * frequency;
+    budget = (impressions / 1000) * cpm;
+  }
+  const costPerReached = reached > 0 ? budget / reached : 0;
+  return { budget, audience, reached, impressions, costPerReached, cpm, frequency };
+}
+
+function renderFunnelAwareness() {
+  const f = currentFunnelAwareness();
+  const ref = Math.max(f.audience, f.impressions, 1);
+  const stages = [
+    { label: t('stageAudience'), value: f.audience, ref },
+    { label: t('stageReached'), value: f.reached, ref },
+    { label: t('stageImpressions'), value: f.impressions, ref },
+  ];
+  document.getElementById('stageList').innerHTML = stages.map(s => {
+    const pct = Math.max(2, (s.value / s.ref) * 100);
+    return `
+      <div class="stage">
+        <div class="label">${s.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure">${fmtNum(s.value)}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('kpiRow').className = 'kpi-row kpi-row-4';
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiRequiredBudget')}</div>
+      <div class="kpi-value">${fmtEUR(f.budget)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiImpressions')}</div>
+      <div class="kpi-value">${fmtNum(f.impressions)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiUniqueReach')}</div>
+      <div class="kpi-value">${fmtNum(f.reached)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiCostPerReached')}</div>
+      <div class="kpi-value">${f.reached > 0 ? fmtEURPrecise(f.costPerReached) : '—'}</div>
+    </div>
+  `;
+
+  lastComputedBudget = f.budget;
+  updateProgramTotal();
+  renderScalingChart(f);
+}
+
+/* ---------- Budget scaling curve (SVG dynamique) ---------- */
+// Recalcule impressions/reach à un budget donné, en Budget-First (le mode pertinent
+// pour explorer "que se passe-t-il si je change le budget ?"), quel que soit le mode
+// de planification actif à l'écran.
+function renderScalingChart(current) {
+  const wrap = document.getElementById('scalingChartSvgWrap');
+  const metric = els.scalingChartMetric.value;
+  const maxBudget = Math.max(current.budget * 2, 200);
+  const steps = 32;
+  const points = [];
+  for (let i = 0; i <= steps; i++) {
+    const b = (maxBudget / steps) * i;
+    const at = currentFunnelAwareness(b);
+    points.push({ x: b, y: metric === 'reach' ? at.reached : at.impressions });
+  }
+  const currentY = metric === 'reach' ? current.reached : current.impressions;
+  wrap.innerHTML = buildScalingCurveSvg(points, current.budget, currentY);
+
+  const plus20 = currentFunnelAwareness(current.budget * 1.2);
+  const plus20Y = metric === 'reach' ? plus20.reached : plus20.impressions;
+  const pctMore = currentY > 0 ? ((plus20Y - currentY) / currentY) * 100 : 0;
+  document.getElementById('scalingChartInsight').innerHTML =
+    '📈 ' + t('scalingChartInsight', {
+      budget: fmtEUR(current.budget * 1.2 - current.budget),
+      pct: pctMore.toFixed(0),
+      metric: t(metric === 'reach' ? 'scalingChartInsightReach' : 'scalingChartInsightImpressions'),
+    });
+}
+
+// Construit un petit line chart SVG responsive : courbe attendue, bande d'incertitude
+// (±12 %), repère pointillé + point sur le budget actuel, axes avec quelques graduations.
+function buildScalingCurveSvg(points, currentX, currentY) {
+  const W = 640, H = 240, padL = 56, padR = 16, padT = 16, padB = 34;
+  const maxX = points[points.length - 1].x || 1;
+  const maxY = Math.max(...points.map(p => p.y), 1) * 1.15;
+  const sx = x => padL + (x / maxX) * (W - padL - padR);
+  const sy = y => H - padB - (y / maxY) * (H - padT - padB);
+
+  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${sx(p.x).toFixed(1)} ${sy(p.y).toFixed(1)}`).join(' ');
+  const bandTop = points.map(p => `${sx(p.x).toFixed(1)} ${sy(p.y * 1.12).toFixed(1)}`).join(' L ');
+  const bandBottom = points.slice().reverse().map(p => `${sx(p.x).toFixed(1)} ${sy(Math.max(p.y * 0.88, 0)).toFixed(1)}`).join(' L ');
+  const bandPath = `M ${bandTop} L ${bandBottom} Z`;
+
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const y = padT + f * (H - padT - padB);
+    const val = maxY * (1 - f);
+    return `<line class="scaling-svg-grid" x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}"></line>
+      <text class="scaling-svg-axis-label" x="${padL - 8}" y="${y + 3}" text-anchor="end">${fmtNum(val)}</text>`;
+  }).join('');
+
+  const xLabels = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const x = padL + f * (W - padL - padR);
+    const anchor = f === 0 ? 'start' : f === 1 ? 'end' : 'middle';
+    return `<text class="scaling-svg-axis-label" x="${x}" y="${H - padB + 16}" text-anchor="${anchor}">${fmtEUR(maxX * f)}</text>`;
+  }).join('');
+
+  const cx = sx(currentX), cy = sy(currentY);
+  const calloutText = `${fmtNum(currentY)}`;
+  const calloutWidth = calloutText.length * 6.5 + 16;
+  const calloutX = Math.min(Math.max(cx - calloutWidth / 2, padL), W - padR - calloutWidth);
+  const calloutY = Math.max(cy - 34, padT);
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" class="scaling-svg" role="img" aria-label="${t('scalingChartTitle')}">
+      ${gridLines}
+      <line class="scaling-svg-grid" x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}"></line>
+      <line class="scaling-svg-grid" x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}"></line>
+      <path class="scaling-svg-band" d="${bandPath}"></path>
+      <path class="scaling-svg-line" d="${linePath}"></path>
+      <line class="scaling-svg-marker" x1="${cx}" y1="${cy}" x2="${cx}" y2="${H - padB}"></line>
+      <circle class="scaling-svg-point" cx="${cx}" cy="${cy}" r="4.5"></circle>
+      <rect class="scaling-svg-callout-bg" x="${calloutX}" y="${calloutY}" width="${calloutWidth}" height="22" rx="5"></rect>
+      <text class="scaling-svg-callout" x="${calloutX + calloutWidth / 2}" y="${calloutY + 15}" text-anchor="middle">${calloutText}</text>
+      ${xLabels}
+    </svg>
+  `;
 }
 
 function syncStateFromFields() {
@@ -2448,7 +2822,12 @@ function syncStateFromFields() {
   state.c2i = +els.c2i.value;
   state.platform = els.platform.value;
   state.formatCount = els.formatCount.value;
+  state.planDuration = els.planDuration.value;
   state.ltv = +els.ltv.value;
+  state.awarenessPlanningMode = els.awarenessPlanningMode.value;
+  state.audienceSize = +els.audienceSize.value;
+  state.reachTarget = +els.reachTarget.value;
+  state.frequency = +els.frequency.value;
   state.agencyName = els.agencyName.value;
   state.clientName = els.clientName.value;
 }
@@ -2460,7 +2839,7 @@ function compute() {
   scheduleSave();
 }
 
-[els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.c2i, els.ltv].forEach(el =>
+[els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.c2i, els.ltv, els.audienceSize, els.reachTarget, els.frequency].forEach(el =>
   el.addEventListener('input', compute)
 );
 [els.industry, els.market, els.objective, els.mix].forEach(el =>
@@ -2468,6 +2847,9 @@ function compute() {
 );
 els.platform.addEventListener('change', () => { updateTabActiveStates(); compute(); });
 els.formatCount.addEventListener('change', () => { updateTabActiveStates(); compute(); });
+els.planDuration.addEventListener('change', () => { updateTabActiveStates(); updateProgramTotal(); syncStateFromFields(); scheduleSave(); });
+els.awarenessPlanningMode.addEventListener('change', () => { updateTabActiveStates(); updateAwarenessModeVisibility(); compute(); });
+els.scalingChartMetric.addEventListener('change', () => { updateTabActiveStates(); renderFunnel(); });
 [els.agencyName, els.clientName].forEach(el =>
   el.addEventListener('input', () => { syncStateFromFields(); scheduleSave(); })
 );
@@ -3365,8 +3747,8 @@ document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnb
 
 /* ---------- Scenarios ---------- */
 function saveScenario() {
-  if (els.objective.value === 'appInstall') {
-    toast(t('toastAppInstallNoScenario'));
+  if (els.objective.value === 'appInstall' || els.objective.value === 'awareness') {
+    toast(t('toastScenarioUnavailable'));
     return;
   }
   const f = currentFunnel();
@@ -3538,6 +3920,11 @@ function hydrateFieldsFromState() {
   els.c2i.value = state.c2i || 20;
   els.platform.value = state.platform || 'blended';
   els.formatCount.value = state.formatCount || '1';
+  els.planDuration.value = state.planDuration || '1';
+  els.awarenessPlanningMode.value = state.awarenessPlanningMode || 'targetReach';
+  els.audienceSize.value = state.audienceSize || 300000;
+  els.reachTarget.value = state.reachTarget || 30;
+  els.frequency.value = state.frequency || 4;
   els.ltv.value = state.ltv;
   viewSwitch.value = state.view === 'full' ? 'full' : 'simple';
   updateObjectiveFieldsVisibility();
