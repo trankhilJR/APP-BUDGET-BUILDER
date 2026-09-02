@@ -594,6 +594,14 @@
   .onboarding[hidden] { display: none; }
   body.onboarding-active { overflow: hidden; }
 
+  .ob-lang-switch {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    z-index: 1;
+  }
+  .ob-lang-switch .tabs { overflow: visible; }
+
   .ob-header[hidden] { display: none; }
   .ob-topbar {
     max-width: 900px;
@@ -801,6 +809,62 @@
   }
   .ob-skip-link:hover { color: var(--ink); }
 
+  .ob-toggle-row {
+    display: flex;
+    gap: 10px;
+    max-width: 620px;
+    margin: 0 auto 20px;
+  }
+  .ob-toggle-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 13px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .ob-toggle-btn.active {
+    border-color: var(--ember);
+    color: var(--ink);
+    background: var(--ember-soft);
+  }
+  .ob-field { max-width: 620px; margin: 0 auto 20px; text-align: left; }
+  .ob-field-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .ob-field-val { color: var(--ember); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ob-field input[type="range"] { width: 100%; accent-color: var(--ember); }
+  .ob-field input[type="number"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+  }
+  .ob-continue-btn {
+    background: var(--ember);
+    border: 1px solid var(--ember);
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .ob-continue-btn:hover { opacity: 0.9; }
+
   @media print {
     .onboarding { display: none !important; }
   }
@@ -876,6 +940,13 @@
 <body>
 
 <div class="onboarding" id="onboarding" hidden>
+  <div class="ob-lang-switch">
+    <div class="tabs" data-target="langSwitch" role="tablist">
+      <button type="button" class="tab-btn" data-value="fr">FR</button>
+      <button type="button" class="tab-btn" data-value="en">EN</button>
+      <button type="button" class="tab-btn" data-value="es">ES</button>
+    </div>
+  </div>
   <div class="ob-header" id="obHeader" hidden>
     <div class="ob-topbar">
       <div class="ob-brand"><span class="dot"></span> Simulateur Reddit Ads</div>
@@ -911,6 +982,16 @@
     </div>
     <div class="masthead-side">
       <div class="header-actions">
+        <div class="tabs lang-switch" data-target="langSwitch" role="tablist">
+          <button type="button" class="tab-btn" data-value="fr">FR</button>
+          <button type="button" class="tab-btn" data-value="en">EN</button>
+          <button type="button" class="tab-btn" data-value="es">ES</button>
+        </div>
+        <select id="langSwitch" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="fr" selected>FR</option>
+          <option value="en">EN</option>
+          <option value="es">ES</option>
+        </select>
         <button type="button" class="icon-toggle" id="themeToggle" aria-label="Basculer le mode sombre">🌙</button>
         <button type="button" class="secondary" id="reopenOnboardingBtn">✨ Assistant de démarrage</button>
         <button type="button" class="secondary" id="shareBtn">Copier le lien</button>
@@ -960,39 +1041,52 @@
         <input type="range" id="budget" min="200" max="30000" step="100" value="3000">
       </div>
 
-      <div class="field">
-        <label>Secteur</label>
-        <select id="industry">
-          <option value="consumer">Grand public / DTC</option>
-          <option value="saas" selected>Tech / SaaS</option>
-          <option value="finance">Finance / Assurance</option>
-          <option value="gaming">Gaming / Loisirs</option>
-        </select>
-      </div>
-
       <div class="field-row">
         <div class="field">
-          <label>Objectif</label>
-          <div class="tabs" data-target="objective" role="tablist">
-            <button type="button" class="tab-btn" data-value="traffic">Trafic</button>
-            <button type="button" class="tab-btn" data-value="conversion">Conversion</button>
-          </div>
-          <select id="objective" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
-            <option value="traffic">Trafic</option>
-            <option value="conversion" selected>Conversion</option>
+          <label>Secteur</label>
+          <select id="industry">
+            <option value="consumer">Grand public / DTC</option>
+            <option value="saas" selected>Tech / SaaS</option>
+            <option value="finance">Finance / Assurance</option>
+            <option value="gaming">Gaming / Loisirs</option>
           </select>
         </div>
         <div class="field">
-          <label>Ciblage</label>
-          <div class="tabs" data-target="mix" role="tablist">
-            <button type="button" class="tab-btn" data-value="broad">Large</button>
-            <button type="button" class="tab-btn" data-value="niche">Niche</button>
-          </div>
-          <select id="mix" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
-            <option value="broad">Large</option>
-            <option value="niche" selected>Niche</option>
+          <label>Marché géographique</label>
+          <select id="market">
+            <option value="fr" selected>France</option>
+            <option value="fr_bech">Belgique / Suisse (FR)</option>
+            <option value="us">États-Unis</option>
+            <option value="uk">Royaume-Uni</option>
+            <option value="es">Espagne</option>
+            <option value="latam">Amérique latine</option>
           </select>
         </div>
+      </div>
+
+      <div class="field">
+        <label>Objectif</label>
+        <div class="tabs" data-target="objective" role="tablist">
+          <button type="button" class="tab-btn" data-value="awareness">Notoriété</button>
+          <button type="button" class="tab-btn" data-value="traffic">Trafic</button>
+          <button type="button" class="tab-btn" data-value="conversion">Conversion</button>
+        </div>
+        <select id="objective" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="awareness">Notoriété</option>
+          <option value="traffic">Trafic</option>
+          <option value="conversion" selected>Conversion</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Ciblage</label>
+        <div class="tabs" data-target="mix" role="tablist">
+          <button type="button" class="tab-btn" data-value="broad">Large</button>
+          <button type="button" class="tab-btn" data-value="niche">Niche</button>
+        </div>
+        <select id="mix" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+          <option value="broad">Large</option>
+          <option value="niche" selected>Niche</option>
+        </select>
       </div>
 
       <hr class="divider">
@@ -1189,7 +1283,7 @@
   <!-- /fullFunnelView -->
 
   <footer class="note">
-    Les hypothèses de coûts (CPM, CTR) sont des ordres de grandeur de marché à ajuster selon le secteur et la période. Elles ne remplacent pas les données réelles issues d'un compte Reddit Ads actif.
+    <span id="footerNote">Les hypothèses de coûts (CPM, CTR) sont des ordres de grandeur de marché à ajuster selon le secteur et la période. Elles ne remplacent pas les données réelles issues d'un compte Reddit Ads actif.</span>
   </footer>
 
 </div>
@@ -1197,11 +1291,250 @@
 <script>
 const STORAGE_KEY = 'redditBudgetBuilder:v1';
 
+/* ---------- i18n (assistant de démarrage + footer) ----------
+   Le reste du tableau de bord (curseurs, vue Full Funnel, tableau de
+   scénarios) reste en français pour l'instant ; seule l'interface de
+   l'assistant, son sélecteur de langue et la note du footer sont traduits. */
+const translations = {
+  fr: {
+    ob_landing_title: 'Simulateur de budget Reddit Ads',
+    ob_landing_sub: "Traduis ton investissement Reddit Ads en pipeline, revenu et portée.",
+    ob_choose_objective: 'Choisis ton objectif',
+    ob_obj_awareness_title: 'Notoriété',
+    ob_obj_awareness_desc: 'Maximise la portée et les impressions pour construire la reconnaissance de marque.',
+    ob_obj_traffic_title: 'Trafic',
+    ob_obj_traffic_desc: 'Maximise les clics qualifiés vers ton site ou ta landing page.',
+    ob_obj_conversion_title: 'Génération de conversion',
+    ob_obj_conversion_desc: "Construis un plan basé sur le funnel, des leads jusqu'au client.",
+    ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impressions', ob_tag_reach: 'Portée',
+    ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clics',
+    ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
+    ob_recommended: 'Recommandé',
+    ob_start: 'Commencer',
+    ob_back: 'Retour',
+    ob_skip: 'Passer cette question',
+    ob_continue: 'Continuer',
+    ob_change_objective: "Changer d'objectif",
+    ob_sector_title: 'Dans quel secteur ton client opère-t-il ?',
+    ob_sector_sub: 'Détermine les hypothèses de coûts (CPM, CTR) par défaut.',
+    industry_consumer: 'Grand public / DTC', industry_consumer_sub: 'E-commerce, produits grand public',
+    industry_saas: 'Tech / SaaS', industry_saas_sub: 'Logiciel, outils B2B',
+    industry_finance: 'Finance / Assurance', industry_finance_sub: 'Banque, assurance, fintech',
+    industry_gaming: 'Gaming / Loisirs', industry_gaming_sub: 'Jeux vidéo, divertissement',
+    ob_market_title: 'Quel est le marché géographique ciblé ?',
+    ob_market_sub: 'Le coût des enchères Reddit Ads varie fortement selon le pays.',
+    market_fr: 'France', market_fr_bech: 'Belgique / Suisse (FR)',
+    market_us: 'États-Unis', market_uk: 'Royaume-Uni', market_es: 'Espagne', market_latam: 'Amérique latine',
+    ob_starting_title: 'Comment veux-tu démarrer ?',
+    ob_starting_sub: "Pars d'un budget disponible, ou d'un objectif de résultat à atteindre.",
+    ob_starting_budget: "Je pars d'un budget",
+    ob_starting_target: "Je pars d'un objectif de résultat",
+    ob_budget_label: 'Budget mensuel',
+    ob_target_awareness_label: 'Combien de personnes veux-tu toucher (reach) par mois ?',
+    ob_target_traffic_label: 'Combien de visites vises-tu par mois ?',
+    ob_target_conversion_label_leads: 'Combien de leads vises-tu par mois ?',
+    ob_target_conversion_label_clients: 'Combien de clients vises-tu par mois ?',
+    ob_target_kind_leads: 'Leads',
+    ob_target_kind_clients: 'Clients',
+    ob_targeting_title: 'Quel type de ciblage envisages-tu ?',
+    ob_targeting_sub: 'Impacte le CPM et les taux de conversion attendus.',
+    ob_targeting_niche: 'Niche', ob_targeting_niche_sub: 'Communautés très ciblées, CPM plus élevé, meilleure qualité',
+    ob_targeting_broad: 'Large', ob_targeting_broad_sub: 'Portée maximale, CPM plus bas, ciblage moins précis',
+    ob_ltv_title: "Quelle est la valeur moyenne d'un client ?",
+    ob_ltv_sub: 'Aussi appelée panier moyen ou valeur vie client.',
+    ltv_low: 'Moins de 500 €', ltv_low_sub: 'Achat unique / e-commerce',
+    ltv_mid: '500 € – 2 000 €', ltv_mid_sub: 'Abonnement / panier moyen',
+    ltv_high: '2 000 € – 10 000 €', ltv_high_sub: 'Contrat B2B',
+    ltv_enterprise: '10 000 €+', ltv_enterprise_sub: 'Grand compte',
+    ob_realdata_title: 'As-tu déjà des données de coûts réels sur Reddit Ads ?',
+    ob_realdata_sub: 'Ou une plateforme social/programmatic similaire.',
+    ob_realdata_yes: 'Oui', ob_realdata_no: 'Non',
+    ob_cpm_observed_label: 'CPM observé (€)',
+    ob_ctr_observed_label: 'CTR observé (%)',
+    ob_ready_badge: 'Ton plan est prêt',
+    ob_reveal_conversion_lead: 'Les comptes {industry} comme le tien génèrent',
+    ob_reveal_conversion_sub: 'par an, basé sur un budget de {budget}/mois et une valeur client de {ltv}.',
+    ob_reveal_awareness_lead: 'Avec ce budget, les comptes {industry} touchent environ',
+    ob_reveal_awareness_sub: 'de portée mensuelle estimée, pour un budget de {budget}/mois.',
+    ob_reveal_traffic_lead: 'Avec ce budget, les comptes {industry} génèrent environ',
+    ob_reveal_traffic_sub: 'de visites qualifiées par mois, pour un budget de {budget}/mois.',
+    ob_bench_title: 'Benchmarks du funnel · ton profil',
+    ob_bench_ctr: 'CTR (taux de clic)',
+    ob_bench_c2l: 'Clic → Lead',
+    ob_bench_l2c: 'Lead → Client',
+    ob_bench_range: 'Fourchette',
+    ob_source: "Source : hypothèses de marché Reddit Ads par secteur — à ajuster avec les vrais chiffres de ton compte.",
+    ob_apply_cta: 'Démarrer avec ces hypothèses',
+    ob_skip_all: 'Passer — utiliser les valeurs par défaut',
+    toast_applied: 'Hypothèses appliquées au tableau de bord',
+    footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
+  },
+  en: {
+    ob_landing_title: 'Reddit Ads Budget Simulator',
+    ob_landing_sub: 'Translate your Reddit Ads investment into pipeline, revenue and reach.',
+    ob_choose_objective: 'Choose your objective',
+    ob_obj_awareness_title: 'Awareness',
+    ob_obj_awareness_desc: 'Maximize reach and impressions to build brand recognition.',
+    ob_obj_traffic_title: 'Traffic',
+    ob_obj_traffic_desc: 'Maximize qualified clicks to your site or landing page.',
+    ob_obj_conversion_title: 'Conversion generation',
+    ob_obj_conversion_desc: 'Build a funnel-backed plan, from leads to closed customers.',
+    ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impressions', ob_tag_reach: 'Reach',
+    ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clicks',
+    ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
+    ob_recommended: 'Recommended',
+    ob_start: 'Start',
+    ob_back: 'Back',
+    ob_skip: 'Skip this question',
+    ob_continue: 'Continue',
+    ob_change_objective: 'Change objective',
+    ob_sector_title: 'What industry is your client in?',
+    ob_sector_sub: 'Sets the default cost assumptions (CPM, CTR).',
+    industry_consumer: 'Consumer / DTC', industry_consumer_sub: 'E-commerce, consumer products',
+    industry_saas: 'Tech / SaaS', industry_saas_sub: 'Software, B2B tools',
+    industry_finance: 'Finance / Insurance', industry_finance_sub: 'Banking, insurance, fintech',
+    industry_gaming: 'Gaming / Entertainment', industry_gaming_sub: 'Video games, entertainment',
+    ob_market_title: 'Which geographic market are you targeting?',
+    ob_market_sub: 'Reddit Ads auction pricing varies a lot by country.',
+    market_fr: 'France', market_fr_bech: 'Belgium / Switzerland (FR)',
+    market_us: 'United States', market_uk: 'United Kingdom', market_es: 'Spain', market_latam: 'Latin America',
+    ob_starting_title: 'How do you want to start?',
+    ob_starting_sub: 'Start from an available budget, or from a result target to hit.',
+    ob_starting_budget: 'I start from a budget',
+    ob_starting_target: 'I start from a result target',
+    ob_budget_label: 'Monthly budget',
+    ob_target_awareness_label: 'How many people do you want to reach per month?',
+    ob_target_traffic_label: 'How many visits are you aiming for per month?',
+    ob_target_conversion_label_leads: 'How many leads are you aiming for per month?',
+    ob_target_conversion_label_clients: 'How many customers are you aiming for per month?',
+    ob_target_kind_leads: 'Leads',
+    ob_target_kind_clients: 'Customers',
+    ob_targeting_title: 'What kind of targeting are you considering?',
+    ob_targeting_sub: 'Affects CPM and expected conversion rates.',
+    ob_targeting_niche: 'Niche', ob_targeting_niche_sub: 'Highly targeted communities, higher CPM, better quality',
+    ob_targeting_broad: 'Broad', ob_targeting_broad_sub: 'Maximum reach, lower CPM, less precise targeting',
+    ob_ltv_title: "What's the average value of a customer?",
+    ob_ltv_sub: 'Also known as average order value or customer lifetime value.',
+    ltv_low: 'Under €500', ltv_low_sub: 'One-off purchase / e-commerce',
+    ltv_mid: '€500 – €2,000', ltv_mid_sub: 'Subscription / average basket',
+    ltv_high: '€2,000 – €10,000', ltv_high_sub: 'B2B contract',
+    ltv_enterprise: '€10,000+', ltv_enterprise_sub: 'Enterprise account',
+    ob_realdata_title: 'Do you already have real Reddit Ads cost data?',
+    ob_realdata_sub: 'Or from a similar social/programmatic platform.',
+    ob_realdata_yes: 'Yes', ob_realdata_no: 'No',
+    ob_cpm_observed_label: 'Observed CPM (€)',
+    ob_ctr_observed_label: 'Observed CTR (%)',
+    ob_ready_badge: 'Your plan is ready',
+    ob_reveal_conversion_lead: 'Accounts like {industry} generate',
+    ob_reveal_conversion_sub: 'a year, based on a budget of {budget}/month and a customer value of {ltv}.',
+    ob_reveal_awareness_lead: 'With this budget, {industry} accounts reach about',
+    ob_reveal_awareness_sub: 'in estimated monthly reach, for a budget of {budget}/month.',
+    ob_reveal_traffic_lead: 'With this budget, {industry} accounts generate about',
+    ob_reveal_traffic_sub: 'qualified visits per month, for a budget of {budget}/month.',
+    ob_bench_title: "Funnel benchmarks · your profile",
+    ob_bench_ctr: 'CTR (click-through rate)',
+    ob_bench_c2l: 'Click → Lead',
+    ob_bench_l2c: 'Lead → Customer',
+    ob_bench_range: 'Range',
+    ob_source: "Source: sector-level Reddit Ads market assumptions — adjust with your account's real numbers.",
+    ob_apply_cta: 'Start with these assumptions',
+    ob_skip_all: 'Skip — use default values',
+    toast_applied: 'Assumptions applied to the dashboard',
+    footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
+  },
+  es: {
+    ob_landing_title: 'Simulador de presupuesto de Reddit Ads',
+    ob_landing_sub: 'Traduce tu inversión en Reddit Ads en pipeline, ingresos y alcance.',
+    ob_choose_objective: 'Elige tu objetivo',
+    ob_obj_awareness_title: 'Notoriedad',
+    ob_obj_awareness_desc: 'Maximiza el alcance y las impresiones para construir reconocimiento de marca.',
+    ob_obj_traffic_title: 'Tráfico',
+    ob_obj_traffic_desc: 'Maximiza los clics cualificados hacia tu sitio o landing page.',
+    ob_obj_conversion_title: 'Generación de conversión',
+    ob_obj_conversion_desc: 'Construye un plan basado en el funnel, desde leads hasta clientes.',
+    ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impresiones', ob_tag_reach: 'Alcance',
+    ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clics',
+    ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
+    ob_recommended: 'Recomendado',
+    ob_start: 'Empezar',
+    ob_back: 'Atrás',
+    ob_skip: 'Saltar esta pregunta',
+    ob_continue: 'Continuar',
+    ob_change_objective: 'Cambiar objetivo',
+    ob_sector_title: '¿En qué sector opera tu cliente?',
+    ob_sector_sub: 'Define las hipótesis de coste por defecto (CPM, CTR).',
+    industry_consumer: 'Consumo / DTC', industry_consumer_sub: 'E-commerce, productos de consumo',
+    industry_saas: 'Tech / SaaS', industry_saas_sub: 'Software, herramientas B2B',
+    industry_finance: 'Finanzas / Seguros', industry_finance_sub: 'Banca, seguros, fintech',
+    industry_gaming: 'Gaming / Ocio', industry_gaming_sub: 'Videojuegos, entretenimiento',
+    ob_market_title: '¿Qué mercado geográfico vas a segmentar?',
+    ob_market_sub: 'El coste de las subastas de Reddit Ads varía mucho según el país.',
+    market_fr: 'Francia', market_fr_bech: 'Bélgica / Suiza (FR)',
+    market_us: 'Estados Unidos', market_uk: 'Reino Unido', market_es: 'España', market_latam: 'Latinoamérica',
+    ob_starting_title: '¿Cómo quieres empezar?',
+    ob_starting_sub: 'Parte de un presupuesto disponible, o de un objetivo de resultado a alcanzar.',
+    ob_starting_budget: 'Parto de un presupuesto',
+    ob_starting_target: 'Parto de un objetivo de resultado',
+    ob_budget_label: 'Presupuesto mensual',
+    ob_target_awareness_label: '¿A cuántas personas quieres llegar (reach) al mes?',
+    ob_target_traffic_label: '¿Cuántas visitas quieres conseguir al mes?',
+    ob_target_conversion_label_leads: '¿Cuántos leads quieres conseguir al mes?',
+    ob_target_conversion_label_clients: '¿Cuántos clientes quieres conseguir al mes?',
+    ob_target_kind_leads: 'Leads',
+    ob_target_kind_clients: 'Clientes',
+    ob_targeting_title: '¿Qué tipo de segmentación planteas?',
+    ob_targeting_sub: 'Afecta al CPM y a las tasas de conversión esperadas.',
+    ob_targeting_niche: 'Nicho', ob_targeting_niche_sub: 'Comunidades muy específicas, CPM más alto, mejor calidad',
+    ob_targeting_broad: 'Amplio', ob_targeting_broad_sub: 'Alcance máximo, CPM más bajo, segmentación menos precisa',
+    ob_ltv_title: '¿Cuál es el valor medio de un cliente?',
+    ob_ltv_sub: 'También llamado ticket medio o valor de vida del cliente.',
+    ltv_low: 'Menos de 500 €', ltv_low_sub: 'Compra única / e-commerce',
+    ltv_mid: '500 € – 2.000 €', ltv_mid_sub: 'Suscripción / ticket medio',
+    ltv_high: '2.000 € – 10.000 €', ltv_high_sub: 'Contrato B2B',
+    ltv_enterprise: '10.000 €+', ltv_enterprise_sub: 'Gran cuenta',
+    ob_realdata_title: '¿Ya tienes datos de coste reales en Reddit Ads?',
+    ob_realdata_sub: 'O de una plataforma social/programática similar.',
+    ob_realdata_yes: 'Sí', ob_realdata_no: 'No',
+    ob_cpm_observed_label: 'CPM observado (€)',
+    ob_ctr_observed_label: 'CTR observado (%)',
+    ob_ready_badge: 'Tu plan está listo',
+    ob_reveal_conversion_lead: 'Las cuentas de {industry} como la tuya generan',
+    ob_reveal_conversion_sub: 'al año, con un presupuesto de {budget}/mes y un valor de cliente de {ltv}.',
+    ob_reveal_awareness_lead: 'Con este presupuesto, las cuentas de {industry} alcanzan aproximadamente',
+    ob_reveal_awareness_sub: 'de alcance mensual estimado, con un presupuesto de {budget}/mes.',
+    ob_reveal_traffic_lead: 'Con este presupuesto, las cuentas de {industry} generan aproximadamente',
+    ob_reveal_traffic_sub: 'de visitas cualificadas al mes, con un presupuesto de {budget}/mes.',
+    ob_bench_title: 'Benchmarks del funnel · tu perfil',
+    ob_bench_ctr: 'CTR (tasa de clics)',
+    ob_bench_c2l: 'Clic → Lead',
+    ob_bench_l2c: 'Lead → Cliente',
+    ob_bench_range: 'Rango',
+    ob_source: 'Fuente: hipótesis de mercado de Reddit Ads por sector — ajusta con los datos reales de tu cuenta.',
+    ob_apply_cta: 'Empezar con estas hipótesis',
+    ob_skip_all: 'Saltar — usar valores por defecto',
+    toast_applied: 'Hipótesis aplicadas al panel',
+    footer_note: 'Benchmarks de Reddit Ads 2026 recopilados de fuentes públicas (AdBacklog, Benly, StackMatix, Marketing LTB) — ajusta con los datos reales de la cuenta de Reddit Ads Manager del cliente en cuanto estén disponibles.',
+  },
+};
+
+function t(key, vars) {
+  const dict = translations[state.lang] || translations.fr;
+  let str = dict[key] ?? translations.fr[key] ?? key;
+  if (vars) Object.keys(vars).forEach(k => { str = str.replace(`{${k}}`, vars[k]); });
+  return str;
+}
+function industryLabelI18n(key) { return t('industry_' + key); }
+function industryLabelSubI18n(key) { return t('industry_' + key + '_sub'); }
+
+// Benchmarks Reddit Ads 2026 (AdBacklog, Benly, StackMatix, AdControlCenter, Marketing LTB, SHNO).
+// Chiffres sources en USD ; convertis en EUR ici avec un taux approximatif (voir USD_TO_EUR)
+// puis affinés par le multiplicateur de marché géographique choisi dans le brief/dashboard.
+const USD_TO_EUR = 0.92;
 const defaultPresets = {
-  consumer: { cpm: 4,   ctr: 0.45, c2l: 3,  l2c: 8  },
-  saas:     { cpm: 6,   ctr: 0.35, c2l: 5,  l2c: 12 },
-  finance:  { cpm: 6,   ctr: 0.30, c2l: 4,  l2c: 10 },
-  gaming:   { cpm: 2.5, ctr: 0.50, c2l: 2,  l2c: 5  },
+  consumer: { cpm: +(3.0 * USD_TO_EUR).toFixed(1), ctr: 0.60, c2l: 3, l2c: 8,  freq: 3, eng: 1.2 },
+  saas:     { cpm: +(5.0 * USD_TO_EUR).toFixed(1), ctr: 0.40, c2l: 5, l2c: 12, freq: 4, eng: 0.8 },
+  finance:  { cpm: +(7.0 * USD_TO_EUR).toFixed(1), ctr: 0.30, c2l: 4, l2c: 10, freq: 4, eng: 0.6 },
+  gaming:   { cpm: +(2.0 * USD_TO_EUR).toFixed(1), ctr: 0.70, c2l: 2, l2c: 5,  freq: 3, eng: 2.0 },
 };
 const industryLabels = {
   consumer: 'Grand public / DTC',
@@ -1209,6 +1542,53 @@ const industryLabels = {
   finance: 'Finance / Assurance',
   gaming: 'Gaming / Loisirs',
 };
+
+// Multiplicateurs par objectif : Trafic optimise le clic (CTR plus haut, CPM plus bas) ;
+// Conversion accepte un CTR plus bas / CPM plus haut contre un meilleur taux de conversion final.
+const objectiveMultipliers = {
+  awareness:  { cpm: 0.80, ctr: 1.00, c2l: 1.00, l2c: 1.00 },
+  traffic:    { cpm: 0.90, ctr: 1.15, c2l: 1.00, l2c: 1.00 },
+  conversion: { cpm: 1.25, ctr: 0.85, c2l: 1.00, l2c: 1.30 },
+};
+
+// Coefficients de marché géographique, appliqués au CPM (le marché le plus cher/mature en tête).
+const marketMultipliers = {
+  us:    { cpm: 1.30 },
+  uk:    { cpm: 1.10 },
+  fr:    { cpm: 0.85 },
+  es:    { cpm: 0.75 },
+  latam: { cpm: 0.60 },
+};
+// Options exposées dans les sélecteurs (plusieurs marchés peuvent partager un coefficient).
+const marketOptions = [
+  { value: 'fr',      coeff: 'fr',    label: 'France' },
+  { value: 'fr_bech', coeff: 'fr',    label: 'Belgique / Suisse (FR)' },
+  { value: 'us',      coeff: 'us',    label: 'États-Unis' },
+  { value: 'uk',      coeff: 'uk',    label: 'Royaume-Uni' },
+  { value: 'es',      coeff: 'es',    label: 'Espagne' },
+  { value: 'latam',   coeff: 'latam', label: 'Amérique latine' },
+];
+function marketCpmMultiplier(marketValue) {
+  const opt = marketOptions.find(m => m.value === marketValue);
+  const bucket = marketMultipliers[opt ? opt.coeff : 'fr'];
+  return bucket ? bucket.cpm : 1;
+}
+// Coeur du calcul de CPM/CTR/taux : cpm(secteur) × objectif × ciblage × marché.
+function computeFunnelAssumptions(industry, objective, mix, market) {
+  const base = presets[industry] || presets.saas;
+  const objMult = objectiveMultipliers[objective] || objectiveMultipliers.conversion;
+  const mixCpm = mix === 'niche' ? 1.2 : 0.85;
+  const mixC2l = mix === 'niche' ? 1.4 : 1.0;
+  const mixL2c = mix === 'niche' ? 1.2 : 1.0;
+  const mktCpm = marketCpmMultiplier(market);
+
+  return {
+    cpm: base.cpm * objMult.cpm * mixCpm * mktCpm,
+    ctr: base.ctr * objMult.ctr,
+    c2l: Math.min(base.c2l * objMult.c2l * mixC2l, 30),
+    l2c: Math.min(base.l2c * objMult.l2c * mixL2c, 50),
+  };
+}
 
 let presets = JSON.parse(JSON.stringify(defaultPresets));
 
@@ -1219,8 +1599,10 @@ const state = {
   agencyLogo: null,
   budget: 3000,
   industry: 'saas',
+  market: 'fr',
   objective: 'conversion',
   mix: 'niche',
+  lang: 'fr',
   cpm: 6,
   ctr: 0.35,
   c2l: 5,
@@ -1251,6 +1633,7 @@ const els = {
   clientName: document.getElementById('clientName'),
   budget: document.getElementById('budget'),
   industry: document.getElementById('industry'),
+  market: document.getElementById('market'),
   objective: document.getElementById('objective'),
   mix: document.getElementById('mix'),
   cpm: document.getElementById('cpm'),
@@ -1279,6 +1662,7 @@ const viewSwitch = document.getElementById('viewSwitch');
 const simpleView = document.getElementById('simpleView');
 const fullFunnelView = document.getElementById('fullFunnelView');
 
+const langSwitch = document.getElementById('langSwitch');
 const themeToggle = document.getElementById('themeToggle');
 const shareBtn = document.getElementById('shareBtn');
 const presentBtn = document.getElementById('presentBtn');
@@ -1369,6 +1753,21 @@ function initTheme() {
   themeToggle.setAttribute('aria-label', state.theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre');
 }
 
+/* ---------- Language (assistant + footer only, see i18n comment above) ---------- */
+function applyLangToUi() {
+  document.documentElement.setAttribute('lang', state.lang);
+  const footerNote = document.getElementById('footerNote');
+  if (footerNote) footerNote.textContent = t('footer_note');
+  if (langSwitch.value !== state.lang) langSwitch.value = state.lang;
+  updateTabActiveStates();
+  if (!document.getElementById('onboarding').hidden) renderOnboarding();
+}
+langSwitch.addEventListener('change', () => {
+  state.lang = langSwitch.value;
+  applyLangToUi();
+  scheduleSave();
+});
+
 /* ---------- Logo ---------- */
 function applyLogo() {
   const has = !!state.agencyLogo;
@@ -1416,17 +1815,11 @@ function updateTabActiveStates() {
 
 /* ---------- Core computation ---------- */
 function applyPreset() {
-  const base = presets[els.industry.value];
-  let cpm = base.cpm, c2l = base.c2l, l2c = base.l2c;
-
-  if (els.objective.value === 'conversion') { cpm *= 1.25; l2c *= 1.3; }
-  if (els.mix.value === 'niche') { cpm *= 1.2; c2l *= 1.4; l2c *= 1.2; }
-  else { cpm *= 0.85; }
-
-  els.cpm.value = cpm.toFixed(1);
-  els.ctr.value = base.ctr;
-  els.c2l.value = Math.min(c2l, 30).toFixed(1);
-  els.l2c.value = Math.min(l2c, 50).toFixed(0);
+  const a = computeFunnelAssumptions(els.industry.value, els.objective.value, els.mix.value, els.market.value);
+  els.cpm.value = a.cpm.toFixed(1);
+  els.ctr.value = a.ctr.toFixed(2);
+  els.c2l.value = a.c2l.toFixed(1);
+  els.l2c.value = a.l2c.toFixed(0);
   syncLabels();
   compute();
 }
@@ -1507,6 +1900,7 @@ function renderFunnel() {
 function syncStateFromFields() {
   state.budget = +els.budget.value;
   state.industry = els.industry.value;
+  state.market = els.market.value;
   state.objective = els.objective.value;
   state.mix = els.mix.value;
   state.cpm = +els.cpm.value;
@@ -1528,7 +1922,7 @@ function compute() {
 [els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.ltv].forEach(el =>
   el.addEventListener('input', compute)
 );
-[els.industry, els.objective, els.mix].forEach(el =>
+[els.industry, els.market, els.objective, els.mix].forEach(el =>
   el.addEventListener('change', () => { applyPreset(); updateTabActiveStates(); })
 );
 [els.agencyName, els.clientName].forEach(el =>
@@ -1948,88 +2342,101 @@ function setView(view) {
 }
 viewSwitch.addEventListener('change', () => setView(viewSwitch.value));
 
-/* ---------- Onboarding wizard ---------- */
-const objectiveOptions = [
-  {
-    key: 'awareness',
-    icon: '📣',
-    title: 'Notoriété',
-    desc: 'Maximise la portée et les impressions pour construire la reconnaissance de marque.',
-    tags: ['CPM', 'Impressions', 'Portée'],
-    objective: 'traffic',
-    mix: 'broad',
-  },
-  {
-    key: 'leadgen',
-    icon: '🎯',
-    title: 'Génération de leads',
-    desc: 'Construis un plan basé sur le funnel, des leads jusqu’au client.',
-    tags: ['CPL', 'Leads', 'Pipeline'],
-    objective: 'conversion',
-    mix: 'niche',
-    recommended: true,
-  },
-  {
-    key: 'traffic',
-    icon: '👆',
-    title: 'Trafic qualifié',
-    desc: 'Maximise les clics qualifiés vers ton site ou ta landing page.',
-    tags: ['CPC', 'CTR', 'Clics'],
-    objective: 'traffic',
-    mix: 'niche',
-  },
-];
+/* ---------- Onboarding wizard (brief de découverte client) ---------- */
+// Ordre FIXE, contenu CONDITIONNEL selon l'objectif choisi à l'étape 1 :
+// objectif -> secteur -> marché -> point de départ (budget|résultat) -> ciblage
+// -> [valeur client, uniquement si objectif=conversion] -> données réelles -> révélation.
+function obObjectiveOptions() {
+  return [
+    { key: 'awareness', icon: '📣', title: t('ob_obj_awareness_title'), desc: t('ob_obj_awareness_desc'), tags: [t('ob_tag_cpm'), t('ob_tag_impressions'), t('ob_tag_reach')] },
+    { key: 'traffic', icon: '👆', title: t('ob_obj_traffic_title'), desc: t('ob_obj_traffic_desc'), tags: [t('ob_tag_cpc'), t('ob_tag_ctr'), t('ob_tag_clicks')] },
+    { key: 'conversion', icon: '🎯', title: t('ob_obj_conversion_title'), desc: t('ob_obj_conversion_desc'), tags: [t('ob_tag_cpl'), t('ob_tag_leads'), t('ob_tag_pipeline')], recommended: true },
+  ];
+}
+function obLtvOptions() {
+  return [
+    { key: 'low', label: t('ltv_low'), sub: t('ltv_low_sub'), ltv: 300 },
+    { key: 'mid', label: t('ltv_mid'), sub: t('ltv_mid_sub'), ltv: 1200 },
+    { key: 'high', label: t('ltv_high'), sub: t('ltv_high_sub'), ltv: 5000 },
+    { key: 'enterprise', label: t('ltv_enterprise'), sub: t('ltv_enterprise_sub'), ltv: 15000 },
+  ];
+}
 
-const companySizeOptions = [
-  { key: 'xs', label: '1–10 salariés', budget: 1200 },
-  { key: 's', label: '11–50 salariés', budget: 3000 },
-  { key: 'm', label: '51–200 salariés', budget: 6000 },
-  { key: 'l', label: '201–1 000 salariés', budget: 12000 },
-  { key: 'xl', label: '1 000+ salariés', budget: 20000 },
-];
+function obDefaultState() {
+  return {
+    step: 'objective',
+    objectiveKey: null,
+    industry: null,
+    market: null,
+    startingPoint: null,      // 'budget' | 'target'
+    budgetValue: null,
+    targetValue: null,
+    targetKind: 'leads',      // 'leads' | 'clients' (objectif conversion uniquement)
+    mix: null,
+    ltvTier: null,
+    hasRealData: 'no',
+    cpmObserved: null,
+    ctrObserved: null,
+  };
+}
+let onboarding = obDefaultState();
 
-const industryOnboardingSub = {
-  consumer: 'E-commerce, produits grand public',
-  saas: 'Logiciel, outils B2B',
-  finance: 'Banque, assurance, fintech',
-  gaming: 'Jeux vidéo, divertissement',
-};
-
-const ltvOptions = [
-  { key: 'low', label: 'Moins de 500 €', sub: 'Achat unique / e-commerce', ltv: 300 },
-  { key: 'mid', label: '500 € – 2 000 €', sub: 'Abonnement / panier moyen', ltv: 1200 },
-  { key: 'high', label: '2 000 € – 10 000 €', sub: 'Contrat B2B', ltv: 5000 },
-  { key: 'enterprise', label: '10 000 €+', sub: 'Grand compte', ltv: 15000 },
-];
-
-const obStepOrder = ['objective', 'q1', 'q2', 'q3', 'reveal'];
-let onboarding = { step: 'objective', objectiveKey: null, companySize: null, industry: null, ltvTier: null };
-
-function fmtPct(n) { return n.toFixed(1).replace('.', ',') + ' %'; }
+// Liste d'étapes dynamique : "ltv" n'apparaît que pour l'objectif conversion.
+function obGetStepList() {
+  const steps = ['objective', 'sector', 'market', 'starting', 'targeting'];
+  if (onboarding.objectiveKey === 'conversion') steps.push('ltv');
+  steps.push('realdata', 'reveal');
+  return steps;
+}
 
 function computeOnboardingResult() {
-  const obj = objectiveOptions.find(o => o.key === onboarding.objectiveKey) || objectiveOptions[1];
-  const sizeOpt = companySizeOptions.find(o => o.key === onboarding.companySize);
-  const budget = sizeOpt ? sizeOpt.budget : state.budget;
-  const industry = onboarding.industry || state.industry;
-  const ltvOpt = ltvOptions.find(o => o.key === onboarding.ltvTier);
-  const ltv = ltvOpt ? ltvOpt.ltv : state.ltv;
-
+  const objective = onboarding.objectiveKey || 'conversion';
+  const industry = onboarding.industry || state.industry || 'saas';
+  const marketValue = onboarding.market || 'fr';
+  const mix = onboarding.mix || 'niche';
   const base = presets[industry];
-  let cpm = base.cpm, c2l = base.c2l, l2c = base.l2c;
-  if (obj.objective === 'conversion') { cpm *= 1.25; l2c *= 1.3; }
-  if (obj.mix === 'niche') { cpm *= 1.2; c2l *= 1.4; l2c *= 1.2; } else { cpm *= 0.85; }
-  const ctr = base.ctr;
-  c2l = Math.min(c2l, 30);
-  l2c = Math.min(l2c, 50);
 
-  const impressions = (budget / cpm) * 1000;
+  const assumptions = computeFunnelAssumptions(industry, objective, mix, marketValue);
+  let cpm = assumptions.cpm, ctr = assumptions.ctr, c2l = assumptions.c2l, l2c = assumptions.l2c;
+
+  // Données réelles client : remplacent (n'multiplient pas) les valeurs calculées.
+  if (onboarding.hasRealData === 'yes') {
+    if (onboarding.cpmObserved > 0) cpm = onboarding.cpmObserved;
+    if (onboarding.ctrObserved > 0) ctr = onboarding.ctrObserved;
+  }
+
+  let budget;
+  if (onboarding.startingPoint === 'target' && onboarding.targetValue > 0) {
+    const target = onboarding.targetValue;
+    if (objective === 'awareness') {
+      // budget = (reach × fréquence / 1000) × cpm
+      budget = (target * (base.freq || 3) / 1000) * cpm;
+    } else if (objective === 'traffic') {
+      // budget = (visites / 0.95 / ctr) / 1000 × cpm
+      const impressionsNeeded = (target / 0.95) / (ctr / 100);
+      budget = (impressionsNeeded / 1000) * cpm;
+    } else {
+      // conversion : on remonte clients/leads -> clics -> impressions -> budget
+      const leadsNeeded = onboarding.targetKind === 'clients' && l2c > 0 ? target / (l2c / 100) : target;
+      const clicksNeeded = c2l > 0 ? leadsNeeded / (c2l / 100) : 0;
+      const impressionsNeeded = ctr > 0 ? clicksNeeded / (ctr / 100) : 0;
+      budget = (impressionsNeeded / 1000) * cpm;
+    }
+  } else {
+    budget = onboarding.budgetValue || state.budget || 3000;
+  }
+
+  const ltvOpt = obLtvOptions().find(o => o.key === onboarding.ltvTier);
+  const ltv = objective === 'conversion' ? (ltvOpt ? ltvOpt.ltv : 1200) : 1200;
+
+  const impressions = cpm > 0 ? (budget / cpm) * 1000 : 0;
   const clicks = impressions * (ctr / 100);
   const leads = clicks * (c2l / 100);
   const clients = leads * (l2c / 100);
   const revenue = clients * ltv;
+  const reach = (base.freq || 3) > 0 ? impressions / (base.freq || 3) : impressions;
 
-  return { obj, industry, budget, ltv, cpm, ctr, c2l, l2c, revenue, annual: revenue * 12 };
+  return { objective, industry, market: marketValue, mix, cpm, ctr, c2l, l2c, budget, ltv, impressions, reach, clicks, leads, clients, revenue, annual: revenue * 12 };
 }
 
 function obProgressBarHtml(filled, total) {
@@ -2040,29 +2447,37 @@ function obProgressBarHtml(filled, total) {
 
 function objectiveScreenHtml() {
   return `
-    <h1 class="ob-hero-title">Simulateur de budget Reddit Ads</h1>
-    <p class="ob-hero-sub">Traduis ton investissement Reddit Ads en pipeline, revenu et portée.</p>
-    <p class="ob-section-label">Choisis ton objectif</p>
+    <h1 class="ob-hero-title">${t('ob_landing_title')}</h1>
+    <p class="ob-hero-sub">${t('ob_landing_sub')}</p>
+    <p class="ob-section-label">${t('ob_choose_objective')}</p>
     <div class="ob-objective-grid">
-      ${objectiveOptions.map(o => `
+      ${obObjectiveOptions().map(o => `
         <div class="ob-card-obj${o.recommended ? ' recommended' : ''}" data-action="pick-objective" data-key="${o.key}">
-          ${o.recommended ? '<span class="ob-badge-rec">✨ Recommandé</span>' : ''}
+          ${o.recommended ? `<span class="ob-badge-rec">✨ ${t('ob_recommended')}</span>` : ''}
           <div class="ob-card-icon">${o.icon}</div>
           <h3>${o.title}</h3>
           <p>${o.desc}</p>
-          <div class="ob-tags">${o.tags.map(t => `<span class="ob-tag">${t}</span>`).join('')}</div>
-          <span class="ob-start-link">Commencer →</span>
+          <div class="ob-tags">${o.tags.map(tag => `<span class="ob-tag">${tag}</span>`).join('')}</div>
+          <span class="ob-start-link">${t('ob_start')} →</span>
         </div>
       `).join('')}
     </div>
   `;
 }
 
-function obNavHtml() {
+function obNavHtml(continueAction) {
+  if (continueAction) {
+    return `
+      <div class="ob-nav">
+        <button type="button" data-action="back">← ${t('ob_back')}</button>
+        <button type="button" class="ob-continue-btn" data-action="${continueAction}">${t('ob_continue')} →</button>
+      </div>
+    `;
+  }
   return `
     <div class="ob-nav">
-      <button type="button" data-action="back">← Retour</button>
-      <button type="button" data-action="skip-question">Passer cette question →</button>
+      <button type="button" data-action="back">← ${t('ob_back')}</button>
+      <button type="button" data-action="skip-question">${t('ob_skip')} →</button>
     </div>
   `;
 }
@@ -2083,29 +2498,130 @@ function questionScreenHtml({ title, sub, options, pickAction }) {
   `;
 }
 
-function q1ScreenHtml() {
+function sectorScreenHtml() {
   return questionScreenHtml({
-    title: 'Quelle est la taille de l’entreprise cliente ?',
-    sub: 'Nous aide à calibrer un budget de départ réaliste.',
-    options: companySizeOptions,
-    pickAction: 'pick-size',
-  });
-}
-function q2ScreenHtml() {
-  return questionScreenHtml({
-    title: 'Dans quel secteur ton client opère-t-il ?',
-    sub: 'Détermine les hypothèses de coûts (CPM, CTR) par défaut.',
-    options: Object.keys(industryLabels).map(key => ({ key, label: industryLabels[key], sub: industryOnboardingSub[key] })),
+    title: t('ob_sector_title'),
+    sub: t('ob_sector_sub'),
+    options: Object.keys(industryLabels).map(key => ({ key, label: industryLabelI18n(key), sub: industryLabelSubI18n(key) })),
     pickAction: 'pick-industry',
   });
 }
-function q3ScreenHtml() {
+
+function marketScreenHtml() {
   return questionScreenHtml({
-    title: 'Quelle est la valeur moyenne d’un client ?',
-    sub: 'Aussi appelée panier moyen ou valeur vie client.',
-    options: ltvOptions,
+    title: t('ob_market_title'),
+    sub: t('ob_market_sub'),
+    options: marketOptions.map(m => ({ key: m.value, label: t('market_' + m.value) })),
+    pickAction: 'pick-market',
+  });
+}
+
+function targetingScreenHtml() {
+  return questionScreenHtml({
+    title: t('ob_targeting_title'),
+    sub: t('ob_targeting_sub'),
+    options: [
+      { key: 'niche', label: t('ob_targeting_niche'), sub: t('ob_targeting_niche_sub') },
+      { key: 'broad', label: t('ob_targeting_broad'), sub: t('ob_targeting_broad_sub') },
+    ],
+    pickAction: 'pick-targeting',
+  });
+}
+
+function ltvScreenHtml() {
+  return questionScreenHtml({
+    title: t('ob_ltv_title'),
+    sub: t('ob_ltv_sub'),
+    options: obLtvOptions(),
     pickAction: 'pick-ltv',
   });
+}
+
+function obToggleRowHtml(name, options, current) {
+  return `
+    <div class="ob-toggle-row">
+      ${options.map(o => `
+        <button type="button" class="ob-toggle-btn${current === o.key ? ' active' : ''}" data-action="${name}" data-key="${o.key}">${o.label}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function startingScreenHtml() {
+  const sp = onboarding.startingPoint || 'budget';
+  let subField = '';
+  if (sp === 'budget') {
+    const val = onboarding.budgetValue || state.budget || 3000;
+    subField = `
+      <div class="ob-field">
+        <label class="ob-field-label">${t('ob_budget_label')} <span class="ob-field-val" id="obBudgetVal">${fmtEUR(val)}</span></label>
+        <input type="range" id="obBudgetInput" min="200" max="30000" step="100" value="${val}">
+      </div>
+    `;
+  } else {
+    const objective = onboarding.objectiveKey || 'conversion';
+    if (objective === 'awareness') {
+      subField = `
+        <div class="ob-field">
+          <label class="ob-field-label">${t('ob_target_awareness_label')}</label>
+          <input type="number" id="obTargetInput" min="1000" step="1000" value="${onboarding.targetValue || 50000}">
+        </div>
+      `;
+    } else if (objective === 'traffic') {
+      subField = `
+        <div class="ob-field">
+          <label class="ob-field-label">${t('ob_target_traffic_label')}</label>
+          <input type="number" id="obTargetInput" min="10" step="10" value="${onboarding.targetValue || 500}">
+        </div>
+      `;
+    } else {
+      const kind = onboarding.targetKind || 'leads';
+      subField = `
+        ${obToggleRowHtml('set-target-kind', [
+          { key: 'leads', label: t('ob_target_kind_leads') },
+          { key: 'clients', label: t('ob_target_kind_clients') },
+        ], kind)}
+        <div class="ob-field">
+          <label class="ob-field-label">${kind === 'clients' ? t('ob_target_conversion_label_clients') : t('ob_target_conversion_label_leads')}</label>
+          <input type="number" id="obTargetInput" min="1" step="1" value="${onboarding.targetValue || (kind === 'clients' ? 10 : 50)}">
+        </div>
+      `;
+    }
+  }
+  return `
+    <h2 class="ob-question-title">${t('ob_starting_title')}</h2>
+    <p class="ob-question-sub">${t('ob_starting_sub')}</p>
+    ${obToggleRowHtml('set-starting', [
+      { key: 'budget', label: t('ob_starting_budget') },
+      { key: 'target', label: t('ob_starting_target') },
+    ], sp)}
+    ${subField}
+    ${obNavHtml('starting-continue')}
+  `;
+}
+
+function realdataScreenHtml() {
+  const has = onboarding.hasRealData || 'no';
+  const fields = has === 'yes' ? `
+    <div class="ob-field">
+      <label class="ob-field-label">${t('ob_cpm_observed_label')}</label>
+      <input type="number" id="obCpmObserved" min="0" step="0.1" value="${onboarding.cpmObserved ?? ''}" placeholder="ex. 5.5">
+    </div>
+    <div class="ob-field">
+      <label class="ob-field-label">${t('ob_ctr_observed_label')}</label>
+      <input type="number" id="obCtrObserved" min="0" step="0.01" value="${onboarding.ctrObserved ?? ''}" placeholder="ex. 0.45">
+    </div>
+  ` : '';
+  return `
+    <h2 class="ob-question-title">${t('ob_realdata_title')}</h2>
+    <p class="ob-question-sub">${t('ob_realdata_sub')}</p>
+    ${obToggleRowHtml('set-realdata', [
+      { key: 'yes', label: t('ob_realdata_yes') },
+      { key: 'no', label: t('ob_realdata_no') },
+    ], has)}
+    ${fields}
+    ${obNavHtml('realdata-continue')}
+  `;
 }
 
 function obBenchRow(label, value) {
@@ -2113,60 +2629,85 @@ function obBenchRow(label, value) {
   return `
     <div class="ob-bench-row">
       <span class="ob-bench-label">${label}</span>
-      <span class="ob-bench-range">Fourchette ${fmtPct(lo)}–${fmtPct(hi)}</span>
+      <span class="ob-bench-range">${t('ob_bench_range')} ${fmtPct(lo)}–${fmtPct(hi)}</span>
       <span class="ob-bench-pill">${fmtPct(value)}</span>
     </div>
   `;
 }
 
+function obRevealHeadline(r) {
+  const industry = escapeHtml(industryLabelI18n(r.industry));
+  const budget = fmtEUR(r.budget);
+  if (r.objective === 'awareness') {
+    return { lead: t('ob_reveal_awareness_lead', { industry }), highlight: `${fmtNum(r.reach)}`, sub: t('ob_reveal_awareness_sub', { industry, budget }) };
+  }
+  if (r.objective === 'traffic') {
+    return { lead: t('ob_reveal_traffic_lead', { industry }), highlight: `${fmtNum(r.clicks)}`, sub: t('ob_reveal_traffic_sub', { industry, budget }) };
+  }
+  return { lead: t('ob_reveal_conversion_lead', { industry }), highlight: fmtEUR(r.annual), sub: t('ob_reveal_conversion_sub', { industry, budget, ltv: fmtEUR(r.ltv) }) };
+}
+
 function revealScreenHtml() {
   const r = computeOnboardingResult();
-  const label = industryLabels[r.industry];
+  const h = obRevealHeadline(r);
   return `
-    <div class="ob-reveal-badge">✨ Ton plan est prêt</div>
-    <h1 class="ob-hero-title">Les comptes ${escapeHtml(label)} comme le tien génèrent<br><span class="ob-highlight">${fmtEUR(r.annual)}</span> de pipeline par an.</h1>
-    <p class="ob-hero-sub">Basé sur un budget de ${fmtEUR(r.budget)}/mois et une valeur client de ${fmtEUR(r.ltv)}.</p>
+    <div class="ob-reveal-badge">✨ ${t('ob_ready_badge')}</div>
+    <h1 class="ob-hero-title">${h.lead}<br><span class="ob-highlight">${h.highlight}</span></h1>
+    <p class="ob-hero-sub">${h.sub}</p>
     <div class="ob-bench-card">
-      <div class="ob-card-head">◎ Benchmarks du funnel · ton profil</div>
-      ${obBenchRow('CTR (taux de clic)', r.ctr)}
-      ${obBenchRow('Clic → Lead', r.c2l)}
-      ${obBenchRow('Lead → Client', r.l2c)}
-      <div class="ob-source">Source : hypothèses de marché Reddit Ads par secteur — à ajuster avec les vrais chiffres de ton compte.</div>
+      <div class="ob-card-head">◎ ${t('ob_bench_title')}</div>
+      ${obBenchRow(t('ob_bench_ctr'), r.ctr)}
+      ${obBenchRow(t('ob_bench_c2l'), r.c2l)}
+      ${obBenchRow(t('ob_bench_l2c'), r.l2c)}
+      <div class="ob-source">${t('ob_source')}</div>
     </div>
-    <button type="button" class="ob-cta" data-action="apply-benchmarks">Démarrer avec ces hypothèses →</button>
-    <button type="button" class="ob-skip-link" data-action="skip-all">Passer — utiliser les valeurs par défaut</button>
+    <button type="button" class="ob-cta" data-action="apply-benchmarks">${t('ob_apply_cta')} →</button>
+    <button type="button" class="ob-skip-link" data-action="skip-all">${t('ob_skip_all')}</button>
   `;
+}
+
+function obStepScreenHtml(step) {
+  if (step === 'sector') return sectorScreenHtml();
+  if (step === 'market') return marketScreenHtml();
+  if (step === 'starting') return startingScreenHtml();
+  if (step === 'targeting') return targetingScreenHtml();
+  if (step === 'ltv') return ltvScreenHtml();
+  if (step === 'realdata') return realdataScreenHtml();
+  if (step === 'reveal') return revealScreenHtml();
+  return '';
 }
 
 function renderOnboarding() {
   const inner = document.getElementById('onboardingInner');
   const header = document.getElementById('obHeader');
+  const list = obGetStepList();
   if (onboarding.step === 'objective') {
     header.hidden = true;
     inner.innerHTML = objectiveScreenHtml();
   } else {
     header.hidden = false;
-    const stepIndex = { q1: 1, q2: 2, q3: 3, reveal: 4 }[onboarding.step];
-    document.getElementById('obProgress').innerHTML = obProgressBarHtml(stepIndex, 4);
-    if (onboarding.step === 'q1') inner.innerHTML = q1ScreenHtml();
-    else if (onboarding.step === 'q2') inner.innerHTML = q2ScreenHtml();
-    else if (onboarding.step === 'q3') inner.innerHTML = q3ScreenHtml();
-    else if (onboarding.step === 'reveal') inner.innerHTML = revealScreenHtml();
+    const subList = list.slice(1);
+    const stepIndex = subList.indexOf(onboarding.step) + 1;
+    document.getElementById('obProgress').innerHTML = obProgressBarHtml(stepIndex, subList.length);
+    inner.innerHTML = obStepScreenHtml(onboarding.step);
   }
   document.getElementById('onboarding').scrollTop = 0;
 }
 
 function obGoBack() {
-  const idx = obStepOrder.indexOf(onboarding.step);
-  if (idx > 0) { onboarding.step = obStepOrder[idx - 1]; renderOnboarding(); }
+  const list = obGetStepList();
+  const idx = list.indexOf(onboarding.step);
+  if (idx > 0) { onboarding.step = list[idx - 1]; renderOnboarding(); }
 }
 function obSkipQuestion() {
-  const idx = obStepOrder.indexOf(onboarding.step);
-  if (idx < obStepOrder.length - 1) { onboarding.step = obStepOrder[idx + 1]; renderOnboarding(); }
+  const list = obGetStepList();
+  const idx = list.indexOf(onboarding.step);
+  if (idx < list.length - 1) { onboarding.step = list[idx + 1]; renderOnboarding(); }
 }
+function obAdvance() { obSkipQuestion(); }
 
 function showOnboarding() {
-  onboarding = { step: 'objective', objectiveKey: null, companySize: null, industry: null, ltvTier: null };
+  onboarding = obDefaultState();
   document.getElementById('onboarding').hidden = false;
   document.body.classList.add('onboarding-active');
   renderOnboarding();
@@ -2180,18 +2721,32 @@ function applyOnboardingResult(useComputed) {
   if (useComputed) {
     const r = computeOnboardingResult();
     els.industry.value = r.industry;
-    els.objective.value = r.obj.objective;
-    els.mix.value = r.obj.mix;
-    els.budget.value = r.budget;
-    els.ltv.value = r.ltv;
-  } else if (onboarding.objectiveKey) {
-    const obj = objectiveOptions.find(o => o.key === onboarding.objectiveKey);
-    if (obj) { els.objective.value = obj.objective; els.mix.value = obj.mix; }
+    els.market.value = r.market;
+    els.objective.value = r.objective;
+    els.mix.value = r.mix;
+    const clampedBudget = Math.max(+els.budget.min, Math.min(+els.budget.max, Math.round(r.budget / 100) * 100));
+    els.budget.value = clampedBudget;
+    if (r.objective === 'conversion') els.ltv.value = r.ltv;
+    updateTabActiveStates();
+    applyPreset();
+    if (onboarding.hasRealData === 'yes') {
+      if (onboarding.cpmObserved > 0) els.cpm.value = onboarding.cpmObserved;
+      if (onboarding.ctrObserved > 0) els.ctr.value = onboarding.ctrObserved;
+      syncLabels();
+      renderFunnel();
+      syncStateFromFields();
+      scheduleSave();
+    }
+  } else {
+    if (onboarding.objectiveKey) els.objective.value = onboarding.objectiveKey;
+    if (onboarding.industry) els.industry.value = onboarding.industry;
+    if (onboarding.market) els.market.value = onboarding.market;
+    if (onboarding.mix) els.mix.value = onboarding.mix;
+    updateTabActiveStates();
+    applyPreset();
   }
-  updateTabActiveStates();
-  applyPreset();
   closeOnboarding();
-  toast('Hypothèses appliquées au tableau de bord');
+  toast(t('toast_applied'));
 }
 
 document.getElementById('onboarding').addEventListener('click', e => {
@@ -2199,16 +2754,50 @@ document.getElementById('onboarding').addEventListener('click', e => {
   if (!el) return;
   const action = el.dataset.action;
   const key = el.dataset.key;
-  if (action === 'pick-objective') { onboarding.objectiveKey = key; onboarding.step = 'q1'; renderOnboarding(); }
-  else if (action === 'pick-size') { onboarding.companySize = key; onboarding.step = 'q2'; renderOnboarding(); }
-  else if (action === 'pick-industry') { onboarding.industry = key; onboarding.step = 'q3'; renderOnboarding(); }
-  else if (action === 'pick-ltv') { onboarding.ltvTier = key; onboarding.step = 'reveal'; renderOnboarding(); }
+  if (action === 'pick-objective') { onboarding.objectiveKey = key; onboarding.step = 'sector'; renderOnboarding(); }
+  else if (action === 'pick-industry') { onboarding.industry = key; onboarding.step = 'market'; renderOnboarding(); }
+  else if (action === 'pick-market') { onboarding.market = key; onboarding.step = 'starting'; renderOnboarding(); }
+  else if (action === 'pick-targeting') { onboarding.mix = key; obAdvance(); }
+  else if (action === 'pick-ltv') { onboarding.ltvTier = key; obAdvance(); }
+  else if (action === 'set-starting') { onboarding.startingPoint = key; renderOnboarding(); }
+  else if (action === 'set-target-kind') { onboarding.targetKind = key; onboarding.targetValue = null; renderOnboarding(); }
+  else if (action === 'set-realdata') { onboarding.hasRealData = key; renderOnboarding(); }
+  else if (action === 'starting-continue') {
+    if (onboarding.startingPoint === 'target') {
+      const inputEl = document.getElementById('obTargetInput');
+      onboarding.targetValue = inputEl ? +inputEl.value : null;
+    } else {
+      onboarding.startingPoint = 'budget';
+      const inputEl = document.getElementById('obBudgetInput');
+      onboarding.budgetValue = inputEl ? +inputEl.value : state.budget;
+    }
+    obAdvance();
+  }
+  else if (action === 'realdata-continue') {
+    const cpmEl = document.getElementById('obCpmObserved');
+    const ctrEl = document.getElementById('obCtrObserved');
+    if (onboarding.hasRealData === 'yes') {
+      onboarding.cpmObserved = cpmEl && cpmEl.value ? +cpmEl.value : null;
+      onboarding.ctrObserved = ctrEl && ctrEl.value ? +ctrEl.value : null;
+    }
+    obAdvance();
+  }
   else if (action === 'back') { obGoBack(); }
   else if (action === 'skip-question') { obSkipQuestion(); }
-  else if (action === 'change-objective') { onboarding = { step: 'objective', objectiveKey: null, companySize: null, industry: null, ltvTier: null }; renderOnboarding(); }
+  else if (action === 'change-objective') { onboarding = obDefaultState(); renderOnboarding(); }
   else if (action === 'apply-benchmarks') { applyOnboardingResult(true); }
   else if (action === 'skip-all') { applyOnboardingResult(false); }
 });
+
+// Curseur/valeur budget en direct pendant le glissement (sans avancer d'étape).
+document.getElementById('onboarding').addEventListener('input', e => {
+  if (e.target.id === 'obBudgetInput') {
+    onboarding.budgetValue = +e.target.value;
+    const valEl = document.getElementById('obBudgetVal');
+    if (valEl) valEl.textContent = fmtEUR(+e.target.value);
+  }
+});
+
 document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnboarding);
 
 /* ---------- Scenarios ---------- */
@@ -2372,6 +2961,7 @@ function hydrateFieldsFromState() {
   els.clientName.value = state.clientName || '';
   els.budget.value = state.budget;
   els.industry.value = state.industry;
+  els.market.value = state.market || 'fr';
   els.objective.value = state.objective;
   els.mix.value = state.mix;
   els.cpm.value = state.cpm;
@@ -2382,6 +2972,7 @@ function hydrateFieldsFromState() {
   viewSwitch.value = state.view === 'full' ? 'full' : 'simple';
   updateTabActiveStates();
   applyLogo();
+  applyLangToUi();
 }
 
 const hadSaved = loadSavedState();
