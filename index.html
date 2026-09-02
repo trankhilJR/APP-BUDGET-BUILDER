@@ -2562,7 +2562,10 @@ let onboarding = obDefaultState();
 
 // Liste d'étapes dynamique : "ltv" n'apparaît que pour l'objectif conversion.
 function obGetStepList() {
-  const steps = ['objective', 'sector', 'market', 'starting', 'targeting'];
+  // Le marché géographique n'est plus demandé dans le quiz (trop de friction pour
+  // une valeur qui ne sert qu'au CPM) ; il reste réglable dans le tableau de bord,
+  // et le brief part silencieusement sur la France par défaut.
+  const steps = ['objective', 'sector', 'starting', 'targeting'];
   if (onboarding.objectiveKey === 'conversion') steps.push('ltv');
   steps.push('realdata', 'reveal');
   return steps;
@@ -2698,15 +2701,6 @@ function sectorScreenHtml() {
     sub: t('ob_sector_sub'),
     options: Object.keys(industryLabels).map(key => ({ key, label: industryLabelI18n(key), sub: industryLabelSubI18n(key) })),
     pickAction: 'pick-industry',
-  });
-}
-
-function marketScreenHtml() {
-  return questionScreenHtml({
-    title: t('ob_market_title'),
-    sub: t('ob_market_sub'),
-    options: marketOptions.map(m => ({ key: m.value, label: t('market_' + m.value) })),
-    pickAction: 'pick-market',
   });
 }
 
@@ -2872,7 +2866,6 @@ function revealScreenHtml() {
 
 function obStepScreenHtml(step) {
   if (step === 'sector') return sectorScreenHtml();
-  if (step === 'market') return marketScreenHtml();
   if (step === 'starting') return startingScreenHtml();
   if (step === 'targeting') return targetingScreenHtml();
   if (step === 'ltv') return ltvScreenHtml();
@@ -2959,8 +2952,7 @@ document.getElementById('onboarding').addEventListener('click', e => {
   const action = el.dataset.action;
   const key = el.dataset.key;
   if (action === 'pick-objective') { onboarding.objectiveKey = key; onboarding.step = 'sector'; renderOnboarding(); }
-  else if (action === 'pick-industry') { onboarding.industry = key; onboarding.step = 'market'; renderOnboarding(); }
-  else if (action === 'pick-market') { onboarding.market = key; onboarding.step = 'starting'; renderOnboarding(); }
+  else if (action === 'pick-industry') { onboarding.industry = key; onboarding.step = 'starting'; renderOnboarding(); }
   else if (action === 'pick-targeting') { onboarding.mix = key; obAdvance(); }
   else if (action === 'pick-ltv') { onboarding.ltvTier = key; obAdvance(); }
   else if (action === 'set-starting') { onboarding.startingPoint = key; renderOnboarding(); }
