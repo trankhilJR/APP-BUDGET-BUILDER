@@ -558,14 +558,13 @@
     .restart-guide-btn { display: none !important; }
   }
 
-  /* Scenarios */
-  .scenarios-panel { margin-top: 24px; }
-
   /* Format recommendation */
   .format-panel { margin-top: 24px; }
   .format-panel[hidden] { display: none; }
   .format-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
   .format-cards.single-format { grid-template-columns: 1fr; }
+  .format-cards.triple-format { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 640px) { .format-cards.triple-format { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 560px) { .format-cards { grid-template-columns: 1fr; } }
   .format-card {
     border: 1px solid var(--line);
@@ -580,57 +579,31 @@
   .format-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
   .format-card-value { font-family: 'Fraunces', serif; font-size: 19px; color: var(--ink); }
   .format-reason { font-size: 13.5px; color: var(--ink); line-height: 1.55; margin: 0 0 10px; }
+  .format-placement { margin: 0 0 14px; padding: 10px 12px; border-radius: 6px; background: var(--moss-soft); font-size: 13px; line-height: 1.5; color: var(--ink); }
+  .format-placement-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--moss); font-weight: 600; }
+  .format-placement p { margin: 4px 0 0; }
   .format-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
   .format-link { font-size: 13px; font-weight: 600; color: var(--ember); text-decoration: none; }
   .format-link:hover { text-decoration: underline; }
   .format-transparency-note { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
-  .format-avoid { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 14px; padding: 10px 12px; border-radius: 6px; background: var(--warn-soft); border: 1px solid rgba(var(--warn-rgb, 154,107,20), 0.35); font-size: 13px; line-height: 1.5; color: var(--ink); }
-  .format-avoid[hidden] { display: none; }
-  .format-avoid-icon { flex: none; line-height: 1; }
-  .format-avoid strong { color: var(--warn); }
+  .format-catalog-list { display: flex; flex-direction: column; gap: 12px; }
+  .format-catalog-item { padding: 10px 0; border-top: 1px solid var(--line); }
+  .format-catalog-item:first-child { border-top: none; padding-top: 0; }
+  .format-catalog-name { font-weight: 600; font-size: 13.5px; color: var(--ink); margin-right: 6px; }
+  .format-catalog-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .format-catalog-link { font-size: 12px; font-weight: 600; color: var(--ember); text-decoration: none; margin-left: 6px; white-space: nowrap; }
+  .format-catalog-link:hover { text-decoration: underline; }
 
-  .chart-legend {
-    display: flex;
-    gap: 18px;
-    font-size: 12.5px;
-    color: var(--ink-soft);
-    margin: 14px 0 12px;
-    flex-wrap: wrap;
-  }
-  .legend-item { display: flex; align-items: center; gap: 6px; }
-  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
-  .swatch-budget { background: var(--chart-neutral); }
-  .swatch-revenue { background: var(--ember); }
-
-  .scenario-chart { display: flex; flex-direction: column; gap: 16px; }
-  .chart-row { display: grid; grid-template-columns: 130px 1fr; gap: 14px; align-items: center; }
-  .chart-row-label {
-    font-size: 12.5px;
-    color: var(--ink);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .chart-bars { display: flex; flex-direction: column; gap: 5px; }
-  .chart-bar-track {
-    position: relative;
-    height: 17px;
-    background: var(--bg);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .chart-bar { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
-  .chart-bar.budget { background: var(--chart-neutral); }
-  .chart-bar.revenue { background: var(--ember); }
-  .chart-bar-value {
-    position: absolute;
-    right: 6px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 10.5px;
-    font-variant-numeric: tabular-nums;
-    color: var(--ink);
-  }
-
+  /* Targeting recommendation */
+  .targeting-panel { margin-top: 24px; }
+  .targeting-subhead { font-family: 'Fraunces', serif; font-weight: 500; font-size: 16px; margin: 22px 0 10px; }
+  .targeting-panel > .targeting-subhead:first-of-type { margin-top: 18px; }
+  table.targeting-subreddit-table th:nth-child(2), table.targeting-subreddit-table td:nth-child(2) { text-align: right; }
+  .targeting-strategy-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 4px; }
+  @media (max-width: 800px) { .targeting-strategy-cards { grid-template-columns: 1fr; } }
+  .targeting-strategy-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .targeting-strategy-name { font-weight: 600; font-size: 13.5px; color: var(--ink); margin-bottom: 6px; display: block; }
+  .targeting-strategy-desc { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
   .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   table.scenario-table {
@@ -656,42 +629,6 @@
     font-weight: 500;
     border-bottom: 2px solid var(--ink);
   }
-  table.scenario-table td.remove {
-    text-align: center;
-    cursor: pointer;
-    color: var(--ember);
-    font-weight: 600;
-  }
-  table.scenario-table td.dup {
-    text-align: center;
-    cursor: pointer;
-    color: var(--ink-soft);
-    font-weight: 600;
-  }
-  .scenario-meta { color: var(--ink-soft); font-size: 11.5px; }
-
-  .notes-cell { min-width: 160px; }
-  .note-input {
-    width: 100%;
-    min-width: 150px;
-    resize: vertical;
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    padding: 6px 8px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--bg);
-    color: var(--ink);
-  }
-  .note-print { display: none; }
-
-  .empty-scenarios {
-    color: var(--ink-soft);
-    font-size: 13px;
-    font-style: italic;
-    padding: 10px 0;
-  }
-
   footer.note {
     margin-top: 28px;
     font-size: 12px;
@@ -1010,7 +947,6 @@
   body.presentation-mode .wrap { max-width: 1400px; padding-top: 30px; }
   body.presentation-mode .layout { grid-template-columns: 1fr; }
   body.presentation-mode #inputPanel,
-  body.presentation-mode .scenarios-panel,
   body.presentation-mode footer.note,
   body.presentation-mode header.masthead .brand-fields,
   body.presentation-mode #funnelPanel .actions {
@@ -1043,14 +979,13 @@
     }
     .field select, .field input, .actions, .brand-fields input,
     .header-actions, .advanced-settings, .tabs, .visually-hidden-select,
-    .logo-field, .note-input, .col-actions, .toast,
+    .logo-field, .toast,
     .view-tabs, #fullFunnelView {
       display: none !important;
     }
     button { display: none !important; }
     .wrap { padding: 0; }
     .layout { grid-template-columns: 1fr; }
-    .note-print { display: block; font-size: 11px; white-space: pre-wrap; color: var(--ink-soft); }
 
     .cover-page {
       display: flex;
@@ -1482,7 +1417,6 @@
       </div>
 
       <div class="actions">
-        <button id="saveScenario" data-i18n="btnSaveScenario">Enregistrer comme scénario</button>
         <button class="secondary" id="exportCsv" data-i18n="btnExportCsv">Exporter en CSV</button>
         <button class="secondary" id="printReport" data-i18n="btnExportPdf">Exporter en PDF</button>
       </div>
@@ -1512,26 +1446,44 @@
         <span class="format-card-label" data-i18n="formatSecondary">Format secondaire</span>
         <span class="format-card-value" id="formatSecondaryLabel"></span>
       </div>
+      <div class="format-card tertiary" id="formatTertiaryCard">
+        <span class="format-card-label" data-i18n="formatTertiary">Format complémentaire</span>
+        <span class="format-card-value" id="formatTertiaryLabel"></span>
+      </div>
     </div>
     <p class="format-reason" id="formatReasonText"></p>
-    <div class="format-avoid" id="formatAvoidBox" hidden>
-      <span class="format-avoid-icon" aria-hidden="true">⚠️</span>
-      <span><strong data-i18n="formatAvoidPrefix">À éviter pour cet objectif :</strong> <span id="formatAvoidLabel"></span> — <span id="formatAvoidText"></span></span>
+    <div class="format-placement" id="formatPlacementBox">
+      <span class="format-placement-label" data-i18n="formatPlacementTitle">Placement recommandé</span>
+      <p id="formatPlacementText"></p>
     </div>
     <div class="format-links">
       <a class="format-link" id="formatSpecLink" href="#" target="_blank" rel="noopener" data-i18n="formatLinkLabel">Voir les spécifications officielles Reddit →</a>
       <a class="format-link" href="https://business.reddit.com/success-stories" target="_blank" rel="noopener" data-i18n="formatCaseStudiesLabel">Voir les case studies annonceurs Reddit →</a>
     </div>
     <p class="hint format-transparency-note" data-i18n="formatTransparencyNote">Recommandations basées sur les données publiques Reddit et des benchmarks tiers 2026.</p>
+
+    <details class="advanced-settings">
+      <summary data-i18n="formatCatalogTitle">Catalogue complet des formats Reddit</summary>
+      <p class="hint" style="margin:10px 0 12px;" data-i18n="formatCatalogHint">Au-delà de la recommandation ci-dessus, voici tous les formats publicitaires disponibles sur Reddit et leur usage type — de quoi construire un mix créatif complet.</p>
+      <div class="format-catalog-list" id="formatCatalogList"></div>
+    </details>
   </div>
 
-  <!-- SCENARIOS -->
-  <div class="panel scenarios-panel" id="scenariosPanel">
-    <h2 data-i18n="panelScenariosTitle">Comparaison de scénarios</h2>
-    <p class="hint" data-i18n="hintScenarios">Enregistre plusieurs scénarios (budgets, ciblages) pour les comparer côte à côte avec ton client.</p>
-    <div id="scenarioChartWrap"></div>
-    <div id="scenarioTableWrap"><p class="empty-scenarios" data-i18n="emptyScenarios">Aucun scénario enregistré pour l'instant.</p></div>
+  <!-- TARGETING RECOMMENDATION -->
+  <div class="panel targeting-panel" id="targetingPanel">
+    <h2 data-i18n="targetingSectionTitle">Ciblage recommandé</h2>
+    <p class="hint" id="targetingSectionHint"></p>
+
+    <h3 class="targeting-subhead" data-i18n="targetingSubredditsTitle">Top communautés par secteur</h3>
+    <div class="table-scroll">
+      <table class="scenario-table targeting-subreddit-table" id="targetingSubredditTable"></table>
+    </div>
+    <p class="hint format-transparency-note" data-i18n="targetingSubredditNote">Chiffres d'abonnés indicatifs (ordre de grandeur, à re-vérifier dans l'outil de ciblage Reddit Ads Manager au moment du lancement — ils évoluent en continu).</p>
+
+    <h3 class="targeting-subhead" data-i18n="targetingStrategiesTitle">Stratégies de ciblage avancées</h3>
+    <div class="targeting-strategy-cards" id="targetingStrategyCards"></div>
   </div>
+
   </div>
   <!-- /simpleView -->
 
@@ -2066,48 +2018,77 @@ const translations = {
     kpiCpl: 'Coût par lead',
     kpiCpa: 'Coût par client (CPA)',
     kpiRoas: 'ROAS projeté',
-    btnSaveScenario: 'Enregistrer comme scénario',
     btnExportCsv: 'Exporter en CSV',
     btnExportPdf: 'Exporter en PDF',
-    panelScenariosTitle: 'Comparaison de scénarios',
-    hintScenarios: 'Enregistre plusieurs scénarios (budgets, ciblages) pour les comparer côte à côte avec ton client.',
-    emptyScenarios: "Aucun scénario enregistré pour l'instant.",
-    legendBudget: 'Budget',
-    legendResult: 'Résultat (CA généré)',
-    thScenario: 'Scénario',
-    thNotes: 'Notes',
-    thBudget: 'Budget',
-    thImpressions: 'Impressions',
-    thClicks: 'Clics',
-    thLeads: 'Leads',
-    thClients: 'Clients',
-    thCpa: 'CPA',
-    thRoas: 'ROAS',
-    placeholderNote: 'Pourquoi ce scénario…',
-    titleDuplicate: 'Dupliquer ce scénario',
-    titleRemove: 'Supprimer',
-    toastAppInstallNoScenario: "Comparaison de scénarios pas encore disponible pour l'objectif Téléchargement d'app",
-    toastScenarioUnavailable: "Comparaison de scénarios pas encore disponible pour cet objectif",
     formatSectionTitle: 'Format recommandé',
     formatPrimary: 'Format principal',
     formatSecondary: 'Format secondaire',
+    formatTertiary: 'Format complémentaire',
+    formatPlacementTitle: 'Placement recommandé',
+    formatPlacementAwareness: 'Privilégie le placement Feed pour maximiser la portée : cet objectif est facturé au CPM, la diffusion large prime sur la précision du placement.',
+    formatPlacementTraffic: 'Combine Feed (volume) et placement Conversation : Reddit indique un CTR quasi identique entre les deux, et le ciblage par mots-clés y capte une intention de recherche plus qualifiée.',
+    formatPlacementConversion: 'Le placement Conversation — sous le post, au-dessus des commentaires — capte une intention plus qualifiée et bénéficie pleinement du ciblage par mots-clés ; combine-le avec le Feed pour le volume.',
+    formatPlacementAppInstall: 'Le Feed reste prioritaire pour la démonstration produit en vidéo ; teste le placement Conversation en complément si le budget le permet, notamment en ciblant les subreddits concurrents.',
+    formatPlacementVideoViews: 'Le Feed est le placement principal pour maximiser le nombre de vues à moindre coût sur cet objectif facturé à la vue.',
+    formatCatalogTitle: 'Catalogue complet des formats Reddit',
+    formatCatalogHint: "Au-delà de la recommandation ci-dessus, voici tous les formats publicitaires disponibles sur Reddit et leur usage type — de quoi construire un mix créatif complet.",
+    formatCatalogImage: 'Format le plus simple et le plus rapide à décliner ; performant en CTR sur les objectifs orientés clic direct.',
+    formatCatalogVideo: 'Format le plus engageant pour la notoriété et la démonstration produit ; seul format éligible pour l\'objectif Vues vidéo (facturé à la vue).',
+    formatCatalogCarousel: "2 à 6 cartes glissables (images ou vidéos) ; idéal pour une histoire séquentielle, une comparaison d'offres ou un argumentaire produit en plusieurs étapes (notoriété, engagement, trafic).",
+    formatCatalogFreeform: "Le format le plus natif, façon post Reddit ; les commentaires activés génèrent une preuve sociale directement dans l'annonce (+28 % de CTR moyen selon les données de lancement Reddit).",
+    formatCatalogProduct: "Product Ads (DPA) : annonces dynamiques générées depuis ton catalogue produit, combinant prospection et retargeting ; Reddit rapporte un ROAS 2x supérieur à une campagne de conversion classique (e-commerce avec catalogue connecté).",
+    formatCatalogText: 'Format texte/lien, façon post Reddit discret avec label « Promoted » ; utile pour tester rapidement un message avant d\'investir dans une création visuelle.',
     formatLinkLabel: 'Voir les spécifications officielles Reddit →',
-    formatReasonAwareness: "Selon l'étude créative KarmaLab de Reddit, associer vidéo et image dans une même campagne multiplie par 10 la mémorisation, par 14 le rappel du message et par 3 la préférence de marque — pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic.",
-    formatReasonTraffic: 'Les visuels statiques surperforment généralement la vidéo en CTR pour les objectifs orientés clic direct (benchmarks tiers 2026, AdControlCenter) ; le carousel permet de tester plusieurs accroches en une seule annonce.',
-    formatReasonConversion: "Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats (données officielles de lancement) : le fil de commentaires natif agit comme preuve sociale directement dans l'annonce, ce qui réduit la friction avant le clic vers le formulaire ou la landing page. En secondaire, l'image reste le format le plus rapide à décliner en plusieurs accroches/offres pour A/B tester la conversion sans repartir d'un tournage vidéo.",
-    formatReasonAppInstall: "La vidéo native (gameplay ou démo produit) est le format le plus efficace pour driver l'installation sur Reddit : elle montre l'expérience réelle de l'app en quelques secondes, ce qui correlle avec un CPI plus bas que les formats statiques (pratique standard du secteur mobile UA, cohérente avec les specs Reddit qui positionnent la vidéo comme format prioritaire en direct-response). L'image reste une déclinaison secondaire utile pour tester rapidement des accroches produit.",
+    formatReasonAwareness: "Selon l'étude créative KarmaLab de Reddit, associer vidéo et image dans une même campagne multiplie par 10 la mémorisation, par 14 le rappel du message et par 3 la préférence de marque — pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic. En complément, le free-form permet de raconter l'histoire de marque sur un format plus long et natif.",
+    formatReasonTraffic: "Les visuels statiques surperforment généralement la vidéo en CTR pour les objectifs orientés clic direct (benchmarks tiers 2026, AdControlCenter). Le carousel permet de tester plusieurs accroches ou de dérouler une séquence produit en une seule annonce ; le free-form, en complément, capitalise sur la preuve sociale des commentaires pour pousser au clic.",
+    formatReasonConversion: "Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats (données officielles de lancement) : le fil de commentaires natif agit comme preuve sociale directement dans l'annonce, ce qui réduit la friction avant le clic vers le formulaire ou la landing page. En secondaire, l'image reste le format le plus rapide à décliner en plusieurs accroches/offres pour A/B tester la conversion. En complément, le carousel déroule une comparaison d'offres en plusieurs étapes avant l'action — et si tu vends en ligne via un catalogue produit (secteur Grand public/DTC), les Product Ads (DPA) le remplacent avantageusement : Reddit rapporte un ROAS 2x supérieur en les combinant à une campagne de conversion classique.",
+    formatReasonAppInstall: "La vidéo native (gameplay ou démo produit) est le format le plus efficace pour driver l'installation sur Reddit : elle montre l'expérience réelle de l'app en quelques secondes, ce qui correlle avec un CPI plus bas que les formats statiques (pratique standard du secteur mobile UA, cohérente avec les specs Reddit qui positionnent la vidéo comme format prioritaire en direct-response). L'image reste une déclinaison secondaire utile pour tester rapidement des accroches produit. En complément, le carousel présente plusieurs écrans clés de l'app (onboarding, fonctionnalité phare, avis) avant l'installation.",
     formatLabel_image: 'Image',
     formatLabel_video: 'Vidéo',
     formatLabel_carousel: 'Carousel',
     formatLabel_freeform: 'Free-form',
+    formatLabel_product: 'Product Ads (DPA)',
+    formatLabel_text: 'Texte',
+    targetingSectionTitle: 'Ciblage recommandé',
+    targetingSectionHintText: "Sélection de communautés et de stratégies de ciblage pertinentes pour le secteur {industry}, basée sur la taille et l'intention d'achat de chaque audience.",
+    targetingSubredditsTitle: 'Top communautés par secteur',
+    targetingSubredditNote: "Chiffres d'abonnés indicatifs (ordre de grandeur, sources tierces 2026) — à re-vérifier dans l'outil de ciblage Reddit Ads Manager au moment du lancement, ils évoluent en continu.",
+    targetingStrategiesTitle: 'Stratégies de ciblage avancées',
+    targetingColSubreddit: 'Subreddit',
+    targetingColMembers: 'Abonnés (ordre de grandeur)',
+    targetingColWhy: 'Pourquoi cette communauté',
+    targetingSubSaas1: "Fondateurs et product managers SaaS, forte intention d'achat d'outils",
+    targetingSubSaas2: "Plus grande communauté business de Reddit, décideurs à fort pouvoir d'achat",
+    targetingSubSaas3: 'Fondateurs early-stage, budgets outillage et croissance',
+    targetingSubSaas4: 'Marketeurs et growth, acheteurs de martech',
+    targetingSubSaas5: "IT/infra, forte intention d'achat B2B tech",
+    targetingSubSaas6: "Buyers DevOps/infra, ciblage de niche à forte intention",
+    targetingSubConsumer1: "Mode masculine, forte intention d'achat produit",
+    targetingSubConsumer2: 'Beauté et skincare, recommandations produit très engagées',
+    targetingSubConsumer3: "Biens durables, intention d'achat qualité/long terme",
+    targetingSubConsumer4: "Marchands e-commerce : pertinent si tu vends des outils/services aux vendeurs (B2B2C), pas aux consommateurs finaux",
+    targetingSubConsumer5: 'Opérateurs e-commerce, même logique B2B2C que r/shopify',
+    targetingSubFinance1: 'Audience finance personnelle la plus large, tous profils',
+    targetingSubFinance2: 'Trading haute fréquence, profil à risque élevé',
+    targetingSubFinance3: "Épargnants FIRE, forte appétence pour les produits d'investissement",
+    targetingSubFinance4: 'Budgets serrés, pertinent pour des produits accessibles/low-cost',
+    targetingSubFinance5: 'Investisseurs indiciels passifs, forte valeur pour courtiers/robo-advisors',
+    targetingSubFinance6: 'Planification financière, préparation retraite et assurance',
+    targetingSubGaming1: 'Portée maximale, audience gaming généraliste',
+    targetingSubGaming2: 'Gamers PC, hardware et périphériques',
+    targetingSubGaming3: 'Communauté de jeu spécifique, forte activité e-sport',
+    targetingSubGaming4: 'Audience console Nintendo, jeux famille et casual',
+    targetingSubGaming5: "Achats de jeux PC dématérialisés, forte intention d'achat",
+    targetingStratRetargetingTitle: 'Reciblage (retargeting)',
+    targetingStratRetargetingDesc: "Utilise le Pixel Reddit pour recibler les visiteurs de ton site (fenêtre de 90 jours) ou les utilisateurs ayant interagi avec tes annonces (180 jours). Reddit recommande de créer un ad group Prospection et un ad group Retargeting séparés, avec un budget similaire, en répartissant les annonces entre placements Feed et Conversation.",
+    targetingStratKeywordTitle: 'Mots-clés concurrents',
+    targetingStratKeywordDesc: "Ajoute le subreddit officiel de tes concurrents à ton ciblage (tactique de conquest) et cible leurs noms de marque en ciblage par mots-clés — en priorité sur le placement Conversation, qui capte le mieux l'intention de recherche et de comparaison.",
+    targetingStratLookalikeTitle: 'Audiences similaires (lookalike)',
+    targetingStratLookalikeDesc: "Une fois une audience de reciblage ou une liste clients en place, crée une audience similaire (Lookalike) : Reddit analyse les centres d'intérêt et comportements d'engagement de cette audience source pour trouver des redditors qui lui ressemblent.",
     formatCountLabel: 'Nombre de formats combinés',
     formatCountHelp: "Combiner plusieurs formats/placements réduit le coût par résultat (donnée Reddit : Feed + Conversation ≈ -12 %). Au-delà de 2 formats, il s'agit d'une estimation prudente à valider par test.",
     formatTransparencyNote: "Recommandations basées sur les données publiques Reddit (spécifications officielles, étude créative KarmaLab, statistiques de lancement des ads free-form) et des benchmarks tiers 2026 (AdControlCenter). L'accélérateur multi-format au-delà de 2 formats est une estimation, pas un chiffre garanti par Reddit. Pour des exemples chiffrés par marque, consulte les case studies officielles ci-dessous.",
     formatCaseStudiesLabel: 'Voir les case studies annonceurs Reddit →',
-    formatAvoidPrefix: 'À éviter pour cet objectif :',
-    formatAvoidConversion: "c'est un format pensé pour faire naviguer entre plusieurs cartes (notoriété, engagement, trafic) : sur un objectif de conversion, il détourne l'attention du call-to-action unique et dilue le message plutôt que de le concentrer sur l'action attendue.",
-    formatAvoidAppInstall: "c'est un format d'engagement/considération : il montre plusieurs écrans mais ne remplace pas la démonstration en mouvement (gameplay, interaction) qui donne le vrai déclic à l'installation.",
-    formatAvoidVideoViews: "cet objectif est facturé à la vue et ne peut être servi que par une création vidéo : le carousel (comme l'image ou le free-form) n'est tout simplement pas éligible ici.",
     formatCpmEffectiveLabel: 'CPM effectif après accélérateur : ',
     footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
   },
@@ -2401,48 +2382,77 @@ const translations = {
     kpiCpl: 'Cost per lead',
     kpiCpa: 'Cost per customer (CPA)',
     kpiRoas: 'Projected ROAS',
-    btnSaveScenario: 'Save as scenario',
     btnExportCsv: 'Export as CSV',
     btnExportPdf: 'Export as PDF',
-    panelScenariosTitle: 'Scenario comparison',
-    hintScenarios: 'Save several scenarios (budgets, targeting) to compare them side by side with your client.',
-    emptyScenarios: 'No scenario saved yet.',
-    legendBudget: 'Budget',
-    legendResult: 'Result (revenue generated)',
-    thScenario: 'Scenario',
-    thNotes: 'Notes',
-    thBudget: 'Budget',
-    thImpressions: 'Impressions',
-    thClicks: 'Clicks',
-    thLeads: 'Leads',
-    thClients: 'Customers',
-    thCpa: 'CPA',
-    thRoas: 'ROAS',
-    placeholderNote: 'Why this scenario…',
-    titleDuplicate: 'Duplicate this scenario',
-    titleRemove: 'Remove',
-    toastAppInstallNoScenario: 'Scenario comparison is not yet available for the App Installs objective',
-    toastScenarioUnavailable: 'Scenario comparison is not yet available for this objective',
     formatSectionTitle: 'Recommended format',
     formatPrimary: 'Primary format',
     formatSecondary: 'Secondary format',
+    formatTertiary: 'Complementary format',
+    formatPlacementTitle: 'Recommended placement',
+    formatPlacementAwareness: 'Favor the Feed placement to maximize reach: this objective is billed on CPM, so broad delivery matters more than placement precision.',
+    formatPlacementTraffic: 'Combine Feed (volume) with Conversation placement: Reddit reports near-identical CTR between the two, and keyword targeting there captures more qualified search intent.',
+    formatPlacementConversion: 'Conversation placement — under the post, above the comments — captures more qualified intent and gets the most out of keyword targeting; combine it with Feed for volume.',
+    formatPlacementAppInstall: 'Feed stays the priority for the in-motion product demo; test Conversation placement as a complement if budget allows, especially targeting competitor subreddits.',
+    formatPlacementVideoViews: 'Feed is the main placement to maximize view volume at the lowest cost for this per-view billed objective.',
+    formatCatalogTitle: 'Full Reddit ad format catalog',
+    formatCatalogHint: 'Beyond the recommendation above, here is every ad format available on Reddit and its typical use — enough to build a complete creative mix.',
+    formatCatalogImage: 'The simplest, fastest format to produce; strong CTR performer for click-driven objectives.',
+    formatCatalogVideo: 'The most engaging format for awareness and product demos; the only format eligible for the Video Views objective (billed per view).',
+    formatCatalogCarousel: '2 to 6 swipeable cards (images or videos); ideal for a sequential story, an offer comparison, or a multi-step product pitch (awareness, engagement, traffic).',
+    formatCatalogFreeform: "The most native format, styled like a Reddit post; enabling comments generates social proof right inside the ad (+28% average CTR per Reddit's launch data).",
+    formatCatalogProduct: "Product Ads (DPA): dynamic ads generated from your product catalog, combining prospecting and retargeting; Reddit reports 2x higher ROAS versus a standard conversions campaign (ecommerce with a connected catalog).",
+    formatCatalogText: 'Text/link format, styled like a discreet Reddit post with a "Promoted" label; useful for quickly testing a message before investing in visual creative.',
     formatLinkLabel: 'View official Reddit specs →',
-    formatReasonAwareness: "Per Reddit's KarmaLab creative study, pairing video with image in the same campaign drives a 10x lift in memorability, a 14x lift in message recall, and a 3x lift in brand favorability — relevant for a CPM-billed objective chasing reach rather than clicks.",
-    formatReasonTraffic: 'Static visuals generally outperform video on CTR for click-driven objectives (third-party 2026 benchmarks, AdControlCenter); carousel lets you test several hooks in a single ad.',
-    formatReasonConversion: "Reddit reports free-form ads drive +28% average CTR vs other formats (official launch data): the native comment thread acts as social proof right inside the ad, cutting friction before the click to your form or landing page. Image is the fastest secondary format to spin up several offers/hooks for A/B testing conversion without a new video shoot.",
-    formatReasonAppInstall: "Native video (gameplay or product demo) is the most effective format for driving installs on Reddit: it shows the real app experience in seconds, which correlates with a lower CPI than static formats (mobile UA industry-standard practice, consistent with Reddit's specs positioning video as the priority direct-response format). Image remains a useful secondary format for quickly testing product hooks.",
+    formatReasonAwareness: "Per Reddit's KarmaLab creative study, pairing video with image in the same campaign drives a 10x lift in memorability, a 14x lift in message recall, and a 3x lift in brand favorability — relevant for a CPM-billed objective chasing reach rather than clicks. As a complement, free-form lets you tell the brand story in a longer, more native format.",
+    formatReasonTraffic: 'Static visuals generally outperform video on CTR for click-driven objectives (third-party 2026 benchmarks, AdControlCenter). Carousel lets you test several hooks or unfold a product sequence in a single ad; free-form, as a complement, leverages comment-driven social proof to push the click.',
+    formatReasonConversion: "Reddit reports free-form ads drive +28% average CTR vs other formats (official launch data): the native comment thread acts as social proof right inside the ad, cutting friction before the click to your form or landing page. Image is the fastest secondary format to spin up several offers/hooks for A/B testing conversion. As a complement, carousel unfolds an offer comparison in several steps before the action — and if you sell online via a product catalog (Consumer/DTC vertical), Product Ads (DPA) beat it there: Reddit reports 2x higher ROAS when combining them with a standard conversions campaign.",
+    formatReasonAppInstall: "Native video (gameplay or product demo) is the most effective format for driving installs on Reddit: it shows the real app experience in seconds, which correlates with a lower CPI than static formats (mobile UA industry-standard practice, consistent with Reddit's specs positioning video as the priority direct-response format). Image remains a useful secondary format for quickly testing product hooks. As a complement, carousel showcases several key app screens (onboarding, flagship feature, reviews) before the install.",
     formatLabel_image: 'Image',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carousel',
     formatLabel_freeform: 'Free-form',
+    formatLabel_product: 'Product Ads (DPA)',
+    formatLabel_text: 'Text',
+    targetingSectionTitle: 'Recommended targeting',
+    targetingSectionHintText: "A selection of communities and targeting strategies relevant to the {industry} vertical, based on each audience's size and purchase intent.",
+    targetingSubredditsTitle: 'Top communities by industry',
+    targetingSubredditNote: 'Subscriber counts are indicative (order of magnitude, third-party 2026 sources) — re-verify them in the Reddit Ads Manager targeting tool at launch time, they change continuously.',
+    targetingStrategiesTitle: 'Advanced targeting strategies',
+    targetingColSubreddit: 'Subreddit',
+    targetingColMembers: 'Members (order of magnitude)',
+    targetingColWhy: 'Why this community',
+    targetingSubSaas1: 'SaaS founders and product managers, strong buying intent for tools',
+    targetingSubSaas2: "Reddit's largest business community, high-purchasing-power decision-makers",
+    targetingSubSaas3: 'Early-stage founders, tooling and growth budgets',
+    targetingSubSaas4: 'Marketers and growth people, martech buyers',
+    targetingSubSaas5: 'IT/infra, strong B2B tech buying intent',
+    targetingSubSaas6: 'DevOps/infra buyers, niche targeting with high intent',
+    targetingSubConsumer1: 'Menswear/fashion, strong product buying intent',
+    targetingSubConsumer2: 'Beauty and skincare, highly engaged product recommendations',
+    targetingSubConsumer3: 'Durable goods, quality/long-term purchase intent',
+    targetingSubConsumer4: 'Ecommerce merchants: relevant if you sell tools/services to sellers (B2B2C), not to end consumers',
+    targetingSubConsumer5: 'Ecommerce operators, same B2B2C logic as r/shopify',
+    targetingSubFinance1: 'The broadest personal-finance audience, all profiles',
+    targetingSubFinance2: 'High-frequency trading, higher risk-tolerant profile',
+    targetingSubFinance3: 'FIRE savers, strong appetite for investment products',
+    targetingSubFinance4: 'Tight budgets, relevant for affordable/low-cost products',
+    targetingSubFinance5: 'Passive index investors, high value for brokers/robo-advisors',
+    targetingSubFinance6: 'Financial planning, retirement and insurance prep',
+    targetingSubGaming1: 'Maximum reach, general gaming audience',
+    targetingSubGaming2: 'PC gamers, hardware and peripherals',
+    targetingSubGaming3: 'Title-specific community, strong esports activity',
+    targetingSubGaming4: 'Nintendo console audience, family/casual games',
+    targetingSubGaming5: 'Digital PC game purchases, strong buying intent',
+    targetingStratRetargetingTitle: 'Retargeting',
+    targetingStratRetargetingDesc: 'Use the Reddit Pixel to retarget website visitors (90-day window) or users who engaged with your ads (180-day window). Reddit recommends creating separate Prospecting and Retargeting ad groups with a similar budget, splitting ads across Feed and Conversation placements.',
+    targetingStratKeywordTitle: 'Competitor keyword targeting',
+    targetingStratKeywordDesc: "Add your competitors' official subreddit to your targeting (a conquesting tactic) and target their brand names via keyword targeting — prioritize Conversation placement, which best captures search and comparison intent.",
+    targetingStratLookalikeTitle: 'Lookalike audiences',
+    targetingStratLookalikeDesc: "Once a retargeting audience or customer list is in place, build a Lookalike audience: Reddit analyzes that seed audience's interests and engagement behaviors to find similar redditors.",
     formatCountLabel: 'Number of combined formats',
     formatCountHelp: 'Combining several formats/placements lowers cost per result (Reddit data: Feed + Conversation ≈ -12%). Beyond 2 formats this is a conservative estimate to validate via A/B testing.',
     formatTransparencyNote: 'Recommendations based on public Reddit data (official specs, the KarmaLab creative study, free-form ad launch stats) and third-party 2026 benchmarks (AdControlCenter). The multi-format accelerator beyond 2 formats is an estimate, not a figure guaranteed by Reddit. For brand-specific numbers, see the official case studies below.',
     formatCaseStudiesLabel: 'View Reddit advertiser case studies →',
-    formatAvoidPrefix: 'Avoid for this objective:',
-    formatAvoidConversion: "it's a format built for browsing between several cards (awareness, engagement, traffic) — on a conversion objective it splits attention away from the single call-to-action instead of concentrating the message on the intended action.",
-    formatAvoidAppInstall: "it's an engagement/consideration format: it shows several screens but doesn't replace the in-motion demo (gameplay, interaction) that actually drives the install decision.",
-    formatAvoidVideoViews: "this objective is billed per view and can only be served by video creative: carousel (like image or free-form) simply isn't eligible here.",
     formatCpmEffectiveLabel: 'Effective CPM after accelerator: ',
     footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
   },
@@ -2736,48 +2746,77 @@ const translations = {
     kpiCpl: 'Coste por lead',
     kpiCpa: 'Coste por cliente (CPA)',
     kpiRoas: 'ROAS proyectado',
-    btnSaveScenario: 'Guardar como escenario',
     btnExportCsv: 'Exportar a CSV',
     btnExportPdf: 'Exportar a PDF',
-    panelScenariosTitle: 'Comparación de escenarios',
-    hintScenarios: 'Guarda varios escenarios (presupuestos, segmentación) para compararlos lado a lado con tu cliente.',
-    emptyScenarios: 'Aún no hay ningún escenario guardado.',
-    legendBudget: 'Presupuesto',
-    legendResult: 'Resultado (ingresos generados)',
-    thScenario: 'Escenario',
-    thNotes: 'Notas',
-    thBudget: 'Presupuesto',
-    thImpressions: 'Impresiones',
-    thClicks: 'Clics',
-    thLeads: 'Leads',
-    thClients: 'Clientes',
-    thCpa: 'CPA',
-    thRoas: 'ROAS',
-    placeholderNote: 'Por qué este escenario…',
-    titleDuplicate: 'Duplicar este escenario',
-    titleRemove: 'Eliminar',
-    toastAppInstallNoScenario: 'La comparación de escenarios aún no está disponible para el objetivo Descargas de app',
-    toastScenarioUnavailable: 'La comparación de escenarios aún no está disponible para este objetivo',
     formatSectionTitle: 'Formato recomendado',
     formatPrimary: 'Formato principal',
     formatSecondary: 'Formato secundario',
+    formatTertiary: 'Formato complementario',
+    formatPlacementTitle: 'Ubicación recomendada',
+    formatPlacementAwareness: 'Prioriza la ubicación Feed para maximizar el alcance: este objetivo se factura por CPM, así que la difusión amplia importa más que la precisión de la ubicación.',
+    formatPlacementTraffic: 'Combina Feed (volumen) con la ubicación Conversación: Reddit reporta un CTR casi idéntico entre ambas, y el targeting por palabras clave capta ahí una intención de búsqueda más cualificada.',
+    formatPlacementConversion: 'La ubicación Conversación — bajo el post, encima de los comentarios — capta una intención más cualificada y aprovecha al máximo el targeting por palabras clave; combínala con el Feed para el volumen.',
+    formatPlacementAppInstall: 'El Feed sigue siendo prioritario para la demo de producto en vídeo; prueba la ubicación Conversación como complemento si el presupuesto lo permite, sobre todo segmentando subreddits de la competencia.',
+    formatPlacementVideoViews: 'El Feed es la ubicación principal para maximizar el número de vistas al menor coste en este objetivo facturado por vista.',
+    formatCatalogTitle: 'Catálogo completo de formatos de Reddit',
+    formatCatalogHint: 'Más allá de la recomendación anterior, aquí tienes todos los formatos publicitarios disponibles en Reddit y su uso típico — suficiente para construir un mix creativo completo.',
+    formatCatalogImage: 'El formato más simple y rápido de producir; buen rendimiento en CTR para objetivos orientados al clic directo.',
+    formatCatalogVideo: 'El formato más atractivo para notoriedad y demos de producto; el único formato elegible para el objetivo Vistas de vídeo (facturado por vista).',
+    formatCatalogCarousel: '2 a 6 tarjetas deslizables (imágenes o vídeos); ideal para una historia secuencial, una comparación de ofertas o un argumentario de producto en varios pasos (notoriedad, engagement, tráfico).',
+    formatCatalogFreeform: 'El formato más nativo, con estilo de post de Reddit; activar los comentarios genera prueba social directamente en el anuncio (+28% de CTR medio según los datos de lanzamiento de Reddit).',
+    formatCatalogProduct: 'Product Ads (DPA): anuncios dinámicos generados desde tu catálogo de producto, combinando prospección y retargeting; Reddit reporta un ROAS 2x superior frente a una campaña de conversión estándar (ecommerce con catálogo conectado).',
+    formatCatalogText: 'Formato de texto/enlace, con estilo de post discreto de Reddit con etiqueta "Promoted"; útil para testear rápido un mensaje antes de invertir en creatividad visual.',
     formatLinkLabel: 'Ver especificaciones oficiales de Reddit →',
-    formatReasonAwareness: 'Según el estudio creativo KarmaLab de Reddit, combinar vídeo e imagen en la misma campaña multiplica por 10 el recuerdo, por 14 el recuerdo del mensaje y por 3 la preferencia de marca — relevante para un objetivo facturado por CPM que busca alcance más que clics.',
-    formatReasonTraffic: 'Los visuales estáticos suelen superar al vídeo en CTR para objetivos orientados al clic directo (benchmarks de terceros 2026, AdControlCenter); el carrusel permite probar varios ganchos en un solo anuncio.',
-    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos (datos oficiales de lanzamiento): el hilo de comentarios nativo actúa como prueba social directamente en el anuncio, lo que reduce la fricción antes del clic al formulario o landing page. La imagen es el formato secundario más rápido para testear varios ganchos/ofertas sin necesidad de un nuevo rodaje de vídeo.',
-    formatReasonAppInstall: 'El vídeo nativo (gameplay o demo de producto) es el formato más eficaz para impulsar la instalación en Reddit: muestra la experiencia real de la app en segundos, lo que se correlaciona con un CPI más bajo que los formatos estáticos (práctica estándar del sector UA móvil, coherente con las specs de Reddit que posicionan el vídeo como formato prioritario en direct-response). La imagen sigue siendo una opción secundaria útil para testear rápido ganchos de producto.',
+    formatReasonAwareness: 'Según el estudio creativo KarmaLab de Reddit, combinar vídeo e imagen en la misma campaña multiplica por 10 el recuerdo, por 14 el recuerdo del mensaje y por 3 la preferencia de marca — relevante para un objetivo facturado por CPM que busca alcance más que clics. Como complemento, el free-form permite contar la historia de marca en un formato más largo y nativo.',
+    formatReasonTraffic: 'Los visuales estáticos suelen superar al vídeo en CTR para objetivos orientados al clic directo (benchmarks de terceros 2026, AdControlCenter). El carrusel permite probar varios ganchos o desplegar una secuencia de producto en un solo anuncio; el free-form, como complemento, aprovecha la prueba social de los comentarios para impulsar el clic.',
+    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos (datos oficiales de lanzamiento): el hilo de comentarios nativo actúa como prueba social directamente en el anuncio, lo que reduce la fricción antes del clic al formulario o landing page. La imagen es el formato secundario más rápido para testear varios ganchos/ofertas. Como complemento, el carrusel despliega una comparación de ofertas en varios pasos antes de la acción — y si vendes online con un catálogo de producto (sector Gran público/DTC), las Product Ads (DPA) lo superan: Reddit reporta un ROAS 2x superior al combinarlas con una campaña de conversión estándar.',
+    formatReasonAppInstall: 'El vídeo nativo (gameplay o demo de producto) es el formato más eficaz para impulsar la instalación en Reddit: muestra la experiencia real de la app en segundos, lo que se correlaciona con un CPI más bajo que los formatos estáticos (práctica estándar del sector UA móvil, coherente con las specs de Reddit que posicionan el vídeo como formato prioritario en direct-response). La imagen sigue siendo una opción secundaria útil para testear rápido ganchos de producto. Como complemento, el carrusel muestra varias pantallas clave de la app (onboarding, función estrella, reseñas) antes de la instalación.',
     formatLabel_image: 'Imagen',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carrusel',
     formatLabel_freeform: 'Free-form',
+    formatLabel_product: 'Product Ads (DPA)',
+    formatLabel_text: 'Texto',
+    targetingSectionTitle: 'Segmentación recomendada',
+    targetingSectionHintText: 'Selección de comunidades y estrategias de segmentación relevantes para el sector {industry}, basada en el tamaño y la intención de compra de cada audiencia.',
+    targetingSubredditsTitle: 'Top comunidades por sector',
+    targetingSubredditNote: 'Las cifras de suscriptores son orientativas (orden de magnitud, fuentes de terceros 2026) — verifícalas en la herramienta de segmentación de Reddit Ads Manager en el momento del lanzamiento, cambian continuamente.',
+    targetingStrategiesTitle: 'Estrategias de segmentación avanzadas',
+    targetingColSubreddit: 'Subreddit',
+    targetingColMembers: 'Miembros (orden de magnitud)',
+    targetingColWhy: 'Por qué esta comunidad',
+    targetingSubSaas1: 'Fundadores y product managers de SaaS, fuerte intención de compra de herramientas',
+    targetingSubSaas2: 'La comunidad de negocios más grande de Reddit, responsables de decisión con alto poder adquisitivo',
+    targetingSubSaas3: 'Fundadores en etapa inicial, presupuestos de herramientas y crecimiento',
+    targetingSubSaas4: 'Marketers y growth, compradores de martech',
+    targetingSubSaas5: 'IT/infraestructura, fuerte intención de compra B2B tech',
+    targetingSubSaas6: 'Compradores DevOps/infra, segmentación de nicho con alta intención',
+    targetingSubConsumer1: 'Moda masculina, fuerte intención de compra de producto',
+    targetingSubConsumer2: 'Belleza y skincare, recomendaciones de producto muy comprometidas',
+    targetingSubConsumer3: 'Bienes duraderos, intención de compra de calidad/largo plazo',
+    targetingSubConsumer4: 'Comerciantes de ecommerce: relevante si vendes herramientas/servicios a vendedores (B2B2C), no a consumidores finales',
+    targetingSubConsumer5: 'Operadores de ecommerce, misma lógica B2B2C que r/shopify',
+    targetingSubFinance1: 'La audiencia de finanzas personales más amplia, todos los perfiles',
+    targetingSubFinance2: 'Trading de alta frecuencia, perfil de mayor riesgo',
+    targetingSubFinance3: 'Ahorradores FIRE, fuerte interés en productos de inversión',
+    targetingSubFinance4: 'Presupuestos ajustados, relevante para productos accesibles/low-cost',
+    targetingSubFinance5: 'Inversores indexados pasivos, alto valor para brokers/robo-advisors',
+    targetingSubFinance6: 'Planificación financiera, preparación de jubilación y seguros',
+    targetingSubGaming1: 'Alcance máximo, audiencia gaming generalista',
+    targetingSubGaming2: 'Gamers de PC, hardware y periféricos',
+    targetingSubGaming3: 'Comunidad de un juego específico, fuerte actividad esports',
+    targetingSubGaming4: 'Audiencia de consola Nintendo, juegos familiares/casual',
+    targetingSubGaming5: 'Compras de juegos de PC digitales, fuerte intención de compra',
+    targetingStratRetargetingTitle: 'Reorientación (retargeting)',
+    targetingStratRetargetingDesc: 'Usa el Pixel de Reddit para reorientar a los visitantes de tu web (ventana de 90 días) o a los usuarios que interactuaron con tus anuncios (180 días). Reddit recomienda crear grupos de anuncios de Prospección y Reorientación separados, con un presupuesto similar, repartiendo los anuncios entre las ubicaciones Feed y Conversación.',
+    targetingStratKeywordTitle: 'Palabras clave de la competencia',
+    targetingStratKeywordDesc: 'Añade el subreddit oficial de tus competidores a tu segmentación (táctica de conquest) y segmenta sus nombres de marca mediante targeting por palabras clave — prioriza la ubicación Conversación, que capta mejor la intención de búsqueda y comparación.',
+    targetingStratLookalikeTitle: 'Audiencias similares (lookalike)',
+    targetingStratLookalikeDesc: 'Una vez que tengas una audiencia de reorientación o una lista de clientes, crea una audiencia similar (Lookalike): Reddit analiza los intereses y comportamientos de engagement de esa audiencia semilla para encontrar redditors parecidos.',
     formatCountLabel: 'Número de formatos combinados',
     formatCountHelp: 'Combinar varios formatos/ubicaciones reduce el coste por resultado (dato de Reddit: Feed + Conversación ≈ -12%). Más allá de 2 formatos es una estimación prudente a validar con pruebas A/B.',
     formatTransparencyNote: 'Recomendaciones basadas en datos públicos de Reddit (especificaciones oficiales, el estudio creativo KarmaLab, estadísticas de lanzamiento de los anuncios free-form) y benchmarks de terceros 2026 (AdControlCenter). El acelerador multi-formato más allá de 2 formatos es una estimación, no una cifra garantizada por Reddit. Para cifras concretas por marca, consulta las case studies oficiales a continuación.',
     formatCaseStudiesLabel: 'Ver case studies de anunciantes de Reddit →',
-    formatAvoidPrefix: 'Evitar para este objetivo:',
-    formatAvoidConversion: 'es un formato pensado para navegar entre varias tarjetas (notoriedad, engagement, tráfico): en un objetivo de conversión, desvía la atención del call-to-action único y diluye el mensaje en lugar de concentrarlo en la acción esperada.',
-    formatAvoidAppInstall: 'es un formato de engagement/consideración: muestra varias pantallas pero no sustituye la demo en movimiento (gameplay, interacción) que realmente impulsa la decisión de instalar.',
-    formatAvoidVideoViews: 'este objetivo se factura por vista y solo puede servirse con una creatividad de vídeo: el carrusel (como la imagen o el free-form) simplemente no es elegible aquí.',
     formatCpmEffectiveLabel: 'CPM efectivo tras el acelerador: ',
     footer_note: 'Benchmarks de Reddit Ads 2026 recopilados de fuentes públicas (AdBacklog, Benly, StackMatix, Marketing LTB) — ajusta con los datos reales de la cuenta de Reddit Ads Manager del cliente en cuanto estén disponibles.',
   },
@@ -2834,16 +2873,17 @@ const objectiveMultipliers = {
 // cher qu'Android en CPI (LTV/concurrence plus fortes), donc un taux effectif plus faible.
 const platformC2iMultipliers = { ios: 0.4, android: 1.5, blended: 1 };
 
-// Recommandation de format publicitaire par objectif (specs et stats officielles Reddit).
-// Le carousel est un format d'engagement/notoriété/trafic (MOFU) selon Reddit — jamais
-// recommandé ici en conversion ou en app install, où il ferait doublon avec un format
-// plus performant. Chaque objectif à risque de confusion porte un champ "avoid" explicite.
+// Recommandation de format publicitaire par objectif, construite à partir du catalogue complet
+// des formats Reddit (cf. adFormatCatalog) plutôt que de 2 formats fixes : chaque objectif a un
+// format principal, un format secondaire et un format complémentaire quand un 3e choix pertinent
+// existe. "tertiaryConsumer" permet d'affiner la 3e reco selon le secteur (ex: Product Ads pour
+// le grand public/DTC en conversion, qui dispose typiquement d'un catalogue produit).
 const formatRecommendations = {
-  awareness:  { primary: 'video', secondary: 'image', reasonKey: 'formatReasonAwareness' },
-  traffic:    { primary: 'image', secondary: 'carousel', reasonKey: 'formatReasonTraffic' },
-  conversion: { primary: 'freeform', secondary: 'image', reasonKey: 'formatReasonConversion', avoid: 'carousel', avoidReasonKey: 'formatAvoidConversion' },
-  appInstall: { primary: 'video', secondary: 'image', reasonKey: 'formatReasonAppInstall', avoid: 'carousel', avoidReasonKey: 'formatAvoidAppInstall' },
-  videoViews: { primary: 'video', secondary: null, reasonKey: 'formatReasonVideoViews', avoid: 'carousel', avoidReasonKey: 'formatAvoidVideoViews' },
+  awareness:  { primary: 'video', secondary: 'image', tertiary: 'freeform', reasonKey: 'formatReasonAwareness', placementKey: 'formatPlacementAwareness' },
+  traffic:    { primary: 'image', secondary: 'carousel', tertiary: 'freeform', reasonKey: 'formatReasonTraffic', placementKey: 'formatPlacementTraffic' },
+  conversion: { primary: 'freeform', secondary: 'image', tertiary: 'carousel', tertiaryConsumer: 'product', reasonKey: 'formatReasonConversion', placementKey: 'formatPlacementConversion' },
+  appInstall: { primary: 'video', secondary: 'image', tertiary: 'carousel', reasonKey: 'formatReasonAppInstall', placementKey: 'formatPlacementAppInstall' },
+  videoViews: { primary: 'video', secondary: null, tertiary: null, reasonKey: 'formatReasonVideoViews', placementKey: 'formatPlacementVideoViews' },
 };
 const formatLinks = {
   image: 'https://business.reddithelp.com/s/article/image-ad-specifications',
@@ -2852,6 +2892,116 @@ const formatLinks = {
   freeform: 'https://business.reddithelp.com/s/article/Free-form-Ads',
 };
 function formatLabel(key) { return t('formatLabel_' + key); }
+
+// Catalogue complet des formats publicitaires Reddit (specs officielles + usage type), affiché
+// en référence sous la recommandation pour donner une vue d'expert complète du mix créatif
+// disponible — pas seulement les 2-3 formats mis en avant pour l'objectif sélectionné.
+const adFormatCatalog = [
+  { key: 'image', descKey: 'formatCatalogImage', link: formatLinks.image },
+  { key: 'video', descKey: 'formatCatalogVideo', link: formatLinks.video },
+  { key: 'carousel', descKey: 'formatCatalogCarousel', link: formatLinks.carousel },
+  { key: 'freeform', descKey: 'formatCatalogFreeform', link: formatLinks.freeform },
+  { key: 'product', descKey: 'formatCatalogProduct', link: null },
+  { key: 'text', descKey: 'formatCatalogText', link: null },
+];
+function renderFormatCatalog() {
+  const list = document.getElementById('formatCatalogList');
+  if (!list) return;
+  list.innerHTML = adFormatCatalog.map(f => `
+    <div class="format-catalog-item">
+      <span class="format-catalog-name">${formatLabel(f.key)}</span>
+      <span class="format-catalog-desc">${t(f.descKey)}</span>
+      ${f.link ? `<a class="format-catalog-link" href="${f.link}" target="_blank" rel="noopener">${t('formatLinkLabel')}</a>` : ''}
+    </div>
+  `).join('');
+}
+
+/* ---------- Targeting recommendation ---------- */
+// Top subreddits par secteur (presets de l'app), classés par pertinence. Chiffres d'abonnés
+// indicatifs (ordres de grandeur, sources tierces 2026) — à re-vérifier dans l'outil de ciblage
+// Reddit Ads Manager au moment du lancement, ils évoluent en continu (cf. note de transparence).
+const targetingSubreddits = {
+  saas: [
+    { name: 'r/SaaS', members: 85000, noteKey: 'targetingSubSaas1' },
+    { name: 'r/Entrepreneur', members: 2800000, noteKey: 'targetingSubSaas2' },
+    { name: 'r/startups', members: 2100000, noteKey: 'targetingSubSaas3' },
+    { name: 'r/marketing', members: 1800000, noteKey: 'targetingSubSaas4' },
+    { name: 'r/sysadmin', members: 1300000, noteKey: 'targetingSubSaas5' },
+    { name: 'r/devops', members: 480000, noteKey: 'targetingSubSaas6' },
+  ],
+  consumer: [
+    { name: 'r/malefashionadvice', members: 6300000, noteKey: 'targetingSubConsumer1' },
+    { name: 'r/SkincareAddiction', members: 2300000, noteKey: 'targetingSubConsumer2' },
+    { name: 'r/BuyItForLife', members: 2000000, noteKey: 'targetingSubConsumer3' },
+    { name: 'r/shopify', members: 349000, noteKey: 'targetingSubConsumer4' },
+    { name: 'r/ecommerce', members: 177000, noteKey: 'targetingSubConsumer5' },
+  ],
+  finance: [
+    { name: 'r/personalfinance', members: 19000000, noteKey: 'targetingSubFinance1' },
+    { name: 'r/wallstreetbets', members: 19900000, noteKey: 'targetingSubFinance2' },
+    { name: 'r/financialindependence', members: 2200000, noteKey: 'targetingSubFinance3' },
+    { name: 'r/povertyfinance', members: 2100000, noteKey: 'targetingSubFinance4' },
+    { name: 'r/Bogleheads', members: 880000, noteKey: 'targetingSubFinance5' },
+    { name: 'r/FinancialPlanning', members: 862000, noteKey: 'targetingSubFinance6' },
+  ],
+  gaming: [
+    { name: 'r/gaming', members: 47200000, noteKey: 'targetingSubGaming1' },
+    { name: 'r/pcmasterrace', members: 16200000, noteKey: 'targetingSubGaming2' },
+    { name: 'r/leagueoflegends', members: 8400000, noteKey: 'targetingSubGaming3' },
+    { name: 'r/NintendoSwitch', members: 7900000, noteKey: 'targetingSubGaming4' },
+    { name: 'r/Steam', members: 5300000, noteKey: 'targetingSubGaming5' },
+  ],
+};
+function renderTargetingSubreddits() {
+  const table = document.getElementById('targetingSubredditTable');
+  if (!table) return;
+  const list = targetingSubreddits[els.industry.value] || targetingSubreddits.saas;
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>${t('targetingColSubreddit')}</th>
+        <th>${t('targetingColMembers')}</th>
+        <th>${t('targetingColWhy')}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${list.map(s => `
+        <tr>
+          <td>${s.name}</td>
+          <td>${fmtNum(s.members)}</td>
+          <td>${t(s.noteKey)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+// Stratégies de ciblage avancées Reddit (reciblage, mots-clés concurrents, audiences similaires),
+// sourcées depuis la documentation officielle Reddit Ads Help (Custom Audiences, Conversation
+// Targeting, Lookalike Audiences).
+const targetingStrategies = [
+  { icon: '🔁', titleKey: 'targetingStratRetargetingTitle', descKey: 'targetingStratRetargetingDesc' },
+  { icon: '🎯', titleKey: 'targetingStratKeywordTitle', descKey: 'targetingStratKeywordDesc' },
+  { icon: '👥', titleKey: 'targetingStratLookalikeTitle', descKey: 'targetingStratLookalikeDesc' },
+];
+function renderTargetingStrategies() {
+  const wrap = document.getElementById('targetingStrategyCards');
+  if (!wrap) return;
+  wrap.innerHTML = targetingStrategies.map(s => `
+    <div class="targeting-strategy-card">
+      <span class="targeting-strategy-name">${s.icon} ${t(s.titleKey)}</span>
+      <p class="targeting-strategy-desc">${t(s.descKey)}</p>
+    </div>
+  `).join('');
+}
+
+function renderTargetingRecommendation() {
+  const hint = document.getElementById('targetingSectionHint');
+  if (!hint) return;
+  hint.textContent = t('targetingSectionHintText', { industry: industryLabelI18n(els.industry.value) });
+  renderTargetingSubreddits();
+  renderTargetingStrategies();
+}
 // Accélérateur multi-format/placement : ancré sur la donnée Reddit publique pour 2 formats
 // (Feed + Conversation ≈ -12%) ; au-delà, estimation prudente à rendements décroissants.
 function formatCountMultiplier(value) {
@@ -3099,7 +3249,6 @@ function applyLangToUi() {
     renderFunnel();
     updateProgramTotal();
   }
-  renderScenarios();
   presentBtn.textContent = presentationActive ? t('btnExitPresentMode') : t('btnPresentMode');
   if (state.view === 'full') ffgCompute();
   if (!document.getElementById('onboarding').hidden) renderOnboarding();
@@ -3236,26 +3385,36 @@ function renderFormatRecommendation() {
   if (!rec) { panel.hidden = true; return; }
   panel.hidden = false;
   document.getElementById('formatPrimaryLabel').textContent = formatLabel(rec.primary);
+
   const cardsWrap = document.getElementById('formatCards');
   const secCard = document.getElementById('formatSecondaryCard');
   if (rec.secondary) {
     secCard.hidden = false;
-    cardsWrap.classList.remove('single-format');
     document.getElementById('formatSecondaryLabel').textContent = formatLabel(rec.secondary);
   } else {
     secCard.hidden = true;
-    cardsWrap.classList.add('single-format');
   }
+
+  // Le format complémentaire peut être affiné selon le secteur (ex: Product Ads pour le
+  // grand public/DTC en conversion, qui dispose typiquement d'un catalogue produit).
+  const isConsumer = els.industry.value === 'consumer';
+  const tertiaryKey = (isConsumer && rec.tertiaryConsumer) ? rec.tertiaryConsumer : rec.tertiary;
+  const terCard = document.getElementById('formatTertiaryCard');
+  if (tertiaryKey) {
+    terCard.hidden = false;
+    document.getElementById('formatTertiaryLabel').textContent = formatLabel(tertiaryKey);
+  } else {
+    terCard.hidden = true;
+  }
+
+  cardsWrap.classList.toggle('single-format', !rec.secondary && !tertiaryKey);
+  cardsWrap.classList.toggle('triple-format', !!rec.secondary && !!tertiaryKey);
+
   document.getElementById('formatReasonText').textContent = t(rec.reasonKey);
   document.getElementById('formatSpecLink').href = formatLinks[rec.primary] || '#';
-  const avoidBox = document.getElementById('formatAvoidBox');
-  if (rec.avoid) {
-    avoidBox.hidden = false;
-    document.getElementById('formatAvoidLabel').textContent = formatLabel(rec.avoid);
-    document.getElementById('formatAvoidText').textContent = t(rec.avoidReasonKey);
-  } else {
-    avoidBox.hidden = true;
-  }
+  document.getElementById('formatPlacementText').textContent = t(rec.placementKey);
+  renderFormatCatalog();
+  renderTargetingRecommendation();
 }
 
 function applyPreset() {
@@ -5108,143 +5267,35 @@ document.getElementById('onboarding').addEventListener('input', e => {
 
 document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnboarding);
 
-/* ---------- Scenarios ---------- */
-function saveScenario() {
-  if (['appInstall', 'awareness', 'videoViews', 'conversion'].includes(els.objective.value)) {
-    toast(t('toastScenarioUnavailable'));
-    return;
-  }
-  const f = currentFunnel();
-  state.scenarios.push({
-    name: `${t('thScenario')} ${state.scenarios.length + 1}`,
-    notes: '',
-    industry: els.industry.options[els.industry.selectedIndex].text,
-    objective: els.objective.options[els.objective.selectedIndex].text,
-    mix: els.mix.options[els.mix.selectedIndex].text,
-    ...f
-  });
-  renderScenarios();
-  scheduleSave();
-}
-
-function duplicateScenario(i) {
-  const copy = JSON.parse(JSON.stringify(state.scenarios[i]));
-  copy.name = copy.name + ' (copie)';
-  state.scenarios.splice(i + 1, 0, copy);
-  renderScenarios();
-  scheduleSave();
-}
-
-function removeScenario(i) {
-  state.scenarios.splice(i, 1);
-  renderScenarios();
-  scheduleSave();
-}
-
-function renderScenarioChart() {
-  const wrap = document.getElementById('scenarioChartWrap');
-  const scenarios = state.scenarios;
-  if (scenarios.length === 0) { wrap.innerHTML = ''; return; }
-  const max = Math.max(1, ...scenarios.flatMap(s => [s.budget, s.revenue]));
-  wrap.innerHTML = `
-    <div class="chart-legend">
-      <span class="legend-item"><span class="swatch swatch-budget"></span>${t('legendBudget')}</span>
-      <span class="legend-item"><span class="swatch swatch-revenue"></span>${t('legendResult')}</span>
-    </div>
-    <div class="scenario-chart">
-      ${scenarios.map(s => `
-        <div class="chart-row">
-          <div class="chart-row-label" title="${escapeHtml(s.name)}">${escapeHtml(s.name)}</div>
-          <div class="chart-bars">
-            <div class="chart-bar-track">
-              <div class="chart-bar budget" style="width:${Math.max(2, (s.budget / max) * 100)}%"></div>
-              <span class="chart-bar-value">${fmtEUR(s.budget)}</span>
-            </div>
-            <div class="chart-bar-track">
-              <div class="chart-bar revenue" style="width:${Math.max(2, (s.revenue / max) * 100)}%"></div>
-              <span class="chart-bar-value">${fmtEUR(s.revenue)}</span>
-            </div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderScenarios() {
-  const wrap = document.getElementById('scenarioTableWrap');
-  const scenarios = state.scenarios;
-  renderScenarioChart();
-  if (scenarios.length === 0) {
-    wrap.innerHTML = `<p class="empty-scenarios">${t('emptyScenarios')}</p>`;
-    return;
-  }
-  wrap.innerHTML = `
-    <div class="table-scroll">
-      <table class="scenario-table">
-        <thead>
-          <tr>
-            <th>${t('thScenario')}</th>
-            <th>${t('thNotes')}</th>
-            <th>${t('thBudget')}</th>
-            <th>${t('thImpressions')}</th>
-            <th>${t('thClicks')}</th>
-            <th>${t('thLeads')}</th>
-            <th>${t('thClients')}</th>
-            <th>${t('thCpa')}</th>
-            <th>${t('thRoas')}</th>
-            <th class="col-actions"></th>
-            <th class="col-actions"></th>
-          </tr>
-        </thead>
-        <tbody>
-          ${scenarios.map((s, i) => `
-            <tr>
-              <td>${escapeHtml(s.name)}<br><span class="scenario-meta">${escapeHtml(s.industry)} · ${escapeHtml(s.objective)} · ${escapeHtml(s.mix)}</span></td>
-              <td class="notes-cell">
-                <textarea class="note-input" data-i="${i}" rows="2" placeholder="${escapeHtml(t('placeholderNote'))}">${escapeHtml(s.notes || '')}</textarea>
-                <div class="note-print">${escapeHtml(s.notes || '')}</div>
-              </td>
-              <td>${fmtEUR(s.budget)}</td>
-              <td>${fmtNum(s.impressions)}</td>
-              <td>${fmtNum(s.clicks)}</td>
-              <td>${fmtNum(s.leads)}</td>
-              <td>${fmtNum(s.clients)}</td>
-              <td>${s.clients > 0 ? fmtEUR(s.cpa) : '—'}</td>
-              <td>${s.roas.toFixed(2)}×</td>
-              <td class="col-actions dup" onclick="duplicateScenario(${i})" title="${escapeHtml(t('titleDuplicate'))}">⧉</td>
-              <td class="col-actions remove" onclick="removeScenario(${i})" title="${escapeHtml(t('titleRemove'))}">✕</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-document.getElementById('scenarioTableWrap').addEventListener('input', e => {
-  if (!e.target.classList.contains('note-input')) return;
-  const i = +e.target.dataset.i;
-  if (!state.scenarios[i]) return;
-  state.scenarios[i].notes = e.target.value;
-  const printEl = e.target.nextElementSibling;
-  if (printEl) printEl.textContent = e.target.value;
-  scheduleSave();
-});
-
+/* ---------- Export CSV ----------
+   Exporte un instantané du scénario actuellement affiché (secteur, objectif, budget,
+   KPIs et étapes du funnel visible) — fonctionne pour les 5 objectifs puisqu'il lit
+   directement le panneau de résultats actif plutôt que de dépendre d'un funnel précis. */
 function exportCsv() {
-  if (state.scenarios.length === 0) saveScenario();
-  const headers = ['Scenario', 'Notes', 'Secteur', 'Objectif', 'Ciblage', 'Budget', 'Impressions', 'Clics', 'Leads', 'Clients', 'CPA', 'ROAS'];
-  const rows = state.scenarios.map(s => [
-    csvField(s.name), csvField(s.notes || ''), csvField(s.industry), csvField(s.objective), csvField(s.mix),
-    s.budget.toFixed(0), s.impressions.toFixed(0), s.clicks.toFixed(0),
-    s.leads.toFixed(1), s.clients.toFixed(2), s.cpa.toFixed(0), s.roas.toFixed(2)
-  ]);
-  const csv = [headers, ...rows].map(r => r.join(';')).join('\n');
+  const isConversion = els.objective.value === 'conversion';
+  const kpiRowId = isConversion ? 'ffKpiRow' : 'kpiRow';
+  const stageListId = isConversion ? 'ffStageList' : 'stageList';
+  const rows = [
+    ['Secteur', els.industry.options[els.industry.selectedIndex].text],
+    ['Marché géographique', els.market.options[els.market.selectedIndex].text],
+    ['Objectif', els.objective.options[els.objective.selectedIndex].text],
+    ['Budget mensuel', fmtEUR(+els.budget.value)],
+  ];
+  document.querySelectorAll(`#${kpiRowId} .kpi`).forEach(el => {
+    const label = el.querySelector('.kpi-label')?.textContent?.trim();
+    const value = el.querySelector('.kpi-value')?.textContent?.trim();
+    if (label) rows.push([label, value || '']);
+  });
+  document.querySelectorAll(`#${stageListId} .stage`).forEach(el => {
+    const label = el.querySelector('.label-text')?.textContent?.trim();
+    const value = el.querySelector('.figure')?.textContent?.trim();
+    if (label) rows.push([label, value || '']);
+  });
+  const csv = rows.map(r => r.map(csvField).join(';')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = 'scenarios-reddit-ads.csv';
+  link.download = 'simulation-reddit-ads.csv';
   link.click();
 }
 
@@ -5261,13 +5312,11 @@ function preparePrint() {
   }
 }
 
-document.getElementById('saveScenario').addEventListener('click', saveScenario);
 document.getElementById('exportCsv').addEventListener('click', exportCsv);
 document.getElementById('printReport').addEventListener('click', () => { preparePrint(); window.print(); });
 
 /* ---------- Boot ---------- */
 function hydrateFieldsFromState() {
-  if (!Array.isArray(state.scenarios)) state.scenarios = [];
   if (!state.customPresets || typeof state.customPresets !== 'object') state.customPresets = {};
   els.agencyName.value = state.agencyName || '';
   els.clientName.value = state.clientName || '';
@@ -5319,7 +5368,6 @@ if (!hadSaved && !hadShare) {
   syncLabels();
   renderFunnel();
 }
-renderScenarios();
 setView(viewSwitch.value);
 saveState();
 
