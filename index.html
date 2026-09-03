@@ -432,14 +432,17 @@
   .scaling-chart-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
   .scaling-chart-head h3 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 15px; margin: 0; }
   .scaling-chart-insight { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line); }
-  .scaling-svg-point { fill: var(--ember); }
-  .scaling-svg-line { fill: none; stroke: var(--ember); stroke-width: 2; }
-  .scaling-svg-band { fill: rgba(var(--ember-rgb), 0.12); }
-  .scaling-svg-grid { stroke: var(--line); stroke-width: 1; }
-  .scaling-svg-axis-label { fill: var(--ink-soft); font-size: 10px; font-family: 'Inter', sans-serif; }
-  .scaling-svg-marker { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 3 3; }
-  .scaling-svg-callout { fill: var(--ink); font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; }
-  .scaling-svg-callout-bg { fill: var(--surface); stroke: var(--line); }
+  /* Les attributs d/cx/cy/x1/x2/x/width sont mis à jour en place par JS (pas recréés) sur
+     chaque saisie : ces transitions font que la courbe se redessine en douceur au lieu de
+     sauter d'un état à l'autre — la donnée affichée, elle, reste exacte à tout instant. */
+  .scaling-svg-point { fill: var(--ember); transition: cx 0.4s ease, cy 0.4s ease; }
+  .scaling-svg-line { fill: none; stroke: var(--ember); stroke-width: 2; transition: d 0.4s ease; }
+  .scaling-svg-band { fill: rgba(var(--ember-rgb), 0.12); transition: d 0.4s ease; }
+  .scaling-svg-grid { stroke: var(--line); stroke-width: 1; transition: y1 0.4s ease, y2 0.4s ease; }
+  .scaling-svg-axis-label { fill: var(--ink-soft); font-size: 10px; font-family: 'Inter', sans-serif; transition: y 0.4s ease; }
+  .scaling-svg-marker { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 3 3; transition: x1 0.4s ease, y1 0.4s ease, x2 0.4s ease; }
+  .scaling-svg-callout { fill: var(--ink); font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; transition: x 0.4s ease, y 0.4s ease; }
+  .scaling-svg-callout-bg { fill: var(--surface); stroke: var(--line); transition: x 0.4s ease, y 0.4s ease, width 0.4s ease; }
   .scaling-svg { width: 100%; height: auto; display: block; }
 
   .kpi {
@@ -554,6 +557,7 @@
   .format-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
   .format-card-value { font-family: 'Fraunces', serif; font-size: 19px; color: var(--ink); }
   .format-reason { font-size: 13.5px; color: var(--ink); line-height: 1.55; margin: 0 0 10px; }
+  .format-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
   .format-link { font-size: 13px; font-weight: 600; color: var(--ember); text-decoration: none; }
   .format-link:hover { text-decoration: underline; }
   .format-transparency-note { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
@@ -1482,7 +1486,10 @@
       </div>
     </div>
     <p class="format-reason" id="formatReasonText"></p>
-    <a class="format-link" id="formatSpecLink" href="#" target="_blank" rel="noopener" data-i18n="formatLinkLabel">Voir les spécifications officielles Reddit →</a>
+    <div class="format-links">
+      <a class="format-link" id="formatSpecLink" href="#" target="_blank" rel="noopener" data-i18n="formatLinkLabel">Voir les spécifications officielles Reddit →</a>
+      <a class="format-link" href="https://business.reddit.com/success-stories" target="_blank" rel="noopener" data-i18n="formatCaseStudiesLabel">Voir les case studies annonceurs Reddit →</a>
+    </div>
     <p class="hint format-transparency-note" data-i18n="formatTransparencyNote">Recommandations basées sur les données publiques Reddit et des benchmarks tiers 2026.</p>
   </div>
 
@@ -1853,7 +1860,7 @@ const translations = {
     kpiCompletedViews: 'Vues complètes',
     kpiCostPerView: 'Coût par vue',
     kpiCostPerCompleted: 'Coût par vue complète',
-    formatReasonVideoViews: "Le format vidéo est nécessaire pour générer des vues : Reddit facture cet objectif à la vue, la vidéo est donc le format natif de la mécanique.",
+    formatReasonVideoViews: "Le format vidéo est nécessaire pour générer des vues : Reddit facture cet objectif à la vue. Conseil créatif Reddit : 80 % des campagnes vidéo les plus performantes révèlent la marque dans les 3 premières secondes, et plus de la moitié de l'audience décroche avant la 30e seconde — privilégie des formats courts avec la marque visible dès le début.",
     funnelTitleConversion: 'Funnel de génération de leads',
     ffPlaceholderTitle: '🚧 Bientôt disponible',
     ffPlaceholderBody: "Cette vue accueillera prochainement une réplication complète des systèmes de planification SLG (Sales-Led Growth) et PLG (Product-Led Growth) — répartition de budget par phase (TOFU/MOFU/BOFU ou Génération/Capture), plan de campagnes par phase, et funnel chaîné complet. En attendant, la logique de prévision B2B (funnel Lead → MQL → SQL → Opportunité → Client, scénarios Bear/Base/Bull, prévision mensuelle) est disponible directement dans la Vue simple, sous l'objectif Conversion.",
@@ -2008,17 +2015,18 @@ const translations = {
     formatPrimary: 'Format principal',
     formatSecondary: 'Format secondaire',
     formatLinkLabel: 'Voir les spécifications officielles Reddit →',
-    formatReasonAwareness: 'La vidéo gagne sur les métriques de mémorisation (view-through), pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic.',
-    formatReasonTraffic: 'Les visuels statiques surperforment la vidéo en CTR pour les objectifs orientés clic direct (benchmarks 2026, AdControlCenter).',
-    formatReasonConversion: 'Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats ; activer les commentaires renforce la preuve sociale.',
-    formatReasonAppInstall: "La démonstration produit/gameplay en vidéo est la norme du secteur pour convertir en installation ; le carousel montre plusieurs écrans de l'app.",
+    formatReasonAwareness: "Selon l'étude créative KarmaLab de Reddit, associer vidéo et image dans une même campagne multiplie par 10 la mémorisation, par 14 le rappel du message et par 3 la préférence de marque — pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic.",
+    formatReasonTraffic: 'Les visuels statiques surperforment généralement la vidéo en CTR pour les objectifs orientés clic direct (benchmarks tiers 2026, AdControlCenter) ; le carousel permet de tester plusieurs accroches en une seule annonce.',
+    formatReasonConversion: 'Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats (données officielles de lancement) ; activer les commentaires renforce la preuve sociale.',
+    formatReasonAppInstall: "La démonstration produit/gameplay en vidéo est la norme du secteur mobile UA pour convertir en installation ; le carousel montre plusieurs écrans de l'app. (Pratique standard du secteur, non un chiffre publié par Reddit spécifiquement pour cet objectif.)",
     formatLabel_image: 'Image',
     formatLabel_video: 'Vidéo',
     formatLabel_carousel: 'Carousel',
     formatLabel_freeform: 'Free-form',
     formatCountLabel: 'Nombre de formats combinés',
     formatCountHelp: "Combiner plusieurs formats/placements réduit le coût par résultat (donnée Reddit : Feed + Conversation ≈ -12 %). Au-delà de 2 formats, il s'agit d'une estimation prudente à valider par test.",
-    formatTransparencyNote: "Recommandations basées sur les données publiques Reddit (spécifications officielles, statistiques de performance des ads free-form) et des benchmarks tiers 2026 (AdControlCenter). L'accélérateur multi-format au-delà de 2 formats est une estimation, pas un chiffre garanti par Reddit.",
+    formatTransparencyNote: "Recommandations basées sur les données publiques Reddit (spécifications officielles, étude créative KarmaLab, statistiques de lancement des ads free-form) et des benchmarks tiers 2026 (AdControlCenter). L'accélérateur multi-format au-delà de 2 formats est une estimation, pas un chiffre garanti par Reddit. Pour des exemples chiffrés par marque, consulte les case studies officielles ci-dessous.",
+    formatCaseStudiesLabel: 'Voir les case studies annonceurs Reddit →',
     formatCpmEffectiveLabel: 'CPM effectif après accélérateur : ',
     footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
   },
@@ -2169,7 +2177,7 @@ const translations = {
     kpiCompletedViews: 'Completed views',
     kpiCostPerView: 'Cost per view',
     kpiCostPerCompleted: 'Cost per completed view',
-    formatReasonVideoViews: 'Video is required to generate views: Reddit bills this objective per view, so video is the native format for the mechanic.',
+    formatReasonVideoViews: "Video is required to generate views: Reddit bills this objective per view. Reddit creative tip: 80% of top-performing video campaigns reveal the brand within the first 3 seconds, and more than half the audience drops off before the 30-second mark — favor short cuts with the brand visible early.",
     funnelTitleConversion: 'Lead generation funnel',
     ffPlaceholderTitle: '🚧 Coming soon',
     ffPlaceholderBody: "This view will soon host a full replication of the SLG (Sales-Led Growth) and PLG (Product-Led Growth) planning systems — phase-based budget split (TOFU/MOFU/BOFU or Demand Gen/Capture), a per-phase campaign plan, and a full chained funnel. In the meantime, the B2B forecasting logic (Lead → MQL → SQL → Opportunity → Customer funnel, Bear/Base/Bull scenarios, monthly forecast) is available directly in Simple view, under the Conversion objective.",
@@ -2324,17 +2332,18 @@ const translations = {
     formatPrimary: 'Primary format',
     formatSecondary: 'Secondary format',
     formatLinkLabel: 'View official Reddit specs →',
-    formatReasonAwareness: 'Video wins on view-through/recall metrics, which matters for a CPM-billed objective chasing reach rather than clicks.',
-    formatReasonTraffic: 'Static visuals outperform video on CTR for click-driven objectives, per 2026 benchmarks compiled by AdControlCenter.',
-    formatReasonConversion: 'Reddit reports free-form ads drive +28% average CTR vs other formats; enabling comments strengthens social proof before the action.',
-    formatReasonAppInstall: 'Video product/gameplay demos are the mobile UA industry standard for driving installs; carousel lets you show several app screens.',
+    formatReasonAwareness: "Per Reddit's KarmaLab creative study, pairing video with image in the same campaign drives a 10x lift in memorability, a 14x lift in message recall, and a 3x lift in brand favorability — relevant for a CPM-billed objective chasing reach rather than clicks.",
+    formatReasonTraffic: 'Static visuals generally outperform video on CTR for click-driven objectives (third-party 2026 benchmarks, AdControlCenter); carousel lets you test several hooks in a single ad.',
+    formatReasonConversion: "Reddit reports free-form ads drive +28% average CTR vs other formats (official launch data); enabling comments strengthens social proof before the action.",
+    formatReasonAppInstall: 'Video product/gameplay demos are the mobile UA industry standard for driving installs; carousel lets you show several app screens. (Industry-standard practice, not a figure Reddit publishes specifically for this objective.)',
     formatLabel_image: 'Image',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carousel',
     formatLabel_freeform: 'Free-form',
     formatCountLabel: 'Number of combined formats',
     formatCountHelp: 'Combining several formats/placements lowers cost per result (Reddit data: Feed + Conversation ≈ -12%). Beyond 2 formats this is a conservative estimate to validate via A/B testing.',
-    formatTransparencyNote: 'Recommendations based on public Reddit data (official specs, free-form ad performance stats) and third-party 2026 benchmarks (AdControlCenter). The multi-format accelerator beyond 2 formats is an estimate, not a figure guaranteed by Reddit.',
+    formatTransparencyNote: 'Recommendations based on public Reddit data (official specs, the KarmaLab creative study, free-form ad launch stats) and third-party 2026 benchmarks (AdControlCenter). The multi-format accelerator beyond 2 formats is an estimate, not a figure guaranteed by Reddit. For brand-specific numbers, see the official case studies below.',
+    formatCaseStudiesLabel: 'View Reddit advertiser case studies →',
     formatCpmEffectiveLabel: 'Effective CPM after accelerator: ',
     footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
   },
@@ -2485,7 +2494,7 @@ const translations = {
     kpiCompletedViews: 'Vistas completas',
     kpiCostPerView: 'Coste por vista',
     kpiCostPerCompleted: 'Coste por vista completa',
-    formatReasonVideoViews: 'El vídeo es necesario para generar vistas: Reddit factura este objetivo por vista, por lo que el vídeo es el formato nativo de la mecánica.',
+    formatReasonVideoViews: 'El vídeo es necesario para generar vistas: Reddit factura este objetivo por vista. Consejo creativo de Reddit: el 80% de las campañas de vídeo más exitosas muestran la marca en los primeros 3 segundos, y más de la mitad de la audiencia abandona antes del segundo 30 — prioriza formatos cortos con la marca visible desde el inicio.',
     funnelTitleConversion: 'Funnel de generación de leads',
     ffPlaceholderTitle: '🚧 Próximamente',
     ffPlaceholderBody: 'Esta vista incorporará próximamente una réplica completa de los sistemas de planificación SLG (Sales-Led Growth) y PLG (Product-Led Growth) — reparto de presupuesto por fase (TOFU/MOFU/BOFU o Generación/Captura de demanda), plan de campañas por fase, y un funnel encadenado completo. Mientras tanto, la lógica de previsión B2B (funnel Lead → MQL → SQL → Oportunidad → Cliente, escenarios Bear/Base/Bull, previsión mensual) está disponible directamente en la Vista simple, en el objetivo Conversión.',
@@ -2640,17 +2649,18 @@ const translations = {
     formatPrimary: 'Formato principal',
     formatSecondary: 'Formato secundario',
     formatLinkLabel: 'Ver especificaciones oficiales de Reddit →',
-    formatReasonAwareness: 'El vídeo gana en métricas de recuerdo (view-through), relevante para un objetivo facturado por CPM que busca alcance más que clics.',
-    formatReasonTraffic: 'Los visuales estáticos superan al vídeo en CTR para objetivos orientados al clic directo, según los benchmarks 2026 de AdControlCenter.',
-    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos; activar los comentarios refuerza la prueba social antes de la acción.',
-    formatReasonAppInstall: 'La demostración en vídeo del producto/gameplay es el estándar del sector UA móvil para convertir en instalación; el carrusel permite mostrar varias pantallas de la app.',
+    formatReasonAwareness: 'Según el estudio creativo KarmaLab de Reddit, combinar vídeo e imagen en la misma campaña multiplica por 10 el recuerdo, por 14 el recuerdo del mensaje y por 3 la preferencia de marca — relevante para un objetivo facturado por CPM que busca alcance más que clics.',
+    formatReasonTraffic: 'Los visuales estáticos suelen superar al vídeo en CTR para objetivos orientados al clic directo (benchmarks de terceros 2026, AdControlCenter); el carrusel permite probar varios ganchos en un solo anuncio.',
+    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos (datos oficiales de lanzamiento); activar los comentarios refuerza la prueba social antes de la acción.',
+    formatReasonAppInstall: 'La demostración en vídeo del producto/gameplay es el estándar del sector UA móvil para convertir en instalación; el carrusel permite mostrar varias pantallas de la app. (Práctica estándar del sector, no una cifra publicada por Reddit específicamente para este objetivo.)',
     formatLabel_image: 'Imagen',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carrusel',
     formatLabel_freeform: 'Free-form',
     formatCountLabel: 'Número de formatos combinados',
     formatCountHelp: 'Combinar varios formatos/ubicaciones reduce el coste por resultado (dato de Reddit: Feed + Conversación ≈ -12%). Más allá de 2 formatos es una estimación prudente a validar con pruebas A/B.',
-    formatTransparencyNote: 'Recomendaciones basadas en datos públicos de Reddit (especificaciones oficiales, estadísticas de rendimiento de los anuncios free-form) y benchmarks de terceros 2026 (AdControlCenter). El acelerador multi-formato más allá de 2 formatos es una estimación, no una cifra garantizada por Reddit.',
+    formatTransparencyNote: 'Recomendaciones basadas en datos públicos de Reddit (especificaciones oficiales, el estudio creativo KarmaLab, estadísticas de lanzamiento de los anuncios free-form) y benchmarks de terceros 2026 (AdControlCenter). El acelerador multi-formato más allá de 2 formatos es una estimación, no una cifra garantizada por Reddit. Para cifras concretas por marca, consulta las case studies oficiales a continuación.',
+    formatCaseStudiesLabel: 'Ver case studies de anunciantes de Reddit →',
     formatCpmEffectiveLabel: 'CPM efectivo tras el acelerador: ',
     footer_note: 'Benchmarks de Reddit Ads 2026 recopilados de fuentes públicas (AdBacklog, Benly, StackMatix, Marketing LTB) — ajusta con los datos reales de la cuenta de Reddit Ads Manager del cliente en cuanto estén disponibles.',
   },
@@ -3152,6 +3162,56 @@ function syncLabels() {
   document.getElementById('formatCountHelp').textContent = t('formatCountHelp');
 }
 
+// Reconstruit les lignes du funnel seulement si leur nombre change (ex. changement
+// d'objectif) ; sinon met à jour les nœuds DOM existants en place (largeur de barre,
+// chiffre, coût) plutôt que de les recréer via innerHTML — un remplacement complet
+// détruirait la continuité nécessaire à la transition CSS (bar-fill s'anime, mais
+// seulement si c'est le MÊME élément dont la largeur change).
+function renderStageListAnimated(containerId, stages) {
+  const container = document.getElementById(containerId);
+  const existing = container.querySelectorAll(':scope > .stage');
+
+  if (existing.length !== stages.length) {
+    container.innerHTML = stages.map(stageRowHtml).join('');
+    return;
+  }
+
+  stages.forEach((s, i) => {
+    const row = existing[i];
+    const pct = Math.max(2, (s.value / (s.ref || 1)) * 100);
+    row.querySelector('.bar-fill').style.width = pct + '%';
+    row.querySelector('.figure').textContent = fmtNum(s.value);
+    const labelText = row.querySelector('.label-text');
+    if (labelText) labelText.textContent = s.label;
+    const badge = row.querySelector('.stage-badge');
+    if (badge && s.badgeLabel) badge.textContent = s.badgeLabel;
+    const costLabel = row.querySelector('.cost-label');
+    if (s.cost != null && costLabel) costLabel.textContent = `${s.costLabel} : ${fmtEUR(s.cost)}`;
+  });
+}
+
+function stageRowHtml(s) {
+  const pct = Math.max(2, (s.value / (s.ref || 1)) * 100);
+  const badge = s.badge ? `<span class="stage-badge ${s.badge}">${s.badgeLabel}</span>` : '';
+  if (s.cost != null || s.badge) {
+    return `
+      <div class="stage">
+        <div class="label"><span class="label-text">${s.label}</span>${badge}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure-wrap">
+          <div class="figure">${fmtNum(s.value)}</div>
+          ${s.cost != null ? `<div class="cost-label">${s.costLabel} : ${fmtEUR(s.cost)}</div>` : ''}
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="stage">
+      <div class="label"><span class="label-text">${s.label}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="figure">${fmtNum(s.value)}</div>
+    </div>`;
+}
+
 function currentFunnel(overrideBudget) {
   const budget = overrideBudget != null ? overrideBudget : +els.budget.value;
   const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
@@ -3205,15 +3265,7 @@ function renderFunnel() {
     { label: t('stageClients'), value: f.clients, ref: f.impressions },
   ];
 
-  document.getElementById('stageList').innerHTML = stages.map(s => {
-    const pct = Math.max(2, (s.value / s.ref) * 100);
-    return `
-      <div class="stage">
-        <div class="label">${s.label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="figure">${fmtNum(s.value)}</div>
-      </div>`;
-  }).join('');
+  renderStageListAnimated('stageList', stages);
 
   const cpaGood = f.clients > 0 && f.cpa < f.budget * 0.3;
   const roasGood = f.roas >= 1;
@@ -3257,15 +3309,7 @@ function renderFunnelAppInstall() {
     { label: t('stageInstalls'), value: f.installs, ref: f.impressions },
   ];
 
-  document.getElementById('stageList').innerHTML = stages.map(s => {
-    const pct = Math.max(2, (s.value / s.ref) * 100);
-    return `
-      <div class="stage">
-        <div class="label">${s.label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="figure">${fmtNum(s.value)}</div>
-      </div>`;
-  }).join('');
+  renderStageListAnimated('stageList', stages);
 
   const benchmark = appInstallCpiBenchmark();
   const cpiGood = f.installs > 0 && f.cpi <= benchmark * 1.5;
@@ -3325,15 +3369,7 @@ function renderFunnelAwareness() {
     { label: t('stageReached'), value: f.reached, ref },
     { label: t('stageImpressions'), value: f.impressions, ref },
   ];
-  document.getElementById('stageList').innerHTML = stages.map(s => {
-    const pct = Math.max(2, (s.value / s.ref) * 100);
-    return `
-      <div class="stage">
-        <div class="label">${s.label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="figure">${fmtNum(s.value)}</div>
-      </div>`;
-  }).join('');
+  renderStageListAnimated('stageList', stages);
 
   document.getElementById('kpiRow').className = 'kpi-row kpi-row-4';
   document.getElementById('kpiRow').innerHTML = `
@@ -3376,7 +3412,7 @@ function renderScalingChart(current, computeAt, getImpressions, getSecondary, in
     points.push({ x: b, y: metric === 'secondary' ? getSecondary(at) : getImpressions(at) });
   }
   const currentY = metric === 'secondary' ? getSecondary(current) : getImpressions(current);
-  wrap.innerHTML = buildScalingCurveSvg(points, current.budget, currentY);
+  updateScalingCurveSvg(wrap, points, current.budget, currentY);
 
   const plus20 = computeAt(current.budget * 1.2);
   const plus20Y = metric === 'secondary' ? getSecondary(plus20) : getImpressions(plus20);
@@ -3389,53 +3425,80 @@ function renderScalingChart(current, computeAt, getImpressions, getSecondary, in
     });
 }
 
-// Construit un petit line chart SVG responsive : courbe attendue, bande d'incertitude
-// (±12 %), repère pointillé + point sur le budget actuel, axes avec quelques graduations.
-function buildScalingCurveSvg(points, currentX, currentY) {
+// Construit (une seule fois) puis met à jour en place un petit line chart SVG responsive :
+// courbe attendue, bande d'incertitude (±12 %), repère pointillé + point sur le budget
+// actuel, axes avec quelques graduations. Mettre à jour les attributs des MÊMES éléments
+// DOM (plutôt que tout reconstruire via innerHTML) permet aux transitions CSS sur d/cx/cy
+// (voir .scaling-svg-*) d'animer réellement la courbe d'un état à l'autre au lieu de
+// sauter instantanément — la donnée affichée reste exacte, seul le tracé s'anime.
+const SCALING_SVG_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
+function updateScalingCurveSvg(wrap, points, currentX, currentY) {
   const W = 640, H = 240, padL = 56, padR = 16, padT = 16, padB = 34;
   const maxX = points[points.length - 1].x || 1;
   const maxY = Math.max(...points.map(p => p.y), 1) * 1.15;
   const sx = x => padL + (x / maxX) * (W - padL - padR);
   const sy = y => H - padB - (y / maxY) * (H - padT - padB);
 
+  let svg = wrap.querySelector('svg.scaling-svg');
+  if (!svg) {
+    wrap.innerHTML = `
+      <svg viewBox="0 0 ${W} ${H}" class="scaling-svg" role="img" aria-label="${t('scalingChartTitle')}">
+        <g class="scaling-grid-group">${SCALING_SVG_FRACTIONS.map((f, i) => `
+          <line class="scaling-svg-grid" data-grid-i="${i}"></line>
+          <text class="scaling-svg-axis-label" data-grid-i="${i}" text-anchor="end"></text>
+        `).join('')}</g>
+        <line class="scaling-svg-grid" x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}"></line>
+        <line class="scaling-svg-grid" x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}"></line>
+        <path class="scaling-svg-band"></path>
+        <path class="scaling-svg-line"></path>
+        <line class="scaling-svg-marker"></line>
+        <circle class="scaling-svg-point" r="4.5"></circle>
+        <rect class="scaling-svg-callout-bg" height="22" rx="5"></rect>
+        <text class="scaling-svg-callout" text-anchor="middle"></text>
+        <g class="scaling-xlabels-group">${SCALING_SVG_FRACTIONS.map((f, i) => `<text class="scaling-svg-axis-label" data-xlabel-i="${i}"></text>`).join('')}</g>
+      </svg>
+    `;
+    svg = wrap.querySelector('svg.scaling-svg');
+  }
+
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${sx(p.x).toFixed(1)} ${sy(p.y).toFixed(1)}`).join(' ');
   const bandTop = points.map(p => `${sx(p.x).toFixed(1)} ${sy(p.y * 1.12).toFixed(1)}`).join(' L ');
   const bandBottom = points.slice().reverse().map(p => `${sx(p.x).toFixed(1)} ${sy(Math.max(p.y * 0.88, 0)).toFixed(1)}`).join(' L ');
   const bandPath = `M ${bandTop} L ${bandBottom} Z`;
 
-  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(f => {
+  SCALING_SVG_FRACTIONS.forEach((f, i) => {
     const y = padT + f * (H - padT - padB);
-    const val = maxY * (1 - f);
-    return `<line class="scaling-svg-grid" x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}"></line>
-      <text class="scaling-svg-axis-label" x="${padL - 8}" y="${y + 3}" text-anchor="end">${fmtNum(val)}</text>`;
-  }).join('');
+    const line = svg.querySelector(`line[data-grid-i="${i}"]`);
+    line.setAttribute('x1', padL); line.setAttribute('y1', y); line.setAttribute('x2', W - padR); line.setAttribute('y2', y);
+    const label = svg.querySelector(`text[data-grid-i="${i}"]`);
+    label.setAttribute('x', padL - 8); label.setAttribute('y', y + 3);
+    label.textContent = fmtNum(maxY * (1 - f));
 
-  const xLabels = [0, 0.25, 0.5, 0.75, 1].map(f => {
     const x = padL + f * (W - padL - padR);
     const anchor = f === 0 ? 'start' : f === 1 ? 'end' : 'middle';
-    return `<text class="scaling-svg-axis-label" x="${x}" y="${H - padB + 16}" text-anchor="${anchor}">${fmtEUR(maxX * f)}</text>`;
-  }).join('');
+    const xLabel = svg.querySelector(`text[data-xlabel-i="${i}"]`);
+    xLabel.setAttribute('x', x); xLabel.setAttribute('y', H - padB + 16); xLabel.setAttribute('text-anchor', anchor);
+    xLabel.textContent = fmtEUR(maxX * f);
+  });
+
+  svg.querySelector('.scaling-svg-band').setAttribute('d', bandPath);
+  svg.querySelector('.scaling-svg-line').setAttribute('d', linePath);
 
   const cx = sx(currentX), cy = sy(currentY);
+  const marker = svg.querySelector('.scaling-svg-marker');
+  marker.setAttribute('x1', cx); marker.setAttribute('y1', cy); marker.setAttribute('x2', cx); marker.setAttribute('y2', H - padB);
+  const point = svg.querySelector('.scaling-svg-point');
+  point.setAttribute('cx', cx); point.setAttribute('cy', cy);
+
   const calloutText = `${fmtNum(currentY)}`;
   const calloutWidth = calloutText.length * 6.5 + 16;
   const calloutX = Math.min(Math.max(cx - calloutWidth / 2, padL), W - padR - calloutWidth);
   const calloutY = Math.max(cy - 34, padT);
-
-  return `
-    <svg viewBox="0 0 ${W} ${H}" class="scaling-svg" role="img" aria-label="${t('scalingChartTitle')}">
-      ${gridLines}
-      <line class="scaling-svg-grid" x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}"></line>
-      <line class="scaling-svg-grid" x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}"></line>
-      <path class="scaling-svg-band" d="${bandPath}"></path>
-      <path class="scaling-svg-line" d="${linePath}"></path>
-      <line class="scaling-svg-marker" x1="${cx}" y1="${cy}" x2="${cx}" y2="${H - padB}"></line>
-      <circle class="scaling-svg-point" cx="${cx}" cy="${cy}" r="4.5"></circle>
-      <rect class="scaling-svg-callout-bg" x="${calloutX}" y="${calloutY}" width="${calloutWidth}" height="22" rx="5"></rect>
-      <text class="scaling-svg-callout" x="${calloutX + calloutWidth / 2}" y="${calloutY + 15}" text-anchor="middle">${calloutText}</text>
-      ${xLabels}
-    </svg>
-  `;
+  const calloutBg = svg.querySelector('.scaling-svg-callout-bg');
+  calloutBg.setAttribute('x', calloutX); calloutBg.setAttribute('y', calloutY); calloutBg.setAttribute('width', calloutWidth);
+  const calloutTextEl = svg.querySelector('.scaling-svg-callout');
+  calloutTextEl.setAttribute('x', calloutX + calloutWidth / 2); calloutTextEl.setAttribute('y', calloutY + 15);
+  calloutTextEl.textContent = calloutText;
 }
 
 // Modèle Vues vidéo : funnel Impressions -> Vues -> Vues complètes -> Clics. Le CTR sert au
@@ -3466,15 +3529,7 @@ function renderFunnelVideoViews() {
     { label: t('stageCompleted'), value: f.completed, ref },
     { label: t('stageClicks'), value: f.clicks, ref },
   ];
-  document.getElementById('stageList').innerHTML = stages.map(s => {
-    const pct = Math.max(2, (s.value / s.ref) * 100);
-    return `
-      <div class="stage">
-        <div class="label">${s.label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="figure">${fmtNum(s.value)}</div>
-      </div>`;
-  }).join('');
+  renderStageListAnimated('stageList', stages);
 
   document.getElementById('kpiRow').className = 'kpi-row kpi-row-5';
   document.getElementById('kpiRow').innerHTML = `
@@ -3833,26 +3888,15 @@ function ffRenderKpis(cfg, budget, funnel, forecast) {
 const ffStageLabelKeys = { l2m: 'ffLblL2m', m2s: 'ffLblM2s', s2o: 'ffLblS2o', o2w: 'ffLblO2w' };
 
 function ffRenderFunnelStages(funnel, budget) {
-  const stages = [
-    { label: t('ffStageLeads'), value: funnel.leads, badge: 'media' },
-    { label: t('ffStageMqls'), value: funnel.mqls, badge: 'sales', cost: funnel.mqls > 0 ? budget / funnel.mqls : null, costLabel: t('ffCostMql') },
-    { label: t('ffStageSqls'), value: funnel.sqls, badge: 'sales', cost: funnel.sqls > 0 ? budget / funnel.sqls : null, costLabel: t('ffCostSql') },
-    { label: t('ffStageOpportunities'), value: funnel.opportunities, badge: 'sales', cost: funnel.opportunities > 0 ? budget / funnel.opportunities : null, costLabel: t('ffCostOpp') },
-    { label: t('ffStageWon'), value: funnel.closedWon, badge: 'sales', cost: funnel.closedWon > 0 ? budget / funnel.closedWon : null, costLabel: t('ffCostCac') },
-  ];
   const ref = funnel.leads || 1;
-  document.getElementById('ffStageList').innerHTML = stages.map(s => {
-    const pct = Math.max(2, (s.value / ref) * 100);
-    return `
-      <div class="stage">
-        <div class="label">${s.label}<span class="stage-badge ${s.badge}">${s.badge === 'media' ? t('ffBadgeMedia') : t('ffBadgeSales')}</span></div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="figure-wrap">
-          <div class="figure">${fmtNum(s.value)}</div>
-          ${s.cost != null ? `<div class="cost-label">${s.costLabel} : ${fmtEUR(s.cost)}</div>` : ''}
-        </div>
-      </div>`;
-  }).join('');
+  const stages = [
+    { label: t('ffStageLeads'), value: funnel.leads, ref, badge: 'media', badgeLabel: t('ffBadgeMedia') },
+    { label: t('ffStageMqls'), value: funnel.mqls, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.mqls > 0 ? budget / funnel.mqls : null, costLabel: t('ffCostMql') },
+    { label: t('ffStageSqls'), value: funnel.sqls, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.sqls > 0 ? budget / funnel.sqls : null, costLabel: t('ffCostSql') },
+    { label: t('ffStageOpportunities'), value: funnel.opportunities, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.opportunities > 0 ? budget / funnel.opportunities : null, costLabel: t('ffCostOpp') },
+    { label: t('ffStageWon'), value: funnel.closedWon, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.closedWon > 0 ? budget / funnel.closedWon : null, costLabel: t('ffCostCac') },
+  ];
+  renderStageListAnimated('ffStageList', stages);
 }
 
 function ffRenderForecastTable(forecast, cfg) {
@@ -4043,25 +4087,17 @@ function slgReadInputs() {
 }
 
 function slgRenderStages(d) {
-  const stages = [
-    { label: t('stageImpressions'), value: d.tofuImpressions },
-    { label: t('slgStageMofuLeads'), value: d.mofuLeads },
-    { label: t('ffStageLeads'), value: d.leads },
-    { label: t('ffStageMqls'), value: d.mqls },
-    { label: t('ffStageSqls'), value: d.sqls },
-    { label: t('ffStageOpportunities'), value: d.opportunities },
-    { label: t('ffStageWon'), value: d.closedWon },
-  ];
   const ref = d.tofuImpressions || 1;
-  document.getElementById('slgStageList').innerHTML = stages.map(s => {
-    const pct = Math.max(2, (s.value / ref) * 100);
-    return `
-      <div class="stage">
-        <div class="label">${s.label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="figure">${fmtNum(s.value)}</div>
-      </div>`;
-  }).join('');
+  const stages = [
+    { label: t('stageImpressions'), value: d.tofuImpressions, ref },
+    { label: t('slgStageMofuLeads'), value: d.mofuLeads, ref },
+    { label: t('ffStageLeads'), value: d.leads, ref },
+    { label: t('ffStageMqls'), value: d.mqls, ref },
+    { label: t('ffStageSqls'), value: d.sqls, ref },
+    { label: t('ffStageOpportunities'), value: d.opportunities, ref },
+    { label: t('ffStageWon'), value: d.closedWon, ref },
+  ];
+  renderStageListAnimated('slgStageList', stages);
 }
 
 function slgRenderKpis(totalBudget, roas, cac, funnel, cfg) {
@@ -4225,23 +4261,15 @@ function plgReadInputs() {
 }
 
 function plgRenderStages(d) {
-  const stages = [
-    { label: t('plgStageReach'), value: d.reach },
-    { label: t('plgStageEngaged'), value: d.engaged },
-    { label: t('plgStageSignups'), value: d.signups },
-    { label: t('plgStagePqls'), value: d.pqls },
-    { label: t('plgStagePaid'), value: d.paid },
-  ];
   const ref = d.reach || 1;
-  document.getElementById('plgStageList').innerHTML = stages.map(s => {
-    const pct = Math.max(2, (s.value / ref) * 100);
-    return `
-      <div class="stage">
-        <div class="label">${s.label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
-        <div class="figure">${fmtNum(s.value)}</div>
-      </div>`;
-  }).join('');
+  const stages = [
+    { label: t('plgStageReach'), value: d.reach, ref },
+    { label: t('plgStageEngaged'), value: d.engaged, ref },
+    { label: t('plgStageSignups'), value: d.signups, ref },
+    { label: t('plgStagePqls'), value: d.pqls, ref },
+    { label: t('plgStagePaid'), value: d.paid, ref },
+  ];
+  renderStageListAnimated('plgStageList', stages);
 }
 
 function plgRenderKpis(totalBudget, roas, cac, paid, revenue) {
