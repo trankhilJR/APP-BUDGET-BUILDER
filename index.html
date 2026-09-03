@@ -224,7 +224,11 @@
     accent-color: var(--ember);
   }
 
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  /* Empilé en une colonne : à la largeur de la sidebar (~320-380px), deux colonnes rendaient
+     "Marché géographique" plus haut que "Secteur" (retour à la ligne du label), ce qui
+     décalait verticalement les deux select — et tronquait les valeurs longues (ex. "Gaming /
+     Loisirs"). Une seule colonne règle les deux problèmes définitivement. */
+  .field-row { display: flex; flex-direction: column; }
 
   /* Tab / pill selector — scrolls horizontally on narrow screens instead of wrapping */
   .tabs {
@@ -1494,9 +1498,196 @@
 
   <!-- FULL FUNNEL VIEW -->
   <div id="fullFunnelView" hidden>
-    <div class="panel ff-placeholder">
-      <h2 data-i18n="ffPlaceholderTitle">🚧 Bientôt disponible</h2>
-      <p class="hint" data-i18n="ffPlaceholderBody">Cette vue accueillera prochainement une réplication complète des systèmes de planification SLG (Sales-Led Growth) et PLG (Product-Led Growth) — répartition de budget par phase (TOFU/MOFU/BOFU ou Génération/Capture), plan de campagnes par phase, et funnel chaîné complet. En attendant, la logique de prévision B2B (funnel Lead → MQL → SQL → Opportunité → Client, scénarios Bear/Base/Bull, prévision mensuelle) est disponible directement dans la Vue simple, sous l'objectif Conversion.</p>
+    <div class="funnel-topbar" style="margin-bottom:18px;">
+      <div class="tabs" data-target="ffgMode" role="tablist">
+        <button type="button" class="tab-btn" data-value="slg" data-i18n="ffgModeSlg">Sales-Led (SLG)</button>
+        <button type="button" class="tab-btn" data-value="plg" data-i18n="ffgModePlg">Product-Led (PLG)</button>
+      </div>
+      <select id="ffgMode" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+        <option value="slg" selected data-i18n="ffgModeSlg">Sales-Led (SLG)</option>
+        <option value="plg" data-i18n="ffgModePlg">Product-Led (PLG)</option>
+      </select>
+    </div>
+    <p class="hint" id="ffgModeHint" style="margin:-10px 0 20px;"></p>
+
+    <!-- ============ SLG ============ -->
+    <div id="slgView">
+      <div class="layout">
+        <div class="panel" id="slgInputPanel">
+          <h2 data-i18n="slgInputTitle">Répartition du budget par phase</h2>
+          <p class="hint" data-i18n="slgInputHint">Sensibilisation (TOFU) → génération de leads (MOFU) → accélération commerciale (BOFU).</p>
+
+          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseTofu">TOFU — Notoriété</strong></p>
+          <div class="field">
+            <label><span data-i18n="slgLblTofuBudget">Budget TOFU</span> <span class="val" id="slgTofuBudgetVal">3 000 €</span></label>
+            <input type="range" id="slgTofuBudget" min="0" max="50000" step="500" value="3000">
+          </div>
+          <div class="field">
+            <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="slgTofuCpmVal">5,0 €</span></label>
+            <input type="range" id="slgTofuCpm" min="1" max="15" step="0.1" value="5">
+          </div>
+          <div class="field">
+            <label><span data-i18n="slgLblTofu2Mofu">Taux Impression → Lead MOFU</span> <span class="val" id="slgTofu2MofuVal">0,80 %</span></label>
+            <input type="range" id="slgTofu2Mofu" min="0.05" max="5" step="0.05" value="0.8">
+          </div>
+
+          <hr class="divider">
+          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseMofu">MOFU — Génération de leads</strong></p>
+          <div class="field">
+            <label><span data-i18n="slgLblMofuBudget">Budget MOFU</span> <span class="val" id="slgMofuBudgetVal">8 000 €</span></label>
+            <input type="range" id="slgMofuBudget" min="0" max="100000" step="500" value="8000">
+          </div>
+          <div class="field">
+            <label><span data-i18n="ffLblCpl">Coût par lead (CPL)</span> <span class="val" id="slgMofuCplVal">250 €</span></label>
+            <input type="range" id="slgMofuCpl" min="5" max="1000" step="5" value="250">
+          </div>
+          <div class="field">
+            <label><span data-i18n="slgLblLeadQual">Taux de qualification des leads</span> <span class="val" id="slgLeadQualVal">85,0 %</span></label>
+            <input type="range" id="slgLeadQual" min="20" max="100" step="1" value="85">
+          </div>
+
+          <hr class="divider">
+          <p class="hint" style="margin-bottom:14px;" data-i18n="ffHintRates">Taux de conversion du funnel</p>
+          <div class="field">
+            <label><span data-i18n="ffLblL2m">Lead → MQL</span> <span class="val" id="slgL2mVal">40,0 %</span></label>
+            <input type="range" id="slgL2m" min="5" max="90" step="1" value="40">
+          </div>
+          <div class="field">
+            <label><span data-i18n="ffLblM2s">MQL → SQL</span> <span class="val" id="slgM2sVal">9,0 %</span></label>
+            <input type="range" id="slgM2s" min="2" max="60" step="1" value="9">
+          </div>
+          <div class="field">
+            <label><span data-i18n="ffLblS2o">SQL → Opportunité</span> <span class="val" id="slgS2oVal">40,0 %</span></label>
+            <input type="range" id="slgS2o" min="5" max="80" step="1" value="40">
+          </div>
+          <div class="field">
+            <label><span data-i18n="ffLblO2w">Opportunité → Gagné</span> <span class="val" id="slgO2wVal">25,0 %</span></label>
+            <input type="range" id="slgO2w" min="5" max="70" step="1" value="25">
+          </div>
+
+          <hr class="divider">
+          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseBofu">BOFU — Accélération commerciale</strong></p>
+          <div class="field">
+            <label><span data-i18n="slgLblBofuBudget">Budget BOFU</span> <span class="val" id="slgBofuBudgetVal">4 000 €</span></label>
+            <input type="range" id="slgBofuBudget" min="0" max="50000" step="500" value="4000">
+          </div>
+          <div class="field">
+            <label data-i18n="slgLblLift">Synergie Full-Funnel Lift</label>
+            <div class="tabs" data-target="slgLift" role="tablist">
+              <button type="button" class="tab-btn" data-value="off" data-i18n="lblOff">Désactivée</button>
+              <button type="button" class="tab-btn" data-value="on" data-i18n="lblOn">Activée</button>
+            </div>
+            <select id="slgLift" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+              <option value="off" selected>Désactivée</option>
+              <option value="on">Activée</option>
+            </select>
+            <p class="hint" id="slgLiftHint" style="margin:8px 0 0;"></p>
+          </div>
+
+          <hr class="divider">
+          <div class="field">
+            <label><span data-i18n="ffLblDeal">Valeur moyenne du deal</span> <span class="val" id="slgDealVal">15 000 €</span></label>
+            <input type="range" id="slgDeal" min="500" max="200000" step="500" value="15000">
+          </div>
+        </div>
+
+        <div class="panel" id="slgOutputPanel">
+          <div class="funnel-header">
+            <h2 data-i18n="slgFunnelTitle">Funnel Sales-Led chaîné</h2>
+          </div>
+          <div class="kpi-row kpi-row-4" id="slgKpiRow"></div>
+          <div class="stage-list" id="slgStageList" style="margin-top:20px;"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="slgCampaignPlanPanel">
+        <div class="funnel-header">
+          <h2 data-i18n="slgCampaignPlanTitle">Plan de campagnes</h2>
+        </div>
+        <div class="table-scroll">
+          <table class="scenario-table" id="slgCampaignPlanTable"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ PLG ============ -->
+    <div id="plgView" hidden>
+      <div class="layout">
+        <div class="panel" id="plgInputPanel">
+          <h2 data-i18n="plgInputTitle">Répartition du budget par phase</h2>
+          <p class="hint" data-i18n="plgInputHint">Génération de la demande (Demand Gen) → capture de la demande (Demand Capture) → activation produit.</p>
+
+          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="plgPhaseGen">Demand Generation</strong></p>
+          <div class="field">
+            <label><span data-i18n="plgLblGenBudget">Budget Demand Gen</span> <span class="val" id="plgGenBudgetVal">10 000 €</span></label>
+            <input type="range" id="plgGenBudget" min="0" max="100000" step="500" value="10000">
+          </div>
+          <div class="field">
+            <label><span data-i18n="plgLblVideoPct">Part Vidéo</span> <span class="val" id="plgVideoPctVal">40 %</span></label>
+            <input type="range" id="plgVideoPct" min="0" max="100" step="5" value="40">
+          </div>
+          <div class="field">
+            <label><span data-i18n="plgLblImagePct">Part Image seule</span> <span class="val" id="plgImagePctVal">35 %</span></label>
+            <input type="range" id="plgImagePct" min="0" max="100" step="5" value="35">
+          </div>
+          <p class="hint" id="plgConversionPctNote" style="margin:-8px 0 14px;"></p>
+          <div class="field">
+            <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="plgCpmVal">6,0 €</span></label>
+            <input type="range" id="plgCpm" min="1" max="15" step="0.1" value="6">
+          </div>
+          <div class="field">
+            <label><span data-i18n="plgLblEngagement">Taux d'engagement (Reach → Engagé)</span> <span class="val" id="plgEngagementVal">8,0 %</span></label>
+            <input type="range" id="plgEngagement" min="0.5" max="40" step="0.5" value="8">
+          </div>
+          <div class="field">
+            <label><span data-i18n="plgLblGenToSignup">Taux Engagé → Inscription (organique)</span> <span class="val" id="plgGenToSignupVal">3,0 %</span></label>
+            <input type="range" id="plgGenToSignup" min="0.1" max="20" step="0.1" value="3">
+          </div>
+
+          <hr class="divider">
+          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="plgPhaseCapture">Demand Capture</strong></p>
+          <div class="field">
+            <label><span data-i18n="plgLblCaptureBudget">Budget Demand Capture</span> <span class="val" id="plgCaptureBudgetVal">5 000 €</span></label>
+            <input type="range" id="plgCaptureBudget" min="0" max="100000" step="500" value="5000">
+          </div>
+          <div class="field">
+            <label><span data-i18n="plgLblCostPerSignup">Coût par inscription</span> <span class="val" id="plgCostPerSignupVal">40 €</span></label>
+            <input type="range" id="plgCostPerSignup" min="1" max="500" step="1" value="40">
+          </div>
+
+          <hr class="divider">
+          <p class="hint" style="margin-bottom:14px;"><strong data-i18n="plgPhaseProduct">Funnel produit</strong></p>
+          <div class="field">
+            <label><span data-i18n="plgLblSignupToPql">Inscription → PQL</span> <span class="val" id="plgSignupToPqlVal">25,0 %</span></label>
+            <input type="range" id="plgSignupToPql" min="1" max="90" step="1" value="25">
+          </div>
+          <div class="field">
+            <label><span data-i18n="plgLblPqlToPaid">PQL → Payant</span> <span class="val" id="plgPqlToPaidVal">20,0 %</span></label>
+            <input type="range" id="plgPqlToPaid" min="1" max="90" step="1" value="20">
+          </div>
+          <div class="field">
+            <label><span data-i18n="plgLblArpu">Revenu moyen par client payant (ARPU)</span> <span class="val" id="plgArpuVal">1 200 €</span></label>
+            <input type="range" id="plgArpu" min="50" max="20000" step="50" value="1200">
+          </div>
+        </div>
+
+        <div class="panel" id="plgOutputPanel">
+          <div class="funnel-header">
+            <h2 data-i18n="plgFunnelTitle">Funnel Product-Led chaîné</h2>
+          </div>
+          <div class="kpi-row kpi-row-4" id="plgKpiRow"></div>
+          <div class="stage-list" id="plgStageList" style="margin-top:20px;"></div>
+        </div>
+      </div>
+
+      <div class="panel" id="plgCampaignPlanPanel">
+        <div class="funnel-header">
+          <h2 data-i18n="slgCampaignPlanTitle">Plan de campagnes</h2>
+        </div>
+        <div class="table-scroll">
+          <table class="scenario-table" id="plgCampaignPlanTable"></table>
+        </div>
+      </div>
     </div>
   </div>
   <!-- /fullFunnelView -->
@@ -1650,6 +1841,8 @@ const translations = {
     scalingChartInsightReach: 'de reach',
     scalingChartClicks: 'Clics',
     scalingChartInsightClicks: 'de clics',
+    scalingChartInsightViews: 'de vues',
+    scalingChartInsightInstalls: "d'installations",
     objVideoViews: 'Vues vidéo',
     funnelTitleVideoViews: 'Projection — Vues vidéo',
     lblViewRate: 'Taux de vue',
@@ -1723,6 +1916,61 @@ const translations = {
     ffThRevenue: 'Revenu',
     ffThCumSpend: 'Dépense cum.',
     ffThCumRevenue: 'Revenu cum.',
+    ffgModeSlg: 'Sales-Led (SLG)',
+    ffgModePlg: 'Product-Led (PLG)',
+    ffgModeHintSlg: "Croissance pilotée par les commerciaux : sensibilisation, génération de leads, puis accélération et closing par l'équipe de vente.",
+    ffgModeHintPlg: "Croissance pilotée par le produit : les utilisateurs s'inscrivent et adoptent le produit en self-service avant toute conversion payante.",
+    slgInputTitle: 'Répartition du budget par phase',
+    slgInputHint: 'Sensibilisation (TOFU) → génération de leads (MOFU) → accélération commerciale (BOFU).',
+    slgPhaseTofu: 'TOFU — Notoriété',
+    slgPhaseMofu: 'MOFU — Génération de leads',
+    slgPhaseBofu: 'BOFU — Accélération commerciale',
+    slgLblTofuBudget: 'Budget TOFU',
+    slgLblTofu2Mofu: 'Taux Impression → Lead MOFU',
+    slgLblMofuBudget: 'Budget MOFU',
+    slgLblLeadQual: 'Taux de qualification des leads',
+    slgLblBofuBudget: 'Budget BOFU',
+    slgLblLift: 'Synergie Full-Funnel Lift',
+    lblOff: 'Désactivée',
+    lblOn: 'Activée',
+    slgLiftHintOn: "Le budget BOFU (retargeting, contenus de vente) renforce la clôture des opportunités déjà influencées par TOFU/MOFU : +{boost} pts sur le taux Opportunité → Gagné.",
+    slgLiftHintOff: 'Chaque phase est modélisée indépendamment, sans effet de synergie entre elles.',
+    slgFunnelTitle: 'Funnel Sales-Led chaîné',
+    slgStageMofuLeads: 'Leads MOFU',
+    slgCampaignPlanTitle: 'Plan de campagnes',
+    slgThPhase: 'Phase',
+    slgThObjective: 'Objectif',
+    slgThFormat: 'Format',
+    slgThBudget: 'Budget',
+    slgThShare: 'Part',
+    slgThOutput: 'Résultat',
+    slgMofuObjective: 'Génération de leads',
+    slgBofuObjective: 'Accélération / Retargeting',
+    slgLiftActive: 'Lift activé',
+    slgLiftInactive: 'Lift désactivé',
+    plgInputTitle: 'Répartition du budget par phase',
+    plgInputHint: 'Génération de la demande (Demand Gen) → capture de la demande (Demand Capture) → activation produit.',
+    plgPhaseGen: 'Demand Generation',
+    plgPhaseCapture: 'Demand Capture',
+    plgPhaseProduct: 'Funnel produit',
+    plgLblGenBudget: 'Budget Demand Gen',
+    plgLblVideoPct: 'Part Vidéo',
+    plgLblImagePct: 'Part Image seule',
+    plgConversionPctNote: 'Part Conversion (calculée) : {pct} %',
+    plgLblEngagement: "Taux d'engagement (Reach → Engagé)",
+    plgLblGenToSignup: 'Taux Engagé → Inscription (organique)',
+    plgLblCaptureBudget: 'Budget Demand Capture',
+    plgLblCostPerSignup: 'Coût par inscription',
+    plgLblSignupToPql: 'Inscription → PQL',
+    plgLblPqlToPaid: 'PQL → Payant',
+    plgLblArpu: 'Revenu moyen par client payant (ARPU)',
+    plgFunnelTitle: 'Funnel Product-Led chaîné',
+    plgStageReach: 'Reach',
+    plgStageEngaged: 'Engagé',
+    plgStageSignups: 'Inscriptions',
+    plgStagePqls: 'PQLs',
+    plgStagePaid: 'Payant',
+    plgKpiNewCustomers: 'Nouveaux clients payants',
     lblAdvancedSettings: 'Paramètres avancés — presets par secteur',
     hintAdvancedSettings: 'Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.',
     btnResetPresets: 'Réinitialiser les valeurs par défaut',
@@ -1909,6 +2157,8 @@ const translations = {
     scalingChartInsightReach: 'reach',
     scalingChartClicks: 'Clicks',
     scalingChartInsightClicks: 'clicks',
+    scalingChartInsightViews: 'views',
+    scalingChartInsightInstalls: 'installs',
     objVideoViews: 'Video views',
     funnelTitleVideoViews: 'Projection — Video views',
     lblViewRate: 'View rate',
@@ -1982,6 +2232,61 @@ const translations = {
     ffThRevenue: 'Revenue',
     ffThCumSpend: 'Cum. spend',
     ffThCumRevenue: 'Cum. revenue',
+    ffgModeSlg: 'Sales-Led (SLG)',
+    ffgModePlg: 'Product-Led (PLG)',
+    ffgModeHintSlg: 'Sales-team-driven growth: awareness, lead generation, then sales-team acceleration and closing.',
+    ffgModeHintPlg: 'Product-driven growth: users sign up and adopt the product self-serve before any paid conversion.',
+    slgInputTitle: 'Budget split by phase',
+    slgInputHint: 'Awareness (TOFU) → lead generation (MOFU) → sales acceleration (BOFU).',
+    slgPhaseTofu: 'TOFU — Awareness',
+    slgPhaseMofu: 'MOFU — Lead generation',
+    slgPhaseBofu: 'BOFU — Sales acceleration',
+    slgLblTofuBudget: 'TOFU budget',
+    slgLblTofu2Mofu: 'Impression → MOFU lead rate',
+    slgLblMofuBudget: 'MOFU budget',
+    slgLblLeadQual: 'Lead qualification rate',
+    slgLblBofuBudget: 'BOFU budget',
+    slgLblLift: 'Full-Funnel Lift synergy',
+    lblOff: 'Off',
+    lblOn: 'On',
+    slgLiftHintOn: 'BOFU budget (retargeting, sales content) reinforces closing on opportunities already influenced by TOFU/MOFU: +{boost} pts on the Opportunity → Won rate.',
+    slgLiftHintOff: 'Each phase is modeled independently, with no synergy effect between them.',
+    slgFunnelTitle: 'Chained Sales-Led funnel',
+    slgStageMofuLeads: 'MOFU leads',
+    slgCampaignPlanTitle: 'Campaign plan',
+    slgThPhase: 'Phase',
+    slgThObjective: 'Objective',
+    slgThFormat: 'Format',
+    slgThBudget: 'Budget',
+    slgThShare: 'Share',
+    slgThOutput: 'Output',
+    slgMofuObjective: 'Lead generation',
+    slgBofuObjective: 'Acceleration / Retargeting',
+    slgLiftActive: 'Lift active',
+    slgLiftInactive: 'Lift inactive',
+    plgInputTitle: 'Budget split by phase',
+    plgInputHint: 'Demand generation (Demand Gen) → demand capture (Demand Capture) → product activation.',
+    plgPhaseGen: 'Demand Generation',
+    plgPhaseCapture: 'Demand Capture',
+    plgPhaseProduct: 'Product funnel',
+    plgLblGenBudget: 'Demand Gen budget',
+    plgLblVideoPct: 'Video share',
+    plgLblImagePct: 'Single-image share',
+    plgConversionPctNote: 'Conversion share (calculated): {pct}%',
+    plgLblEngagement: 'Engagement rate (Reach → Engaged)',
+    plgLblGenToSignup: 'Engaged → Signup rate (organic)',
+    plgLblCaptureBudget: 'Demand Capture budget',
+    plgLblCostPerSignup: 'Cost per signup',
+    plgLblSignupToPql: 'Signup → PQL',
+    plgLblPqlToPaid: 'PQL → Paid',
+    plgLblArpu: 'Average revenue per paying customer (ARPU)',
+    plgFunnelTitle: 'Chained Product-Led funnel',
+    plgStageReach: 'Reach',
+    plgStageEngaged: 'Engaged',
+    plgStageSignups: 'Signups',
+    plgStagePqls: 'PQLs',
+    plgStagePaid: 'Paid',
+    plgKpiNewCustomers: 'New paying customers',
     lblAdvancedSettings: 'Advanced settings — presets by industry',
     hintAdvancedSettings: "Adjust the default CPM and CTR for each industry using the real numbers from your clients' Reddit Ads Manager accounts.",
     btnResetPresets: 'Reset to default values',
@@ -2168,6 +2473,8 @@ const translations = {
     scalingChartInsightReach: 'reach',
     scalingChartClicks: 'Clics',
     scalingChartInsightClicks: 'clics',
+    scalingChartInsightViews: 'vistas',
+    scalingChartInsightInstalls: 'instalaciones',
     objVideoViews: 'Vistas de vídeo',
     funnelTitleVideoViews: 'Proyección — Vistas de vídeo',
     lblViewRate: 'Tasa de vista',
@@ -2241,6 +2548,61 @@ const translations = {
     ffThRevenue: 'Ingresos',
     ffThCumSpend: 'Gasto acum.',
     ffThCumRevenue: 'Ingresos acum.',
+    ffgModeSlg: 'Sales-Led (SLG)',
+    ffgModePlg: 'Product-Led (PLG)',
+    ffgModeHintSlg: 'Crecimiento impulsado por ventas: sensibilización, generación de leads y luego aceleración y cierre por el equipo comercial.',
+    ffgModeHintPlg: 'Crecimiento impulsado por el producto: los usuarios se registran y adoptan el producto en self-service antes de cualquier conversión de pago.',
+    slgInputTitle: 'Reparto del presupuesto por fase',
+    slgInputHint: 'Sensibilización (TOFU) → generación de leads (MOFU) → aceleración comercial (BOFU).',
+    slgPhaseTofu: 'TOFU — Sensibilización',
+    slgPhaseMofu: 'MOFU — Generación de leads',
+    slgPhaseBofu: 'BOFU — Aceleración comercial',
+    slgLblTofuBudget: 'Presupuesto TOFU',
+    slgLblTofu2Mofu: 'Tasa Impresión → Lead MOFU',
+    slgLblMofuBudget: 'Presupuesto MOFU',
+    slgLblLeadQual: 'Tasa de cualificación de leads',
+    slgLblBofuBudget: 'Presupuesto BOFU',
+    slgLblLift: 'Sinergia Full-Funnel Lift',
+    lblOff: 'Desactivada',
+    lblOn: 'Activada',
+    slgLiftHintOn: 'El presupuesto BOFU (retargeting, contenidos de venta) refuerza el cierre de oportunidades ya influidas por TOFU/MOFU: +{boost} pts en la tasa Oportunidad → Ganado.',
+    slgLiftHintOff: 'Cada fase se modela de forma independiente, sin efecto de sinergia entre ellas.',
+    slgFunnelTitle: 'Funnel Sales-Led encadenado',
+    slgStageMofuLeads: 'Leads MOFU',
+    slgCampaignPlanTitle: 'Plan de campañas',
+    slgThPhase: 'Fase',
+    slgThObjective: 'Objetivo',
+    slgThFormat: 'Formato',
+    slgThBudget: 'Presupuesto',
+    slgThShare: 'Parte',
+    slgThOutput: 'Resultado',
+    slgMofuObjective: 'Generación de leads',
+    slgBofuObjective: 'Aceleración / Retargeting',
+    slgLiftActive: 'Lift activado',
+    slgLiftInactive: 'Lift desactivado',
+    plgInputTitle: 'Reparto del presupuesto por fase',
+    plgInputHint: 'Generación de demanda (Demand Gen) → captura de demanda (Demand Capture) → activación del producto.',
+    plgPhaseGen: 'Demand Generation',
+    plgPhaseCapture: 'Demand Capture',
+    plgPhaseProduct: 'Funnel de producto',
+    plgLblGenBudget: 'Presupuesto Demand Gen',
+    plgLblVideoPct: 'Parte Vídeo',
+    plgLblImagePct: 'Parte Imagen única',
+    plgConversionPctNote: 'Parte Conversión (calculada): {pct} %',
+    plgLblEngagement: 'Tasa de interacción (Reach → Interacción)',
+    plgLblGenToSignup: 'Tasa Interacción → Registro (orgánico)',
+    plgLblCaptureBudget: 'Presupuesto Demand Capture',
+    plgLblCostPerSignup: 'Coste por registro',
+    plgLblSignupToPql: 'Registro → PQL',
+    plgLblPqlToPaid: 'PQL → De pago',
+    plgLblArpu: 'Ingreso medio por cliente de pago (ARPU)',
+    plgFunnelTitle: 'Funnel Product-Led encadenado',
+    plgStageReach: 'Reach',
+    plgStageEngaged: 'Interacción',
+    plgStageSignups: 'Registros',
+    plgStagePqls: 'PQLs',
+    plgStagePaid: 'De pago',
+    plgKpiNewCustomers: 'Nuevos clientes de pago',
     lblAdvancedSettings: 'Ajustes avanzados — presets por sector',
     hintAdvancedSettings: 'Ajusta el CPM y el CTR por defecto de cada sector con las cifras reales de las cuentas de Reddit Ads Manager de tus clientes.',
     btnResetPresets: 'Restablecer valores por defecto',
@@ -2609,6 +2971,7 @@ function applyLangToUi() {
   }
   renderScenarios();
   presentBtn.textContent = presentationActive ? t('btnExitPresentMode') : t('btnPresentMode');
+  if (state.view === 'full') ffgCompute();
   if (!document.getElementById('onboarding').hidden) renderOnboarding();
 }
 langSwitch.addEventListener('change', () => {
@@ -2698,10 +3061,14 @@ function updateObjectiveFieldsVisibility() {
   document.getElementById('ffScenarioWrap').hidden = !isConversion;
   if (isAwareness) updateAwarenessModeVisibility();
   else document.getElementById('budgetField').hidden = isConversion;
-  const showScalingChart = isAwareness || isVideoViews;
+  const showScalingChart = !isConversion;
   document.getElementById('scalingChartCard').hidden = !showScalingChart;
   if (showScalingChart) {
-    document.getElementById('scalingChartSecondaryBtn').textContent = t(isVideoViews ? 'scalingChartClicks' : 'scalingChartReach');
+    const secondaryLabelKey = isAwareness ? 'scalingChartReach'
+      : isVideoViews ? 'stageViews'
+      : isAppInstall ? 'stageInstalls'
+      : 'scalingChartClicks';
+    document.getElementById('scalingChartSecondaryBtn').textContent = t(secondaryLabelKey);
   }
   if (isConversion) {
     document.getElementById('programTotalNote').textContent = '';
@@ -2785,8 +3152,8 @@ function syncLabels() {
   document.getElementById('formatCountHelp').textContent = t('formatCountHelp');
 }
 
-function currentFunnel() {
-  const budget = +els.budget.value;
+function currentFunnel(overrideBudget) {
+  const budget = overrideBudget != null ? overrideBudget : +els.budget.value;
   const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
   const ctr = +els.ctr.value / 100;
   const c2l = +els.c2l.value / 100;
@@ -2805,8 +3172,8 @@ function currentFunnel() {
   return { budget, impressions, clicks, leads, clients, revenue, cpa, cpl, roas };
 }
 
-function currentFunnelAppInstall() {
-  const budget = +els.budget.value;
+function currentFunnelAppInstall(overrideBudget) {
+  const budget = overrideBudget != null ? overrideBudget : +els.budget.value;
   const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
   const ctr = +els.ctr.value / 100;
   const c2i = +els.c2i.value / 100;
@@ -2871,6 +3238,7 @@ function renderFunnel() {
   prevKpiStatus = { cpa: cpaGood, roas: roasGood };
   lastComputedBudget = f.budget;
   updateProgramTotal();
+  renderScalingChart(f, currentFunnel, at => at.impressions, at => at.clicks, 'scalingChartInsightClicks');
 }
 
 // Benchmarks marché indicatifs pour le CPI (Grand public ~6$, SaaS/outils ~3$,
@@ -2921,6 +3289,7 @@ function renderFunnelAppInstall() {
   prevKpiStatus = { ...prevKpiStatus, cpi: cpiGood };
   lastComputedBudget = f.budget;
   updateProgramTotal();
+  renderScalingChart(f, currentFunnelAppInstall, at => at.impressions, at => at.installs, 'scalingChartInsightInstalls');
 }
 
 // Modèle Notoriété : deux modes de planification (méthodologie fournie par l'agence).
@@ -3133,7 +3502,7 @@ function renderFunnelVideoViews() {
 
   lastComputedBudget = f.budget;
   updateProgramTotal();
-  renderScalingChart(f, currentFunnelVideoViews, at => at.impressions, at => at.clicks, 'scalingChartInsightClicks');
+  renderScalingChart(f, currentFunnelVideoViews, at => at.impressions, at => at.views, 'scalingChartInsightViews');
 }
 
 function syncStateFromFields() {
@@ -3590,14 +3959,419 @@ function ffCompute() {
   el.addEventListener('change', () => { ffCompute(); updateTabActiveStates(); })
 );
 
+/* ==================== Full Funnel : SLG / PLG ====================
+   Le moteur B2B "single funnel" (ex-Full Funnel) vit désormais dans la vue
+   Simple, objectif Conversion (voir ffCompute plus haut). Cette vue "Full
+   Funnel" est réservée à la réplication des systèmes de planification
+   multi-phase Sales-Led Growth (SLG) et Product-Led Growth (PLG).
+   Note méthodologique : SLG/PLG sont des cadres marketing génériques (pas
+   des standards Reddit) ; les formules ci-dessous sont une adaptation
+   raisonnable de la structure demandée (répartition de budget par phase,
+   funnel chaîné, synergie inter-phases), pas la copie d'un outil précis. */
+
+const ffgMode = document.getElementById('ffgMode');
+const slgView = document.getElementById('slgView');
+const plgView = document.getElementById('plgView');
+
+const slgEls = {
+  tofuBudget: document.getElementById('slgTofuBudget'),
+  tofuCpm: document.getElementById('slgTofuCpm'),
+  tofu2Mofu: document.getElementById('slgTofu2Mofu'),
+  mofuBudget: document.getElementById('slgMofuBudget'),
+  mofuCpl: document.getElementById('slgMofuCpl'),
+  leadQual: document.getElementById('slgLeadQual'),
+  l2m: document.getElementById('slgL2m'),
+  m2s: document.getElementById('slgM2s'),
+  s2o: document.getElementById('slgS2o'),
+  o2w: document.getElementById('slgO2w'),
+  bofuBudget: document.getElementById('slgBofuBudget'),
+  lift: document.getElementById('slgLift'),
+  deal: document.getElementById('slgDeal'),
+};
+
+const plgEls = {
+  genBudget: document.getElementById('plgGenBudget'),
+  videoPct: document.getElementById('plgVideoPct'),
+  imagePct: document.getElementById('plgImagePct'),
+  cpm: document.getElementById('plgCpm'),
+  engagement: document.getElementById('plgEngagement'),
+  genToSignup: document.getElementById('plgGenToSignup'),
+  captureBudget: document.getElementById('plgCaptureBudget'),
+  costPerSignup: document.getElementById('plgCostPerSignup'),
+  signupToPql: document.getElementById('plgSignupToPql'),
+  pqlToPaid: document.getElementById('plgPqlToPaid'),
+  arpu: document.getElementById('plgArpu'),
+};
+
+// Points de pourcentage ajoutés au taux Opportunité -> Gagné quand la synergie
+// Full-Funnel Lift est activée (le retargeting/contenu de vente BOFU renforce
+// la clôture des opportunités déjà "réchauffées" par TOFU/MOFU).
+const SLG_LIFT_BOOST = 8;
+
+function slgSyncLabels() {
+  document.getElementById('slgTofuBudgetVal').textContent = fmtEUR(+slgEls.tofuBudget.value);
+  document.getElementById('slgTofuCpmVal').textContent = (+slgEls.tofuCpm.value).toFixed(1).replace('.', ',') + ' €';
+  document.getElementById('slgTofu2MofuVal').textContent = (+slgEls.tofu2Mofu.value).toFixed(2).replace('.', ',') + ' %';
+  document.getElementById('slgMofuBudgetVal').textContent = fmtEUR(+slgEls.mofuBudget.value);
+  document.getElementById('slgMofuCplVal').textContent = fmtEUR(+slgEls.mofuCpl.value);
+  document.getElementById('slgLeadQualVal').textContent = (+slgEls.leadQual.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('slgL2mVal').textContent = fmtPct(+slgEls.l2m.value);
+  document.getElementById('slgM2sVal').textContent = fmtPct(+slgEls.m2s.value);
+  document.getElementById('slgS2oVal').textContent = fmtPct(+slgEls.s2o.value);
+  document.getElementById('slgO2wVal').textContent = fmtPct(+slgEls.o2w.value);
+  document.getElementById('slgBofuBudgetVal').textContent = fmtEUR(+slgEls.bofuBudget.value);
+  document.getElementById('slgDealVal').textContent = fmtEUR(+slgEls.deal.value);
+  document.getElementById('slgLiftHint').textContent = t(slgEls.lift.value === 'on' ? 'slgLiftHintOn' : 'slgLiftHintOff', { boost: SLG_LIFT_BOOST });
+}
+
+function slgReadInputs() {
+  return {
+    tofuBudget: +slgEls.tofuBudget.value,
+    tofuCpm: +slgEls.tofuCpm.value,
+    tofu2Mofu: +slgEls.tofu2Mofu.value / 100,
+    mofuBudget: +slgEls.mofuBudget.value,
+    mofuCpl: +slgEls.mofuCpl.value,
+    leadQual: +slgEls.leadQual.value / 100,
+    l2m: +slgEls.l2m.value,
+    m2s: +slgEls.m2s.value,
+    s2o: +slgEls.s2o.value,
+    o2w: +slgEls.o2w.value,
+    bofuBudget: +slgEls.bofuBudget.value,
+    liftEnabled: slgEls.lift.value === 'on',
+    deal: +slgEls.deal.value,
+  };
+}
+
+function slgRenderStages(d) {
+  const stages = [
+    { label: t('stageImpressions'), value: d.tofuImpressions },
+    { label: t('slgStageMofuLeads'), value: d.mofuLeads },
+    { label: t('ffStageLeads'), value: d.leads },
+    { label: t('ffStageMqls'), value: d.mqls },
+    { label: t('ffStageSqls'), value: d.sqls },
+    { label: t('ffStageOpportunities'), value: d.opportunities },
+    { label: t('ffStageWon'), value: d.closedWon },
+  ];
+  const ref = d.tofuImpressions || 1;
+  document.getElementById('slgStageList').innerHTML = stages.map(s => {
+    const pct = Math.max(2, (s.value / ref) * 100);
+    return `
+      <div class="stage">
+        <div class="label">${s.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure">${fmtNum(s.value)}</div>
+      </div>`;
+  }).join('');
+}
+
+function slgRenderKpis(totalBudget, roas, cac, funnel, cfg) {
+  document.getElementById('slgKpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiRequiredBudget')}</div>
+      <div class="kpi-value">${fmtEUR(totalBudget)}</div>
+      <div class="kpi-sub">${roas.toFixed(2)}× ROAS</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('ffKpiPipeline')}</div>
+      <div class="kpi-value">${fmtEUR(funnel.pipelineValue)}</div>
+      <div class="kpi-sub">${t('ffSubOpportunities', { count: funnel.opportunities.toFixed(1) })}</div>
+    </div>
+    <div class="kpi ${funnel.closedWon > 0 && cac < cfg.deal ? 'good' : 'warn'}">
+      <div class="kpi-label">${t('ffKpiCac')}</div>
+      <div class="kpi-value">${funnel.closedWon > 0 ? fmtEUR(cac) : '—'}</div>
+      <div class="kpi-sub">${t('ffSubWon', { count: funnel.closedWon.toFixed(1) })}</div>
+    </div>
+    <div class="kpi ${roas >= 1 ? 'good' : 'warn'}">
+      <div class="kpi-label">${t('ffKpiRevenue')}</div>
+      <div class="kpi-value">${fmtEUR(funnel.revenue)}</div>
+    </div>
+  `;
+}
+
+function slgRenderCampaignPlan(cfg, totalBudget, tofuImpressions, mofuLeads) {
+  const share = b => totalBudget > 0 ? ((b / totalBudget) * 100).toFixed(0) + ' %' : '—';
+  const rows = [
+    { phase: 'TOFU', objective: t('ob_obj_awareness_title'), format: formatLabel('video'), budget: cfg.tofuBudget, output: `${t('kpiImpressions')} : ${fmtNum(tofuImpressions)}` },
+    { phase: 'MOFU', objective: t('slgMofuObjective'), format: formatLabel('freeform'), budget: cfg.mofuBudget, output: `${t('ffStageLeads')} : ${fmtNum(mofuLeads)}` },
+    { phase: 'BOFU', objective: t('slgBofuObjective'), format: formatLabel('carousel'), budget: cfg.bofuBudget, output: cfg.liftEnabled ? t('slgLiftActive') : t('slgLiftInactive') },
+  ];
+  document.getElementById('slgCampaignPlanTable').innerHTML = `
+    <thead>
+      <tr>
+        <th style="text-align:left;">${t('slgThPhase')}</th>
+        <th style="text-align:left;">${t('slgThObjective')}</th>
+        <th style="text-align:left;">${t('slgThFormat')}</th>
+        <th>${t('slgThBudget')}</th>
+        <th>${t('slgThShare')}</th>
+        <th style="text-align:left;">${t('slgThOutput')}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(r => `
+        <tr>
+          <td style="text-align:left;"><strong>${r.phase}</strong></td>
+          <td style="text-align:left;">${r.objective}</td>
+          <td style="text-align:left;">${r.format}</td>
+          <td>${fmtEUR(r.budget)}</td>
+          <td>${share(r.budget)}</td>
+          <td style="text-align:left;">${r.output}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+function slgCompute() {
+  slgSyncLabels();
+  const cfg = slgReadInputs();
+
+  const tofuImpressions = cfg.tofuCpm > 0 ? (cfg.tofuBudget / cfg.tofuCpm) * 1000 : 0;
+  const mofuLeadsFromTofu = tofuImpressions * cfg.tofu2Mofu;
+  const mofuDirectLeads = cfg.mofuCpl > 0 ? cfg.mofuBudget / cfg.mofuCpl : 0;
+  const mofuLeads = mofuLeadsFromTofu + mofuDirectLeads;
+  const leads = mofuLeads * cfg.leadQual;
+
+  const o2w = cfg.liftEnabled ? Math.min(cfg.o2w + SLG_LIFT_BOOST, 95) : cfg.o2w;
+  const funnel = ffFunnelFromLeads(leads, { l2m: cfg.l2m, m2s: cfg.m2s, s2o: cfg.s2o, o2w, deal: cfg.deal });
+
+  const totalBudget = cfg.tofuBudget + cfg.mofuBudget + cfg.bofuBudget;
+  const roas = totalBudget > 0 ? funnel.revenue / totalBudget : 0;
+  const cac = funnel.closedWon > 0 ? totalBudget / funnel.closedWon : 0;
+
+  slgRenderKpis(totalBudget, roas, cac, funnel, cfg);
+  slgRenderStages({ tofuImpressions, mofuLeads, leads, ...funnel });
+  slgRenderCampaignPlan(cfg, totalBudget, tofuImpressions, mofuLeads);
+  slgSyncStateFromFields();
+  scheduleSave();
+}
+
+function slgSyncStateFromFields() {
+  state.slg = {
+    tofuBudget: +slgEls.tofuBudget.value, tofuCpm: +slgEls.tofuCpm.value, tofu2Mofu: +slgEls.tofu2Mofu.value,
+    mofuBudget: +slgEls.mofuBudget.value, mofuCpl: +slgEls.mofuCpl.value, leadQual: +slgEls.leadQual.value,
+    l2m: +slgEls.l2m.value, m2s: +slgEls.m2s.value, s2o: +slgEls.s2o.value, o2w: +slgEls.o2w.value,
+    bofuBudget: +slgEls.bofuBudget.value, lift: slgEls.lift.value, deal: +slgEls.deal.value,
+  };
+}
+
+function slgHydrateFieldsFromState() {
+  const defaults = {
+    tofuBudget: 3000, tofuCpm: 5, tofu2Mofu: 0.8, mofuBudget: 8000, mofuCpl: 250, leadQual: 85,
+    l2m: 40, m2s: 9, s2o: 40, o2w: 25, bofuBudget: 4000, lift: 'off', deal: 15000,
+  };
+  const d = Object.assign(defaults, state.slg && typeof state.slg === 'object' ? state.slg : {});
+  slgEls.tofuBudget.value = d.tofuBudget;
+  slgEls.tofuCpm.value = d.tofuCpm;
+  slgEls.tofu2Mofu.value = d.tofu2Mofu;
+  slgEls.mofuBudget.value = d.mofuBudget;
+  slgEls.mofuCpl.value = d.mofuCpl;
+  slgEls.leadQual.value = d.leadQual;
+  slgEls.l2m.value = d.l2m;
+  slgEls.m2s.value = d.m2s;
+  slgEls.s2o.value = d.s2o;
+  slgEls.o2w.value = d.o2w;
+  slgEls.bofuBudget.value = d.bofuBudget;
+  slgEls.lift.value = d.lift;
+  slgEls.deal.value = d.deal;
+}
+
+[slgEls.tofuBudget, slgEls.tofuCpm, slgEls.tofu2Mofu, slgEls.mofuBudget, slgEls.mofuCpl, slgEls.leadQual,
+ slgEls.l2m, slgEls.m2s, slgEls.s2o, slgEls.o2w, slgEls.bofuBudget, slgEls.deal].forEach(el =>
+  el.addEventListener('input', slgCompute)
+);
+slgEls.lift.addEventListener('change', () => { updateTabActiveStates(); slgCompute(); });
+
+/* -------- PLG -------- */
+
+function plgSyncLabels() {
+  document.getElementById('plgGenBudgetVal').textContent = fmtEUR(+plgEls.genBudget.value);
+  document.getElementById('plgVideoPctVal').textContent = plgEls.videoPct.value + ' %';
+  document.getElementById('plgImagePctVal').textContent = plgEls.imagePct.value + ' %';
+  const conversionPct = Math.max(0, 100 - (+plgEls.videoPct.value) - (+plgEls.imagePct.value));
+  document.getElementById('plgConversionPctNote').textContent = t('plgConversionPctNote', { pct: conversionPct });
+  document.getElementById('plgCpmVal').textContent = (+plgEls.cpm.value).toFixed(1).replace('.', ',') + ' €';
+  document.getElementById('plgEngagementVal').textContent = (+plgEls.engagement.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('plgGenToSignupVal').textContent = (+plgEls.genToSignup.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('plgCaptureBudgetVal').textContent = fmtEUR(+plgEls.captureBudget.value);
+  document.getElementById('plgCostPerSignupVal').textContent = fmtEUR(+plgEls.costPerSignup.value);
+  document.getElementById('plgSignupToPqlVal').textContent = (+plgEls.signupToPql.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('plgPqlToPaidVal').textContent = (+plgEls.pqlToPaid.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('plgArpuVal').textContent = fmtEUR(+plgEls.arpu.value);
+}
+
+// Le budget Demand Gen se répartit sur 3 formats (Vidéo/Image seule/Conversion) via 2
+// sliders interactifs ; la part Conversion est calculée en complément (toujours = 100 %),
+// ce qui évite le problème classique de 3 sliders devant sommer à 100.
+function plgReadInputs() {
+  let videoPct = +plgEls.videoPct.value;
+  let imagePct = +plgEls.imagePct.value;
+  if (videoPct + imagePct > 100) {
+    imagePct = 100 - videoPct;
+    plgEls.imagePct.value = imagePct;
+  }
+  const conversionPct = Math.max(0, 100 - videoPct - imagePct);
+  return {
+    genBudget: +plgEls.genBudget.value,
+    videoPct, imagePct, conversionPct,
+    cpm: +plgEls.cpm.value,
+    engagement: +plgEls.engagement.value / 100,
+    genToSignup: +plgEls.genToSignup.value / 100,
+    captureBudget: +plgEls.captureBudget.value,
+    costPerSignup: +plgEls.costPerSignup.value,
+    signupToPql: +plgEls.signupToPql.value / 100,
+    pqlToPaid: +plgEls.pqlToPaid.value / 100,
+    arpu: +plgEls.arpu.value,
+  };
+}
+
+function plgRenderStages(d) {
+  const stages = [
+    { label: t('plgStageReach'), value: d.reach },
+    { label: t('plgStageEngaged'), value: d.engaged },
+    { label: t('plgStageSignups'), value: d.signups },
+    { label: t('plgStagePqls'), value: d.pqls },
+    { label: t('plgStagePaid'), value: d.paid },
+  ];
+  const ref = d.reach || 1;
+  document.getElementById('plgStageList').innerHTML = stages.map(s => {
+    const pct = Math.max(2, (s.value / ref) * 100);
+    return `
+      <div class="stage">
+        <div class="label">${s.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure">${fmtNum(s.value)}</div>
+      </div>`;
+  }).join('');
+}
+
+function plgRenderKpis(totalBudget, roas, cac, paid, revenue) {
+  document.getElementById('plgKpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiRequiredBudget')}</div>
+      <div class="kpi-value">${fmtEUR(totalBudget)}</div>
+      <div class="kpi-sub">${roas.toFixed(2)}× ROAS</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('plgKpiNewCustomers')}</div>
+      <div class="kpi-value">${fmtNum(paid)}</div>
+    </div>
+    <div class="kpi ${paid > 0 ? 'good' : 'warn'}">
+      <div class="kpi-label">${t('ffKpiCac')}</div>
+      <div class="kpi-value">${paid > 0 ? fmtEUR(cac) : '—'}</div>
+    </div>
+    <div class="kpi ${roas >= 1 ? 'good' : 'warn'}">
+      <div class="kpi-label">${t('ffKpiRevenue')}</div>
+      <div class="kpi-value">${fmtEUR(revenue)}</div>
+    </div>
+  `;
+}
+
+function plgRenderCampaignPlan(cfg, totalBudget) {
+  const share = b => totalBudget > 0 ? ((b / totalBudget) * 100).toFixed(0) + ' %' : '—';
+  const rows = [
+    { phase: `${t('plgPhaseGen')} — ${formatLabel('video')}`, budget: cfg.genBudget * cfg.videoPct / 100 },
+    { phase: `${t('plgPhaseGen')} — ${formatLabel('image')}`, budget: cfg.genBudget * cfg.imagePct / 100 },
+    { phase: `${t('plgPhaseGen')} — ${formatLabel('freeform')}`, budget: cfg.genBudget * cfg.conversionPct / 100 },
+    { phase: t('plgPhaseCapture'), budget: cfg.captureBudget },
+  ];
+  document.getElementById('plgCampaignPlanTable').innerHTML = `
+    <thead>
+      <tr>
+        <th style="text-align:left;">${t('slgThPhase')}</th>
+        <th>${t('slgThBudget')}</th>
+        <th>${t('slgThShare')}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(r => `
+        <tr>
+          <td style="text-align:left;">${r.phase}</td>
+          <td>${fmtEUR(r.budget)}</td>
+          <td>${share(r.budget)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+function plgCompute() {
+  plgSyncLabels();
+  const cfg = plgReadInputs();
+
+  const reach = cfg.cpm > 0 ? (cfg.genBudget / cfg.cpm) * 1000 : 0;
+  const engaged = reach * cfg.engagement;
+  const signupsFromGen = engaged * cfg.genToSignup;
+  const signupsFromCapture = cfg.costPerSignup > 0 ? cfg.captureBudget / cfg.costPerSignup : 0;
+  const signups = signupsFromGen + signupsFromCapture;
+  const pqls = signups * cfg.signupToPql;
+  const paid = pqls * cfg.pqlToPaid;
+  const revenue = paid * cfg.arpu;
+  const totalBudget = cfg.genBudget + cfg.captureBudget;
+  const roas = totalBudget > 0 ? revenue / totalBudget : 0;
+  const cac = paid > 0 ? totalBudget / paid : 0;
+
+  plgRenderKpis(totalBudget, roas, cac, paid, revenue);
+  plgRenderStages({ reach, engaged, signups, pqls, paid });
+  plgRenderCampaignPlan(cfg, totalBudget);
+  plgSyncStateFromFields();
+  scheduleSave();
+}
+
+function plgSyncStateFromFields() {
+  state.plg = {
+    genBudget: +plgEls.genBudget.value, videoPct: +plgEls.videoPct.value, imagePct: +plgEls.imagePct.value,
+    cpm: +plgEls.cpm.value, engagement: +plgEls.engagement.value, genToSignup: +plgEls.genToSignup.value,
+    captureBudget: +plgEls.captureBudget.value, costPerSignup: +plgEls.costPerSignup.value,
+    signupToPql: +plgEls.signupToPql.value, pqlToPaid: +plgEls.pqlToPaid.value, arpu: +plgEls.arpu.value,
+  };
+}
+
+function plgHydrateFieldsFromState() {
+  const defaults = {
+    genBudget: 10000, videoPct: 40, imagePct: 35, cpm: 6, engagement: 8, genToSignup: 3,
+    captureBudget: 5000, costPerSignup: 40, signupToPql: 25, pqlToPaid: 20, arpu: 1200,
+  };
+  const d = Object.assign(defaults, state.plg && typeof state.plg === 'object' ? state.plg : {});
+  plgEls.genBudget.value = d.genBudget;
+  plgEls.videoPct.value = d.videoPct;
+  plgEls.imagePct.value = d.imagePct;
+  plgEls.cpm.value = d.cpm;
+  plgEls.engagement.value = d.engagement;
+  plgEls.genToSignup.value = d.genToSignup;
+  plgEls.captureBudget.value = d.captureBudget;
+  plgEls.costPerSignup.value = d.costPerSignup;
+  plgEls.signupToPql.value = d.signupToPql;
+  plgEls.pqlToPaid.value = d.pqlToPaid;
+  plgEls.arpu.value = d.arpu;
+}
+
+[plgEls.genBudget, plgEls.videoPct, plgEls.imagePct, plgEls.cpm, plgEls.engagement, plgEls.genToSignup,
+ plgEls.captureBudget, plgEls.costPerSignup, plgEls.signupToPql, plgEls.pqlToPaid, plgEls.arpu].forEach(el =>
+  el.addEventListener('input', plgCompute)
+);
+
+/* -------- Mode SLG/PLG + intégration à la vue Full Funnel -------- */
+function updateFfgModeUI() {
+  const mode = ffgMode.value;
+  slgView.hidden = mode !== 'slg';
+  plgView.hidden = mode !== 'plg';
+  document.getElementById('ffgModeHint').textContent = t(mode === 'slg' ? 'ffgModeHintSlg' : 'ffgModeHintPlg');
+}
+
+function ffgCompute() {
+  updateFfgModeUI();
+  if (ffgMode.value === 'slg') slgCompute(); else plgCompute();
+}
+
+ffgMode.addEventListener('change', () => { state.ffgMode = ffgMode.value; updateTabActiveStates(); ffgCompute(); scheduleSave(); });
+
 /* ---------- View switch (Vue simple / Vue Full Funnel) ---------- */
-// La vue "Full Funnel" séparée est réservée au futur système SLG/PLG (placeholder pour
-// l'instant) : le moteur B2B (ffCompute) vit désormais dans la vue Simple, objectif Conversion.
 function setView(view) {
   state.view = view === 'full' ? 'full' : 'simple';
   simpleView.hidden = state.view !== 'simple';
   fullFunnelView.hidden = state.view !== 'full';
   updateTabActiveStates();
+  if (state.view === 'full') ffgCompute();
   scheduleSave();
 }
 viewSwitch.addEventListener('change', () => setView(viewSwitch.value));
@@ -4264,6 +5038,8 @@ function hydrateFieldsFromState() {
   els.completionRate.value = state.completionRate || 1;
   els.ltv.value = state.ltv;
   viewSwitch.value = state.view === 'full' ? 'full' : 'simple';
+  simpleView.hidden = state.view !== 'simple';
+  fullFunnelView.hidden = state.view !== 'full';
   updateObjectiveFieldsVisibility();
   updateTabActiveStates();
   applyLogo();
@@ -4274,6 +5050,10 @@ const hadSaved = loadSavedState();
 applyCustomPresetsToBase();
 const hadShare = applyShareParam();
 ffHydrateFieldsFromState();
+slgHydrateFieldsFromState();
+plgHydrateFieldsFromState();
+ffgMode.value = state.ffgMode || 'slg';
+updateFfgModeUI();
 hydrateFieldsFromState();
 initTheme();
 renderAdvancedPresetsPanel();
