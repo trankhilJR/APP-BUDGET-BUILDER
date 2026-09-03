@@ -1650,6 +1650,8 @@ const translations = {
     scalingChartInsightReach: 'de reach',
     scalingChartClicks: 'Clics',
     scalingChartInsightClicks: 'de clics',
+    scalingChartInsightViews: 'de vues',
+    scalingChartInsightInstalls: "d'installations",
     objVideoViews: 'Vues vidéo',
     funnelTitleVideoViews: 'Projection — Vues vidéo',
     lblViewRate: 'Taux de vue',
@@ -1909,6 +1911,8 @@ const translations = {
     scalingChartInsightReach: 'reach',
     scalingChartClicks: 'Clicks',
     scalingChartInsightClicks: 'clicks',
+    scalingChartInsightViews: 'views',
+    scalingChartInsightInstalls: 'installs',
     objVideoViews: 'Video views',
     funnelTitleVideoViews: 'Projection — Video views',
     lblViewRate: 'View rate',
@@ -2168,6 +2172,8 @@ const translations = {
     scalingChartInsightReach: 'reach',
     scalingChartClicks: 'Clics',
     scalingChartInsightClicks: 'clics',
+    scalingChartInsightViews: 'vistas',
+    scalingChartInsightInstalls: 'instalaciones',
     objVideoViews: 'Vistas de vídeo',
     funnelTitleVideoViews: 'Proyección — Vistas de vídeo',
     lblViewRate: 'Tasa de vista',
@@ -2698,10 +2704,14 @@ function updateObjectiveFieldsVisibility() {
   document.getElementById('ffScenarioWrap').hidden = !isConversion;
   if (isAwareness) updateAwarenessModeVisibility();
   else document.getElementById('budgetField').hidden = isConversion;
-  const showScalingChart = isAwareness || isVideoViews;
+  const showScalingChart = !isConversion;
   document.getElementById('scalingChartCard').hidden = !showScalingChart;
   if (showScalingChart) {
-    document.getElementById('scalingChartSecondaryBtn').textContent = t(isVideoViews ? 'scalingChartClicks' : 'scalingChartReach');
+    const secondaryLabelKey = isAwareness ? 'scalingChartReach'
+      : isVideoViews ? 'stageViews'
+      : isAppInstall ? 'stageInstalls'
+      : 'scalingChartClicks';
+    document.getElementById('scalingChartSecondaryBtn').textContent = t(secondaryLabelKey);
   }
   if (isConversion) {
     document.getElementById('programTotalNote').textContent = '';
@@ -2785,8 +2795,8 @@ function syncLabels() {
   document.getElementById('formatCountHelp').textContent = t('formatCountHelp');
 }
 
-function currentFunnel() {
-  const budget = +els.budget.value;
+function currentFunnel(overrideBudget) {
+  const budget = overrideBudget != null ? overrideBudget : +els.budget.value;
   const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
   const ctr = +els.ctr.value / 100;
   const c2l = +els.c2l.value / 100;
@@ -2805,8 +2815,8 @@ function currentFunnel() {
   return { budget, impressions, clicks, leads, clients, revenue, cpa, cpl, roas };
 }
 
-function currentFunnelAppInstall() {
-  const budget = +els.budget.value;
+function currentFunnelAppInstall(overrideBudget) {
+  const budget = overrideBudget != null ? overrideBudget : +els.budget.value;
   const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
   const ctr = +els.ctr.value / 100;
   const c2i = +els.c2i.value / 100;
@@ -2871,6 +2881,7 @@ function renderFunnel() {
   prevKpiStatus = { cpa: cpaGood, roas: roasGood };
   lastComputedBudget = f.budget;
   updateProgramTotal();
+  renderScalingChart(f, currentFunnel, at => at.impressions, at => at.clicks, 'scalingChartInsightClicks');
 }
 
 // Benchmarks marché indicatifs pour le CPI (Grand public ~6$, SaaS/outils ~3$,
@@ -2921,6 +2932,7 @@ function renderFunnelAppInstall() {
   prevKpiStatus = { ...prevKpiStatus, cpi: cpiGood };
   lastComputedBudget = f.budget;
   updateProgramTotal();
+  renderScalingChart(f, currentFunnelAppInstall, at => at.impressions, at => at.installs, 'scalingChartInsightInstalls');
 }
 
 // Modèle Notoriété : deux modes de planification (méthodologie fournie par l'agence).
@@ -3133,7 +3145,7 @@ function renderFunnelVideoViews() {
 
   lastComputedBudget = f.budget;
   updateProgramTotal();
-  renderScalingChart(f, currentFunnelVideoViews, at => at.impressions, at => at.clicks, 'scalingChartInsightClicks');
+  renderScalingChart(f, currentFunnelVideoViews, at => at.impressions, at => at.views, 'scalingChartInsightViews');
 }
 
 function syncStateFromFields() {
