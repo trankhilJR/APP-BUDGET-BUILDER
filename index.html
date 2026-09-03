@@ -413,7 +413,8 @@
     overflow: hidden;
   }
   .kpi-row.kpi-row-4 { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 640px) { .kpi-row.kpi-row-4 { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-row.kpi-row-5 { grid-template-columns: repeat(5, 1fr); }
+  @media (max-width: 640px) { .kpi-row.kpi-row-4, .kpi-row.kpi-row-5 { grid-template-columns: repeat(2, 1fr); } }
 
   .scaling-chart { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
   .scaling-chart-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
@@ -1240,6 +1241,17 @@
         </div>
       </div>
 
+      <div id="videoFields" hidden>
+        <div class="field">
+          <label><span data-i18n="lblViewRate">Taux de vue</span> <span class="val" id="viewRateVal">40,0 %</span></label>
+          <input type="range" id="viewRate" min="5" max="90" step="1" value="40">
+        </div>
+        <div class="field">
+          <label><span data-i18n="lblCompletionRate">Taux de complétion</span> <span class="val" id="completionRateVal">1,0 %</span></label>
+          <input type="range" id="completionRate" min="0.1" max="20" step="0.1" value="1">
+        </div>
+      </div>
+
       <hr class="divider">
 
       <p class="hint" style="margin-bottom:14px;" data-i18n="hintFunnelAssumptions">Hypothèses du funnel (éditables)</p>
@@ -1308,6 +1320,7 @@
             <option value="traffic" data-i18n="ob_obj_traffic_title">Trafic</option>
             <option value="conversion" selected data-i18n="ob_obj_conversion_title">Conversion</option>
             <option value="appInstall" data-i18n="objAppInstall">Téléchargement d'app</option>
+            <option value="videoViews" data-i18n="objVideoViews">Vues vidéo</option>
           </select>
           <span class="objective-chevron" aria-hidden="true">▾</span>
         </div>
@@ -1325,11 +1338,11 @@
           <h3 data-i18n="scalingChartTitle">Courbe de mise à l'échelle du budget</h3>
           <div class="tabs" data-target="scalingChartMetric" role="tablist">
             <button type="button" class="tab-btn" data-value="impressions" data-i18n="scalingChartImpressions">Impressions</button>
-            <button type="button" class="tab-btn" data-value="reach" data-i18n="scalingChartReach">Reach</button>
+            <button type="button" class="tab-btn" data-value="secondary" id="scalingChartSecondaryBtn">Reach</button>
           </div>
           <select id="scalingChartMetric" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
             <option value="impressions" selected>Impressions</option>
-            <option value="reach">Reach</option>
+            <option value="secondary">Reach</option>
           </select>
         </div>
         <div id="scalingChartSvgWrap"></div>
@@ -1647,6 +1660,19 @@ const translations = {
     scalingChartInsight: '+20 % de budget ({budget}) apporterait ~{pct} % {metric} en plus.',
     scalingChartInsightImpressions: "d'impressions",
     scalingChartInsightReach: 'de reach',
+    scalingChartClicks: 'Clics',
+    scalingChartInsightClicks: 'de clics',
+    objVideoViews: 'Vues vidéo',
+    funnelTitleVideoViews: 'Projection — Vues vidéo',
+    lblViewRate: 'Taux de vue',
+    lblCompletionRate: 'Taux de complétion',
+    stageViews: 'Vues',
+    stageCompleted: 'Vues complètes',
+    kpiVideoViews: 'Vues vidéo',
+    kpiCompletedViews: 'Vues complètes',
+    kpiCostPerView: 'Coût par vue',
+    kpiCostPerCompleted: 'Coût par vue complète',
+    formatReasonVideoViews: "Le format vidéo est nécessaire pour générer des vues : Reddit facture cet objectif à la vue, la vidéo est donc le format natif de la mécanique.",
     lblAdvancedSettings: 'Paramètres avancés — presets par secteur',
     hintAdvancedSettings: 'Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.',
     btnResetPresets: 'Réinitialiser les valeurs par défaut',
@@ -1831,6 +1857,19 @@ const translations = {
     scalingChartInsight: '+20% budget ({budget}) would deliver ~{pct}% more {metric}.',
     scalingChartInsightImpressions: 'impressions',
     scalingChartInsightReach: 'reach',
+    scalingChartClicks: 'Clicks',
+    scalingChartInsightClicks: 'clicks',
+    objVideoViews: 'Video views',
+    funnelTitleVideoViews: 'Projection — Video views',
+    lblViewRate: 'View rate',
+    lblCompletionRate: 'Completion rate',
+    stageViews: 'Views',
+    stageCompleted: 'Completed views',
+    kpiVideoViews: 'Video views',
+    kpiCompletedViews: 'Completed views',
+    kpiCostPerView: 'Cost per view',
+    kpiCostPerCompleted: 'Cost per completed view',
+    formatReasonVideoViews: 'Video is required to generate views: Reddit bills this objective per view, so video is the native format for the mechanic.',
     lblAdvancedSettings: 'Advanced settings — presets by industry',
     hintAdvancedSettings: "Adjust the default CPM and CTR for each industry using the real numbers from your clients' Reddit Ads Manager accounts.",
     btnResetPresets: 'Reset to default values',
@@ -2015,6 +2054,19 @@ const translations = {
     scalingChartInsight: '+20% de presupuesto ({budget}) generaría ~{pct}% más de {metric}.',
     scalingChartInsightImpressions: 'impresiones',
     scalingChartInsightReach: 'reach',
+    scalingChartClicks: 'Clics',
+    scalingChartInsightClicks: 'clics',
+    objVideoViews: 'Vistas de vídeo',
+    funnelTitleVideoViews: 'Proyección — Vistas de vídeo',
+    lblViewRate: 'Tasa de vista',
+    lblCompletionRate: 'Tasa de finalización',
+    stageViews: 'Vistas',
+    stageCompleted: 'Vistas completas',
+    kpiVideoViews: 'Vistas de vídeo',
+    kpiCompletedViews: 'Vistas completas',
+    kpiCostPerView: 'Coste por vista',
+    kpiCostPerCompleted: 'Coste por vista completa',
+    formatReasonVideoViews: 'El vídeo es necesario para generar vistas: Reddit factura este objetivo por vista, por lo que el vídeo es el formato nativo de la mecánica.',
     lblAdvancedSettings: 'Ajustes avanzados — presets por sector',
     hintAdvancedSettings: 'Ajusta el CPM y el CTR por defecto de cada sector con las cifras reales de las cuentas de Reddit Ads Manager de tus clientes.',
     btnResetPresets: 'Restablecer valores por defecto',
@@ -2110,6 +2162,10 @@ const objectiveMultipliers = {
   // différemment -> CPM un peu moins cher. c2l/l2c/eng/freq ne s'appliquent pas
   // au modèle app install (funnel impressions -> clics -> installations).
   appInstall: { cpm: 1.10, ctr: 0.90, c2l: 1.00, l2c: 1.00 },
+  // Vues vidéo : enchère CPM proche de Notoriété (objectif de reach/mémorisation), le CTR
+  // sert ici au calcul des clics annexes (pas la métrique principale). Estimation directionnelle,
+  // Reddit ne publie pas de multiplicateur spécifique par objectif "vues vidéo".
+  videoViews: { cpm: 0.85, ctr: 1.00, c2l: 1.00, l2c: 1.00 },
 };
 // Multiplicateur de plateforme sur le taux clic -> installation : iOS coûte 2-3,5x plus
 // cher qu'Android en CPI (LTV/concurrence plus fortes), donc un taux effectif plus faible.
@@ -2121,6 +2177,7 @@ const formatRecommendations = {
   traffic:    { primary: 'image', secondary: 'carousel', reasonKey: 'formatReasonTraffic' },
   conversion: { primary: 'freeform', secondary: 'carousel', reasonKey: 'formatReasonConversion' },
   appInstall: { primary: 'video', secondary: 'carousel', reasonKey: 'formatReasonAppInstall' },
+  videoViews: { primary: 'video', secondary: 'image', reasonKey: 'formatReasonVideoViews' },
 };
 const formatLinks = {
   image: 'https://business.reddithelp.com/s/article/image-ad-specifications',
@@ -2201,6 +2258,8 @@ const state = {
   audienceSize: 300000,
   reachTarget: 30,
   frequency: 4,
+  viewRate: 40,
+  completionRate: 1,
   ltv: 1200,
   customPresets: {},
   scenarios: [],
@@ -2244,6 +2303,8 @@ const els = {
   reachTarget: document.getElementById('reachTarget'),
   frequency: document.getElementById('frequency'),
   scalingChartMetric: document.getElementById('scalingChartMetric'),
+  viewRate: document.getElementById('viewRate'),
+  completionRate: document.getElementById('completionRate'),
 };
 
 const ffEls = {
@@ -2433,7 +2494,7 @@ function updateTabActiveStates() {
 // installations, enchère CPC) : pas de leads/clients/LTV, un champ clic->install
 // (c2i) à la place, et un multiplicateur de plateforme (iOS/Android/mixte).
 // Couleur du point indicateur devant le dropdown d'objectif (repère visuel rapide).
-const objectiveDotColors = { awareness: '#3F5A47', traffic: '#2563EB', conversion: '#BF4E2C', appInstall: '#7C3AED' };
+const objectiveDotColors = { awareness: '#3F5A47', traffic: '#2563EB', conversion: '#BF4E2C', appInstall: '#7C3AED', videoViews: '#DB2777' };
 function updateObjectiveDot() {
   document.getElementById('objectiveDot').style.background = objectiveDotColors[els.objective.value] || 'var(--ember)';
 }
@@ -2443,17 +2504,24 @@ function updateObjectiveFieldsVisibility() {
   const objective = els.objective.value;
   const isAppInstall = objective === 'appInstall';
   const isAwareness = objective === 'awareness';
+  const isVideoViews = objective === 'videoViews';
   document.getElementById('platformField').hidden = !isAppInstall;
-  document.getElementById('c2lField').hidden = isAppInstall || isAwareness;
-  document.getElementById('l2cField').hidden = isAppInstall || isAwareness;
-  document.getElementById('ltvField').hidden = isAppInstall || isAwareness;
+  document.getElementById('c2lField').hidden = isAppInstall || isAwareness || isVideoViews;
+  document.getElementById('l2cField').hidden = isAppInstall || isAwareness || isVideoViews;
+  document.getElementById('ltvField').hidden = isAppInstall || isAwareness || isVideoViews;
   document.getElementById('c2iField').hidden = !isAppInstall;
   document.getElementById('ctrField').hidden = isAwareness;
   document.getElementById('awarenessFields').hidden = !isAwareness;
+  document.getElementById('videoFields').hidden = !isVideoViews;
   if (isAwareness) updateAwarenessModeVisibility();
   else document.getElementById('budgetField').hidden = false;
-  document.getElementById('scalingChartCard').hidden = !isAwareness;
-  document.getElementById('funnelTitle').textContent = isAppInstall ? t('funnelTitleAppInstall') : t('funnelTitlePipeline');
+  const showScalingChart = isAwareness || isVideoViews;
+  document.getElementById('scalingChartCard').hidden = !showScalingChart;
+  if (showScalingChart) {
+    document.getElementById('scalingChartSecondaryBtn').textContent = t(isVideoViews ? 'scalingChartClicks' : 'scalingChartReach');
+  }
+  document.getElementById('funnelTitle').textContent = isAppInstall ? t('funnelTitleAppInstall')
+    : isVideoViews ? t('funnelTitleVideoViews') : t('funnelTitlePipeline');
   renderFormatRecommendation();
 }
 
@@ -2496,7 +2564,7 @@ function applyPreset() {
   if (objective === 'appInstall') {
     const base = presets[els.industry.value];
     els.c2i.value = (base.c2i || 20).toFixed(1);
-  } else {
+  } else if (objective !== 'videoViews' && objective !== 'awareness') {
     els.c2l.value = a.c2l.toFixed(1);
     els.l2c.value = a.l2c.toFixed(0);
   }
@@ -2515,6 +2583,8 @@ function syncLabels() {
   document.getElementById('ltvVal').textContent = fmtEUR(+els.ltv.value);
   document.getElementById('reachTargetVal').textContent = (+els.reachTarget.value).toFixed(0) + ' %';
   document.getElementById('frequencyVal').textContent = (+els.frequency.value).toFixed(0);
+  document.getElementById('viewRateVal').textContent = (+els.viewRate.value).toFixed(1).replace('.', ',') + ' %';
+  document.getElementById('completionRateVal').textContent = (+els.completionRate.value).toFixed(1).replace('.', ',') + ' %';
 
   const mult = formatCountMultiplier(els.formatCount.value);
   const cpmNote = document.getElementById('cpmEffectiveNote');
@@ -2570,6 +2640,7 @@ function renderFunnel() {
   document.getElementById('kpiRow').className = 'kpi-row';
   if (objective === 'appInstall') { renderFunnelAppInstall(); return; }
   if (objective === 'awareness') { renderFunnelAwareness(); return; }
+  if (objective === 'videoViews') { renderFunnelVideoViews(); return; }
   const f = currentFunnel();
   const stages = [
     { label: t('stageImpressions'), value: f.impressions, ref: f.impressions },
@@ -2728,35 +2799,35 @@ function renderFunnelAwareness() {
 
   lastComputedBudget = f.budget;
   updateProgramTotal();
-  renderScalingChart(f);
+  renderScalingChart(f, currentFunnelAwareness, at => at.impressions, at => at.reached, 'scalingChartInsightReach');
 }
 
 /* ---------- Budget scaling curve (SVG dynamique) ---------- */
-// Recalcule impressions/reach à un budget donné, en Budget-First (le mode pertinent
-// pour explorer "que se passe-t-il si je change le budget ?"), quel que soit le mode
-// de planification actif à l'écran.
-function renderScalingChart(current) {
+// Générique : rejoue computeAt() à plusieurs paliers de budget (en Budget-First, seul mode
+// pertinent pour explorer "que se passe-t-il si je change le budget ?") pour tracer la courbe,
+// quel que soit l'objectif ou le mode de planification actif à l'écran.
+function renderScalingChart(current, computeAt, getImpressions, getSecondary, insightSecondaryKey) {
   const wrap = document.getElementById('scalingChartSvgWrap');
-  const metric = els.scalingChartMetric.value;
+  const metric = els.scalingChartMetric.value; // 'impressions' | 'secondary'
   const maxBudget = Math.max(current.budget * 2, 200);
   const steps = 32;
   const points = [];
   for (let i = 0; i <= steps; i++) {
     const b = (maxBudget / steps) * i;
-    const at = currentFunnelAwareness(b);
-    points.push({ x: b, y: metric === 'reach' ? at.reached : at.impressions });
+    const at = computeAt(b);
+    points.push({ x: b, y: metric === 'secondary' ? getSecondary(at) : getImpressions(at) });
   }
-  const currentY = metric === 'reach' ? current.reached : current.impressions;
+  const currentY = metric === 'secondary' ? getSecondary(current) : getImpressions(current);
   wrap.innerHTML = buildScalingCurveSvg(points, current.budget, currentY);
 
-  const plus20 = currentFunnelAwareness(current.budget * 1.2);
-  const plus20Y = metric === 'reach' ? plus20.reached : plus20.impressions;
+  const plus20 = computeAt(current.budget * 1.2);
+  const plus20Y = metric === 'secondary' ? getSecondary(plus20) : getImpressions(plus20);
   const pctMore = currentY > 0 ? ((plus20Y - currentY) / currentY) * 100 : 0;
   document.getElementById('scalingChartInsight').innerHTML =
     '📈 ' + t('scalingChartInsight', {
       budget: fmtEUR(current.budget * 1.2 - current.budget),
       pct: pctMore.toFixed(0),
-      metric: t(metric === 'reach' ? 'scalingChartInsightReach' : 'scalingChartInsightImpressions'),
+      metric: t(metric === 'secondary' ? insightSecondaryKey : 'scalingChartInsightImpressions'),
     });
 }
 
@@ -2809,6 +2880,73 @@ function buildScalingCurveSvg(points, currentX, currentY) {
   `;
 }
 
+// Modèle Vues vidéo : funnel Impressions -> Vues -> Vues complètes -> Clics. Le CTR sert au
+// calcul des clics annexes (pas la métrique principale, contrairement à Trafic/Conversion).
+function currentFunnelVideoViews(overrideBudget) {
+  const cpm = +els.cpm.value * formatCountMultiplier(els.formatCount.value);
+  const ctr = +els.ctr.value / 100;
+  const viewRate = +els.viewRate.value / 100;
+  const completionRate = +els.completionRate.value / 100;
+  const budget = overrideBudget != null ? overrideBudget : +els.budget.value;
+
+  const impressions = (budget / cpm) * 1000;
+  const views = impressions * viewRate;
+  const completed = views * completionRate;
+  const clicks = impressions * ctr;
+  const costPerView = views > 0 ? budget / views : 0;
+  const costPerCompleted = completed > 0 ? budget / completed : 0;
+
+  return { budget, impressions, views, completed, clicks, costPerView, costPerCompleted, cpm };
+}
+
+function renderFunnelVideoViews() {
+  const f = currentFunnelVideoViews();
+  const ref = f.impressions || 1;
+  const stages = [
+    { label: t('stageImpressions'), value: f.impressions, ref },
+    { label: t('stageViews'), value: f.views, ref },
+    { label: t('stageCompleted'), value: f.completed, ref },
+    { label: t('stageClicks'), value: f.clicks, ref },
+  ];
+  document.getElementById('stageList').innerHTML = stages.map(s => {
+    const pct = Math.max(2, (s.value / s.ref) * 100);
+    return `
+      <div class="stage">
+        <div class="label">${s.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="figure">${fmtNum(s.value)}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('kpiRow').className = 'kpi-row kpi-row-5';
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiRequiredBudget')}</div>
+      <div class="kpi-value">${fmtEUR(f.budget)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiVideoViews')}</div>
+      <div class="kpi-value">${fmtNum(f.views)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiCompletedViews')}</div>
+      <div class="kpi-value">${fmtNum(f.completed)}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiCostPerView')}</div>
+      <div class="kpi-value">${f.views > 0 ? fmtEURPrecise(f.costPerView) : '—'}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">${t('kpiCostPerCompleted')}</div>
+      <div class="kpi-value">${f.completed > 0 ? fmtEURPrecise(f.costPerCompleted) : '—'}</div>
+    </div>
+  `;
+
+  lastComputedBudget = f.budget;
+  updateProgramTotal();
+  renderScalingChart(f, currentFunnelVideoViews, at => at.impressions, at => at.clicks, 'scalingChartInsightClicks');
+}
+
 function syncStateFromFields() {
   state.budget = +els.budget.value;
   state.industry = els.industry.value;
@@ -2828,6 +2966,8 @@ function syncStateFromFields() {
   state.audienceSize = +els.audienceSize.value;
   state.reachTarget = +els.reachTarget.value;
   state.frequency = +els.frequency.value;
+  state.viewRate = +els.viewRate.value;
+  state.completionRate = +els.completionRate.value;
   state.agencyName = els.agencyName.value;
   state.clientName = els.clientName.value;
 }
@@ -2839,7 +2979,7 @@ function compute() {
   scheduleSave();
 }
 
-[els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.c2i, els.ltv, els.audienceSize, els.reachTarget, els.frequency].forEach(el =>
+[els.budget, els.cpm, els.ctr, els.c2l, els.l2c, els.c2i, els.ltv, els.audienceSize, els.reachTarget, els.frequency, els.viewRate, els.completionRate].forEach(el =>
   el.addEventListener('input', compute)
 );
 [els.industry, els.market, els.objective, els.mix].forEach(el =>
@@ -3747,7 +3887,7 @@ document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnb
 
 /* ---------- Scenarios ---------- */
 function saveScenario() {
-  if (els.objective.value === 'appInstall' || els.objective.value === 'awareness') {
+  if (['appInstall', 'awareness', 'videoViews'].includes(els.objective.value)) {
     toast(t('toastScenarioUnavailable'));
     return;
   }
@@ -3925,6 +4065,8 @@ function hydrateFieldsFromState() {
   els.audienceSize.value = state.audienceSize || 300000;
   els.reachTarget.value = state.reachTarget || 30;
   els.frequency.value = state.frequency || 4;
+  els.viewRate.value = state.viewRate || 40;
+  els.completionRate.value = state.completionRate || 1;
   els.ltv.value = state.ltv;
   viewSwitch.value = state.view === 'full' ? 'full' : 'simple';
   updateObjectiveFieldsVisibility();
