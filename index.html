@@ -374,6 +374,7 @@
     flex-wrap: wrap;
     gap: 10px;
   }
+  .log-scale-badge { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; }
 
   .stage-list { display: flex; flex-direction: column; }
   /* Un simple attribut [hidden] perdrait face à .stage-list/.kpi-row (même spécificité,
@@ -1425,6 +1426,7 @@
       </div>
       <div class="funnel-header">
         <h2 id="funnelTitle">Projection du pipeline</h2>
+        <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
       </div>
 
       <div class="stage-list" id="stageList"></div>
@@ -1604,6 +1606,7 @@
         <div class="panel" id="slgOutputPanel">
           <div class="funnel-header">
             <h2 data-i18n="slgFunnelTitle">Funnel Sales-Led chaîné</h2>
+            <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
           </div>
           <div class="kpi-row kpi-row-4" id="slgKpiRow"></div>
           <div class="stage-list" id="slgStageList" style="margin-top:20px;"></div>
@@ -1687,6 +1690,7 @@
         <div class="panel" id="plgOutputPanel">
           <div class="funnel-header">
             <h2 data-i18n="plgFunnelTitle">Funnel Product-Led chaîné</h2>
+            <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
           </div>
           <div class="kpi-row kpi-row-4" id="plgKpiRow"></div>
           <div class="stage-list" id="plgStageList" style="margin-top:20px;"></div>
@@ -1991,6 +1995,7 @@ const translations = {
     hintAdvancedSettings: 'Ajuste le CPM et le CTR par défaut de chaque secteur à partir des vrais chiffres de tes comptes Reddit Ads Manager.',
     btnResetPresets: 'Réinitialiser les valeurs par défaut',
     funnelTitlePipeline: 'Projection du pipeline',
+    logScaleLabel: 'Échelle logarithmique',
     stageImpressions: 'Impressions',
     stageClicks: 'Clics',
     stageLeads: 'Leads',
@@ -2311,6 +2316,7 @@ const translations = {
     hintAdvancedSettings: "Adjust the default CPM and CTR for each industry using the real numbers from your clients' Reddit Ads Manager accounts.",
     btnResetPresets: 'Reset to default values',
     funnelTitlePipeline: 'Pipeline projection',
+    logScaleLabel: 'Logarithmic scale',
     stageImpressions: 'Impressions',
     stageClicks: 'Clicks',
     stageLeads: 'Leads',
@@ -2631,6 +2637,7 @@ const translations = {
     hintAdvancedSettings: 'Ajusta el CPM y el CTR por defecto de cada sector con las cifras reales de las cuentas de Reddit Ads Manager de tus clientes.',
     btnResetPresets: 'Restablecer valores por defecto',
     funnelTitlePipeline: 'Proyección del pipeline',
+    logScaleLabel: 'Escala logarítmica',
     stageImpressions: 'Impresiones',
     stageClicks: 'Clics',
     stageLeads: 'Leads',
@@ -3182,11 +3189,21 @@ function syncLabels() {
 // chiffre, coût) plutôt que de les recréer via innerHTML — un remplacement complet
 // détruirait la continuité nécessaire à la transition CSS (bar-fill s'anime, mais
 // seulement si c'est le MÊME élément dont la largeur change).
+// Échelle logarithmique (comme l'outil de référence, qui l'affiche explicitement en
+// label "Logarithmic Scale") plutôt que linéaire. En linéaire, un CTR de 0,3 % et un
+// taux de conversion global de l'ordre de 0,01 % rendent les étapes Clics/Leads/Clients
+// visuellement nulles (toutes plafonnées au minimum de 2 %) quel que soit le budget —
+// ce qui donne l'impression que le funnel est "cassé"/statique. En log, un ordre de
+// grandeur reste visuellement lisible, ET la proportion se déplace légèrement quand le
+// budget change (contrairement au ratio linéaire value/ref qui, lui, est strictement
+// invariant à l'échelle : doubler le budget double value ET ref, le ratio ne bouge pas).
 // Plancher à 2 % (une barre à 0 % serait invisible/illisible) et plafond à 100 % :
 // sans ce plafond, une étape qui dépasse sa référence (ex. impressions > audience à
 // fréquence élevée) produirait une barre plus large que son propre track.
 function stageBarPct(value, ref) {
-  return Math.min(100, Math.max(2, (value / (ref || 1)) * 100));
+  if (value <= 0 || ref <= 0) return 2;
+  const pct = (Math.log10(value + 1) / Math.log10(ref + 1)) * 100;
+  return Math.min(100, Math.max(2, pct));
 }
 
 function renderStageListAnimated(containerId, stages) {
