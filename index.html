@@ -1524,11 +1524,22 @@
           <h2 data-i18n="slgInputTitle">Répartition du budget par phase</h2>
           <p class="hint" data-i18n="slgInputHint">Sensibilisation (TOFU) → génération de leads (MOFU) → accélération commerciale (BOFU).</p>
 
-          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseTofu">TOFU — Notoriété</strong></p>
           <div class="field">
-            <label><span data-i18n="slgLblTofuBudget">Budget TOFU</span> <span class="val" id="slgTofuBudgetVal">3 000 €</span></label>
-            <input type="range" id="slgTofuBudget" min="0" max="50000" step="500" value="3000">
+            <label><span data-i18n="slgLblTotalBudget">Budget total</span> <span class="val" id="slgTotalBudgetVal">15 000 €</span></label>
+            <input type="range" id="slgTotalBudget" min="1000" max="150000" step="500" value="15000">
           </div>
+          <div class="field">
+            <label><span data-i18n="slgPhaseTofu">TOFU — Notoriété</span> <span class="val" id="slgTofuPctVal">20 %</span></label>
+            <input type="range" id="slgTofuPct" min="0" max="100" step="1" value="20">
+          </div>
+          <div class="field">
+            <label><span data-i18n="slgPhaseMofu">MOFU — Génération de leads</span> <span class="val" id="slgMofuPctVal">53 %</span></label>
+            <input type="range" id="slgMofuPct" min="0" max="100" step="1" value="53">
+          </div>
+          <p class="hint" id="slgBofuPctNote" style="margin:-8px 0 14px;"></p>
+
+          <hr class="divider">
+          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseTofu">TOFU — Notoriété</strong></p>
           <div class="field">
             <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="slgTofuCpmVal">5,0 €</span></label>
             <input type="range" id="slgTofuCpm" min="1" max="15" step="0.1" value="5">
@@ -1540,10 +1551,6 @@
 
           <hr class="divider">
           <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseMofu">MOFU — Génération de leads</strong></p>
-          <div class="field">
-            <label><span data-i18n="slgLblMofuBudget">Budget MOFU</span> <span class="val" id="slgMofuBudgetVal">8 000 €</span></label>
-            <input type="range" id="slgMofuBudget" min="0" max="100000" step="500" value="8000">
-          </div>
           <div class="field">
             <label><span data-i18n="ffLblCpl">Coût par lead (CPL)</span> <span class="val" id="slgMofuCplVal">250 €</span></label>
             <input type="range" id="slgMofuCpl" min="5" max="1000" step="5" value="250">
@@ -1574,10 +1581,6 @@
 
           <hr class="divider">
           <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseBofu">BOFU — Accélération commerciale</strong></p>
-          <div class="field">
-            <label><span data-i18n="slgLblBofuBudget">Budget BOFU</span> <span class="val" id="slgBofuBudgetVal">4 000 €</span></label>
-            <input type="range" id="slgBofuBudget" min="0" max="50000" step="500" value="4000">
-          </div>
           <div class="field">
             <label data-i18n="slgLblLift">Synergie Full-Funnel Lift</label>
             <div class="tabs" data-target="slgLift" role="tablist">
@@ -1624,11 +1627,18 @@
           <h2 data-i18n="plgInputTitle">Répartition du budget par phase</h2>
           <p class="hint" data-i18n="plgInputHint">Génération de la demande (Demand Gen) → capture de la demande (Demand Capture) → activation produit.</p>
 
-          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="plgPhaseGen">Demand Generation</strong></p>
           <div class="field">
-            <label><span data-i18n="plgLblGenBudget">Budget Demand Gen</span> <span class="val" id="plgGenBudgetVal">10 000 €</span></label>
-            <input type="range" id="plgGenBudget" min="0" max="100000" step="500" value="10000">
+            <label><span data-i18n="slgLblTotalBudget">Budget total</span> <span class="val" id="plgTotalBudgetVal">15 000 €</span></label>
+            <input type="range" id="plgTotalBudget" min="1000" max="150000" step="500" value="15000">
           </div>
+          <div class="field">
+            <label><span data-i18n="plgPhaseGen">Demand Generation</span> <span class="val" id="plgGenPctVal">67 %</span></label>
+            <input type="range" id="plgGenPct" min="0" max="100" step="1" value="67">
+          </div>
+          <p class="hint" id="plgCapturePctNote" style="margin:-8px 0 14px;"></p>
+
+          <hr class="divider">
+          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="plgPhaseGen">Demand Generation</strong></p>
           <div class="field">
             <label><span data-i18n="plgLblVideoPct">Part Vidéo</span> <span class="val" id="plgVideoPctVal">40 %</span></label>
             <input type="range" id="plgVideoPct" min="0" max="100" step="5" value="40">
@@ -1653,10 +1663,6 @@
 
           <hr class="divider">
           <p class="hint" style="margin-bottom:10px;"><strong data-i18n="plgPhaseCapture">Demand Capture</strong></p>
-          <div class="field">
-            <label><span data-i18n="plgLblCaptureBudget">Budget Demand Capture</span> <span class="val" id="plgCaptureBudgetVal">5 000 €</span></label>
-            <input type="range" id="plgCaptureBudget" min="0" max="100000" step="500" value="5000">
-          </div>
           <div class="field">
             <label><span data-i18n="plgLblCostPerSignup">Coût par inscription</span> <span class="val" id="plgCostPerSignupVal">40 €</span></label>
             <input type="range" id="plgCostPerSignup" min="1" max="500" step="1" value="40">
@@ -1936,6 +1942,8 @@ const translations = {
     slgLblTofu2Mofu: 'Taux Impression → Lead MOFU',
     slgLblMofuBudget: 'Budget MOFU',
     slgLblLeadQual: 'Taux de qualification des leads',
+    slgLblTotalBudget: 'Budget total',
+    slgBofuPctNote: 'BOFU — Accélération commerciale (calculé) : {pct} %',
     slgLblBofuBudget: 'Budget BOFU',
     slgLblLift: 'Synergie Full-Funnel Lift',
     lblOff: 'Désactivée',
@@ -1966,6 +1974,7 @@ const translations = {
     plgConversionPctNote: 'Part Conversion (calculée) : {pct} %',
     plgLblEngagement: "Taux d'engagement (Reach → Engagé)",
     plgLblGenToSignup: 'Taux Engagé → Inscription (organique)',
+    plgCapturePctNote: 'Demand Capture (calculé) : {pct} %',
     plgLblCaptureBudget: 'Budget Demand Capture',
     plgLblCostPerSignup: 'Coût par inscription',
     plgLblSignupToPql: 'Inscription → PQL',
@@ -2253,6 +2262,8 @@ const translations = {
     slgLblTofu2Mofu: 'Impression → MOFU lead rate',
     slgLblMofuBudget: 'MOFU budget',
     slgLblLeadQual: 'Lead qualification rate',
+    slgLblTotalBudget: 'Total budget',
+    slgBofuPctNote: 'BOFU — Sales acceleration (calculated): {pct}%',
     slgLblBofuBudget: 'BOFU budget',
     slgLblLift: 'Full-Funnel Lift synergy',
     lblOff: 'Off',
@@ -2283,6 +2294,7 @@ const translations = {
     plgConversionPctNote: 'Conversion share (calculated): {pct}%',
     plgLblEngagement: 'Engagement rate (Reach → Engaged)',
     plgLblGenToSignup: 'Engaged → Signup rate (organic)',
+    plgCapturePctNote: 'Demand Capture (calculated): {pct}%',
     plgLblCaptureBudget: 'Demand Capture budget',
     plgLblCostPerSignup: 'Cost per signup',
     plgLblSignupToPql: 'Signup → PQL',
@@ -2570,6 +2582,8 @@ const translations = {
     slgLblTofu2Mofu: 'Tasa Impresión → Lead MOFU',
     slgLblMofuBudget: 'Presupuesto MOFU',
     slgLblLeadQual: 'Tasa de cualificación de leads',
+    slgLblTotalBudget: 'Presupuesto total',
+    slgBofuPctNote: 'BOFU — Aceleración comercial (calculado): {pct} %',
     slgLblBofuBudget: 'Presupuesto BOFU',
     slgLblLift: 'Sinergia Full-Funnel Lift',
     lblOff: 'Desactivada',
@@ -2600,6 +2614,7 @@ const translations = {
     plgConversionPctNote: 'Parte Conversión (calculada): {pct} %',
     plgLblEngagement: 'Tasa de interacción (Reach → Interacción)',
     plgLblGenToSignup: 'Tasa Interacción → Registro (orgánico)',
+    plgCapturePctNote: 'Demand Capture (calculado): {pct} %',
     plgLblCaptureBudget: 'Presupuesto Demand Capture',
     plgLblCostPerSignup: 'Coste por registro',
     plgLblSignupToPql: 'Registro → PQL',
@@ -3167,6 +3182,13 @@ function syncLabels() {
 // chiffre, coût) plutôt que de les recréer via innerHTML — un remplacement complet
 // détruirait la continuité nécessaire à la transition CSS (bar-fill s'anime, mais
 // seulement si c'est le MÊME élément dont la largeur change).
+// Plancher à 2 % (une barre à 0 % serait invisible/illisible) et plafond à 100 % :
+// sans ce plafond, une étape qui dépasse sa référence (ex. impressions > audience à
+// fréquence élevée) produirait une barre plus large que son propre track.
+function stageBarPct(value, ref) {
+  return Math.min(100, Math.max(2, (value / (ref || 1)) * 100));
+}
+
 function renderStageListAnimated(containerId, stages) {
   const container = document.getElementById(containerId);
   const existing = container.querySelectorAll(':scope > .stage');
@@ -3178,7 +3200,7 @@ function renderStageListAnimated(containerId, stages) {
 
   stages.forEach((s, i) => {
     const row = existing[i];
-    const pct = Math.max(2, (s.value / (s.ref || 1)) * 100);
+    const pct = stageBarPct(s.value, s.ref);
     row.querySelector('.bar-fill').style.width = pct + '%';
     row.querySelector('.figure').textContent = fmtNum(s.value);
     const labelText = row.querySelector('.label-text');
@@ -3363,7 +3385,11 @@ function currentFunnelAwareness(overrideBudget) {
 
 function renderFunnelAwareness() {
   const f = currentFunnelAwareness();
-  const ref = Math.max(f.audience, f.impressions, 1);
+  // Référence fixe = audience (comme les autres funnels utilisent la 1re étape comme
+  // référence) : avec un ref dynamique (max des valeurs), la barre Audience — dont le
+  // nombre ne change pourtant pas — se mettait à rétrécir dès que Reach/Impressions la
+  // dépassait, ce qui donnait l'impression que le slider "bougeait tout de travers".
+  const ref = f.audience || 1;
   const stages = [
     { label: t('stageAudience'), value: f.audience, ref },
     { label: t('stageReached'), value: f.reached, ref },
@@ -4018,29 +4044,29 @@ const slgView = document.getElementById('slgView');
 const plgView = document.getElementById('plgView');
 
 const slgEls = {
-  tofuBudget: document.getElementById('slgTofuBudget'),
+  totalBudget: document.getElementById('slgTotalBudget'),
+  tofuPct: document.getElementById('slgTofuPct'),
+  mofuPct: document.getElementById('slgMofuPct'),
   tofuCpm: document.getElementById('slgTofuCpm'),
   tofu2Mofu: document.getElementById('slgTofu2Mofu'),
-  mofuBudget: document.getElementById('slgMofuBudget'),
   mofuCpl: document.getElementById('slgMofuCpl'),
   leadQual: document.getElementById('slgLeadQual'),
   l2m: document.getElementById('slgL2m'),
   m2s: document.getElementById('slgM2s'),
   s2o: document.getElementById('slgS2o'),
   o2w: document.getElementById('slgO2w'),
-  bofuBudget: document.getElementById('slgBofuBudget'),
   lift: document.getElementById('slgLift'),
   deal: document.getElementById('slgDeal'),
 };
 
 const plgEls = {
-  genBudget: document.getElementById('plgGenBudget'),
+  totalBudget: document.getElementById('plgTotalBudget'),
+  genPct: document.getElementById('plgGenPct'),
   videoPct: document.getElementById('plgVideoPct'),
   imagePct: document.getElementById('plgImagePct'),
   cpm: document.getElementById('plgCpm'),
   engagement: document.getElementById('plgEngagement'),
   genToSignup: document.getElementById('plgGenToSignup'),
-  captureBudget: document.getElementById('plgCaptureBudget'),
   costPerSignup: document.getElementById('plgCostPerSignup'),
   signupToPql: document.getElementById('plgSignupToPql'),
   pqlToPaid: document.getElementById('plgPqlToPaid'),
@@ -4052,35 +4078,54 @@ const plgEls = {
 // la clôture des opportunités déjà "réchauffées" par TOFU/MOFU).
 const SLG_LIFT_BOOST = 8;
 
+// TOFU%/MOFU% sont 2 sliders interactifs ; BOFU% se déduit toujours en complément à 100 %
+// (même pattern que le mix Vidéo/Image/Conversion du PLG) — évite le problème classique de
+// plusieurs sliders devant sommer à 100 tout en gardant une interaction fluide au doigt.
+function slgPcts() {
+  let tofuPct = +slgEls.tofuPct.value;
+  let mofuPct = +slgEls.mofuPct.value;
+  if (tofuPct + mofuPct > 100) {
+    mofuPct = 100 - tofuPct;
+    slgEls.mofuPct.value = mofuPct;
+  }
+  const bofuPct = Math.max(0, 100 - tofuPct - mofuPct);
+  return { tofuPct, mofuPct, bofuPct };
+}
+
 function slgSyncLabels() {
-  document.getElementById('slgTofuBudgetVal').textContent = fmtEUR(+slgEls.tofuBudget.value);
+  const { tofuPct, mofuPct, bofuPct } = slgPcts();
+  document.getElementById('slgTotalBudgetVal').textContent = fmtEUR(+slgEls.totalBudget.value);
+  document.getElementById('slgTofuPctVal').textContent = tofuPct + ' %';
+  document.getElementById('slgMofuPctVal').textContent = mofuPct + ' %';
+  document.getElementById('slgBofuPctNote').textContent = t('slgBofuPctNote', { pct: bofuPct });
   document.getElementById('slgTofuCpmVal').textContent = (+slgEls.tofuCpm.value).toFixed(1).replace('.', ',') + ' €';
   document.getElementById('slgTofu2MofuVal').textContent = (+slgEls.tofu2Mofu.value).toFixed(2).replace('.', ',') + ' %';
-  document.getElementById('slgMofuBudgetVal').textContent = fmtEUR(+slgEls.mofuBudget.value);
   document.getElementById('slgMofuCplVal').textContent = fmtEUR(+slgEls.mofuCpl.value);
   document.getElementById('slgLeadQualVal').textContent = (+slgEls.leadQual.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('slgL2mVal').textContent = fmtPct(+slgEls.l2m.value);
   document.getElementById('slgM2sVal').textContent = fmtPct(+slgEls.m2s.value);
   document.getElementById('slgS2oVal').textContent = fmtPct(+slgEls.s2o.value);
   document.getElementById('slgO2wVal').textContent = fmtPct(+slgEls.o2w.value);
-  document.getElementById('slgBofuBudgetVal').textContent = fmtEUR(+slgEls.bofuBudget.value);
   document.getElementById('slgDealVal').textContent = fmtEUR(+slgEls.deal.value);
   document.getElementById('slgLiftHint').textContent = t(slgEls.lift.value === 'on' ? 'slgLiftHintOn' : 'slgLiftHintOff', { boost: SLG_LIFT_BOOST });
 }
 
 function slgReadInputs() {
+  const totalBudget = +slgEls.totalBudget.value;
+  const { tofuPct, mofuPct, bofuPct } = slgPcts();
   return {
-    tofuBudget: +slgEls.tofuBudget.value,
+    totalBudget,
+    tofuBudget: totalBudget * tofuPct / 100,
     tofuCpm: +slgEls.tofuCpm.value,
     tofu2Mofu: +slgEls.tofu2Mofu.value / 100,
-    mofuBudget: +slgEls.mofuBudget.value,
+    mofuBudget: totalBudget * mofuPct / 100,
     mofuCpl: +slgEls.mofuCpl.value,
     leadQual: +slgEls.leadQual.value / 100,
     l2m: +slgEls.l2m.value,
     m2s: +slgEls.m2s.value,
     s2o: +slgEls.s2o.value,
     o2w: +slgEls.o2w.value,
-    bofuBudget: +slgEls.bofuBudget.value,
+    bofuBudget: totalBudget * bofuPct / 100,
     liftEnabled: slgEls.lift.value === 'on',
     deal: +slgEls.deal.value,
   };
@@ -4183,44 +4228,56 @@ function slgCompute() {
 
 function slgSyncStateFromFields() {
   state.slg = {
-    tofuBudget: +slgEls.tofuBudget.value, tofuCpm: +slgEls.tofuCpm.value, tofu2Mofu: +slgEls.tofu2Mofu.value,
-    mofuBudget: +slgEls.mofuBudget.value, mofuCpl: +slgEls.mofuCpl.value, leadQual: +slgEls.leadQual.value,
+    totalBudget: +slgEls.totalBudget.value, tofuPct: +slgEls.tofuPct.value, mofuPct: +slgEls.mofuPct.value,
+    tofuCpm: +slgEls.tofuCpm.value, tofu2Mofu: +slgEls.tofu2Mofu.value,
+    mofuCpl: +slgEls.mofuCpl.value, leadQual: +slgEls.leadQual.value,
     l2m: +slgEls.l2m.value, m2s: +slgEls.m2s.value, s2o: +slgEls.s2o.value, o2w: +slgEls.o2w.value,
-    bofuBudget: +slgEls.bofuBudget.value, lift: slgEls.lift.value, deal: +slgEls.deal.value,
+    lift: slgEls.lift.value, deal: +slgEls.deal.value,
   };
 }
 
 function slgHydrateFieldsFromState() {
   const defaults = {
-    tofuBudget: 3000, tofuCpm: 5, tofu2Mofu: 0.8, mofuBudget: 8000, mofuCpl: 250, leadQual: 85,
-    l2m: 40, m2s: 9, s2o: 40, o2w: 25, bofuBudget: 4000, lift: 'off', deal: 15000,
+    totalBudget: 15000, tofuPct: 20, mofuPct: 53, tofuCpm: 5, tofu2Mofu: 0.8, mofuCpl: 250, leadQual: 85,
+    l2m: 40, m2s: 9, s2o: 40, o2w: 25, lift: 'off', deal: 15000,
   };
   const d = Object.assign(defaults, state.slg && typeof state.slg === 'object' ? state.slg : {});
-  slgEls.tofuBudget.value = d.tofuBudget;
+  slgEls.totalBudget.value = d.totalBudget;
+  slgEls.tofuPct.value = d.tofuPct;
+  slgEls.mofuPct.value = d.mofuPct;
   slgEls.tofuCpm.value = d.tofuCpm;
   slgEls.tofu2Mofu.value = d.tofu2Mofu;
-  slgEls.mofuBudget.value = d.mofuBudget;
   slgEls.mofuCpl.value = d.mofuCpl;
   slgEls.leadQual.value = d.leadQual;
   slgEls.l2m.value = d.l2m;
   slgEls.m2s.value = d.m2s;
   slgEls.s2o.value = d.s2o;
   slgEls.o2w.value = d.o2w;
-  slgEls.bofuBudget.value = d.bofuBudget;
   slgEls.lift.value = d.lift;
   slgEls.deal.value = d.deal;
 }
 
-[slgEls.tofuBudget, slgEls.tofuCpm, slgEls.tofu2Mofu, slgEls.mofuBudget, slgEls.mofuCpl, slgEls.leadQual,
- slgEls.l2m, slgEls.m2s, slgEls.s2o, slgEls.o2w, slgEls.bofuBudget, slgEls.deal].forEach(el =>
+[slgEls.totalBudget, slgEls.tofuPct, slgEls.mofuPct, slgEls.tofuCpm, slgEls.tofu2Mofu, slgEls.mofuCpl, slgEls.leadQual,
+ slgEls.l2m, slgEls.m2s, slgEls.s2o, slgEls.o2w, slgEls.deal].forEach(el =>
   el.addEventListener('input', slgCompute)
 );
 slgEls.lift.addEventListener('change', () => { updateTabActiveStates(); slgCompute(); });
 
 /* -------- PLG -------- */
 
+// Demand Gen / Demand Capture se répartissent le budget total via UN seul slider
+// (Demand Gen %), Demand Capture % étant toujours le complément à 100 — pas d'ambiguïté
+// possible avec seulement 2 phases (contrairement au mix à 3 formats plus bas).
+function plgPcts() {
+  const genPct = +plgEls.genPct.value;
+  return { genPct, capturePct: 100 - genPct };
+}
+
 function plgSyncLabels() {
-  document.getElementById('plgGenBudgetVal').textContent = fmtEUR(+plgEls.genBudget.value);
+  const { genPct, capturePct } = plgPcts();
+  document.getElementById('plgTotalBudgetVal').textContent = fmtEUR(+plgEls.totalBudget.value);
+  document.getElementById('plgGenPctVal').textContent = genPct + ' %';
+  document.getElementById('plgCapturePctNote').textContent = t('plgCapturePctNote', { pct: capturePct });
   document.getElementById('plgVideoPctVal').textContent = plgEls.videoPct.value + ' %';
   document.getElementById('plgImagePctVal').textContent = plgEls.imagePct.value + ' %';
   const conversionPct = Math.max(0, 100 - (+plgEls.videoPct.value) - (+plgEls.imagePct.value));
@@ -4228,7 +4285,6 @@ function plgSyncLabels() {
   document.getElementById('plgCpmVal').textContent = (+plgEls.cpm.value).toFixed(1).replace('.', ',') + ' €';
   document.getElementById('plgEngagementVal').textContent = (+plgEls.engagement.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('plgGenToSignupVal').textContent = (+plgEls.genToSignup.value).toFixed(1).replace('.', ',') + ' %';
-  document.getElementById('plgCaptureBudgetVal').textContent = fmtEUR(+plgEls.captureBudget.value);
   document.getElementById('plgCostPerSignupVal').textContent = fmtEUR(+plgEls.costPerSignup.value);
   document.getElementById('plgSignupToPqlVal').textContent = (+plgEls.signupToPql.value).toFixed(1).replace('.', ',') + ' %';
   document.getElementById('plgPqlToPaidVal').textContent = (+plgEls.pqlToPaid.value).toFixed(1).replace('.', ',') + ' %';
@@ -4246,13 +4302,15 @@ function plgReadInputs() {
     plgEls.imagePct.value = imagePct;
   }
   const conversionPct = Math.max(0, 100 - videoPct - imagePct);
+  const totalBudget = +plgEls.totalBudget.value;
+  const { genPct, capturePct } = plgPcts();
   return {
-    genBudget: +plgEls.genBudget.value,
+    genBudget: totalBudget * genPct / 100,
     videoPct, imagePct, conversionPct,
     cpm: +plgEls.cpm.value,
     engagement: +plgEls.engagement.value / 100,
     genToSignup: +plgEls.genToSignup.value / 100,
-    captureBudget: +plgEls.captureBudget.value,
+    captureBudget: totalBudget * capturePct / 100,
     costPerSignup: +plgEls.costPerSignup.value,
     signupToPql: +plgEls.signupToPql.value / 100,
     pqlToPaid: +plgEls.pqlToPaid.value / 100,
@@ -4347,34 +4405,35 @@ function plgCompute() {
 
 function plgSyncStateFromFields() {
   state.plg = {
-    genBudget: +plgEls.genBudget.value, videoPct: +plgEls.videoPct.value, imagePct: +plgEls.imagePct.value,
+    totalBudget: +plgEls.totalBudget.value, genPct: +plgEls.genPct.value,
+    videoPct: +plgEls.videoPct.value, imagePct: +plgEls.imagePct.value,
     cpm: +plgEls.cpm.value, engagement: +plgEls.engagement.value, genToSignup: +plgEls.genToSignup.value,
-    captureBudget: +plgEls.captureBudget.value, costPerSignup: +plgEls.costPerSignup.value,
+    costPerSignup: +plgEls.costPerSignup.value,
     signupToPql: +plgEls.signupToPql.value, pqlToPaid: +plgEls.pqlToPaid.value, arpu: +plgEls.arpu.value,
   };
 }
 
 function plgHydrateFieldsFromState() {
   const defaults = {
-    genBudget: 10000, videoPct: 40, imagePct: 35, cpm: 6, engagement: 8, genToSignup: 3,
-    captureBudget: 5000, costPerSignup: 40, signupToPql: 25, pqlToPaid: 20, arpu: 1200,
+    totalBudget: 15000, genPct: 67, videoPct: 40, imagePct: 35, cpm: 6, engagement: 8, genToSignup: 3,
+    costPerSignup: 40, signupToPql: 25, pqlToPaid: 20, arpu: 1200,
   };
   const d = Object.assign(defaults, state.plg && typeof state.plg === 'object' ? state.plg : {});
-  plgEls.genBudget.value = d.genBudget;
+  plgEls.totalBudget.value = d.totalBudget;
+  plgEls.genPct.value = d.genPct;
   plgEls.videoPct.value = d.videoPct;
   plgEls.imagePct.value = d.imagePct;
   plgEls.cpm.value = d.cpm;
   plgEls.engagement.value = d.engagement;
   plgEls.genToSignup.value = d.genToSignup;
-  plgEls.captureBudget.value = d.captureBudget;
   plgEls.costPerSignup.value = d.costPerSignup;
   plgEls.signupToPql.value = d.signupToPql;
   plgEls.pqlToPaid.value = d.pqlToPaid;
   plgEls.arpu.value = d.arpu;
 }
 
-[plgEls.genBudget, plgEls.videoPct, plgEls.imagePct, plgEls.cpm, plgEls.engagement, plgEls.genToSignup,
- plgEls.captureBudget, plgEls.costPerSignup, plgEls.signupToPql, plgEls.pqlToPaid, plgEls.arpu].forEach(el =>
+[plgEls.totalBudget, plgEls.genPct, plgEls.videoPct, plgEls.imagePct, plgEls.cpm, plgEls.engagement, plgEls.genToSignup,
+ plgEls.costPerSignup, plgEls.signupToPql, plgEls.pqlToPaid, plgEls.arpu].forEach(el =>
   el.addEventListener('input', plgCompute)
 );
 
