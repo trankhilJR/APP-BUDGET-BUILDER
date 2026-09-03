@@ -21,6 +21,9 @@
     --moss-rgb: 63,90,71;
     --ember-rgb: 191,78,44;
     --chart-neutral: #565F58;
+    --warn: #9A6B14;
+    --warn-soft: #FBF0D9;
+    --warn-rgb: 154,107,20;
     --radius: 3px;
     color-scheme: light;
   }
@@ -38,6 +41,9 @@
     --moss-rgb: 127,190,152;
     --ember-rgb: 232,115,74;
     --chart-neutral: #9AA79E;
+    --warn: #E0A542;
+    --warn-soft: #332A16;
+    --warn-rgb: 224,165,66;
     color-scheme: dark;
   }
 
@@ -320,6 +326,20 @@
     font-weight: 600;
     color: var(--ink);
   }
+  .advanced-settings[open] summary { margin-bottom: 4px; }
+
+  /* Phase budget split bar (SLG/PLG) */
+  .phase-split-bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; margin: 2px 0 10px; background: var(--line); }
+  .phase-split-seg { transition: width 0.35s ease; }
+  .phase-split-seg.tofu, .phase-split-seg.gen { background: var(--ember); }
+  .phase-split-seg.mofu, .phase-split-seg.capture { background: var(--moss); }
+  .phase-split-seg.bofu { background: var(--chart-neutral); }
+  .phase-split-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 18px; font-size: 11.5px; color: var(--ink-soft); }
+  .phase-split-legend-item { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .phase-split-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .phase-split-dot.tofu, .phase-split-dot.gen { background: var(--ember); }
+  .phase-split-dot.mofu, .phase-split-dot.capture { background: var(--moss); }
+  .phase-split-dot.bofu { background: var(--chart-neutral); }
   .presets-editor { margin-top: 10px; }
   .preset-row {
     display: grid;
@@ -545,6 +565,7 @@
   .format-panel { margin-top: 24px; }
   .format-panel[hidden] { display: none; }
   .format-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  .format-cards.single-format { grid-template-columns: 1fr; }
   @media (max-width: 560px) { .format-cards { grid-template-columns: 1fr; } }
   .format-card {
     border: 1px solid var(--line);
@@ -554,6 +575,7 @@
     flex-direction: column;
     gap: 4px;
   }
+  .format-card[hidden] { display: none; }
   .format-card.primary { border: 2px solid var(--ember); background: var(--ember-soft); }
   .format-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
   .format-card-value { font-family: 'Fraunces', serif; font-size: 19px; color: var(--ink); }
@@ -562,6 +584,10 @@
   .format-link { font-size: 13px; font-weight: 600; color: var(--ember); text-decoration: none; }
   .format-link:hover { text-decoration: underline; }
   .format-transparency-note { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
+  .format-avoid { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 14px; padding: 10px 12px; border-radius: 6px; background: var(--warn-soft); border: 1px solid rgba(var(--warn-rgb, 154,107,20), 0.35); font-size: 13px; line-height: 1.5; color: var(--ink); }
+  .format-avoid[hidden] { display: none; }
+  .format-avoid-icon { flex: none; line-height: 1; }
+  .format-avoid strong { color: var(--warn); }
 
   .chart-legend {
     display: flex;
@@ -1477,17 +1503,21 @@
   <!-- FORMAT RECOMMENDATION -->
   <div class="panel format-panel" id="formatPanel">
     <h2 data-i18n="formatSectionTitle">Format recommandé</h2>
-    <div class="format-cards">
+    <div class="format-cards" id="formatCards">
       <div class="format-card primary">
         <span class="format-card-label" data-i18n="formatPrimary">Format principal</span>
         <span class="format-card-value" id="formatPrimaryLabel"></span>
       </div>
-      <div class="format-card secondary">
+      <div class="format-card secondary" id="formatSecondaryCard">
         <span class="format-card-label" data-i18n="formatSecondary">Format secondaire</span>
         <span class="format-card-value" id="formatSecondaryLabel"></span>
       </div>
     </div>
     <p class="format-reason" id="formatReasonText"></p>
+    <div class="format-avoid" id="formatAvoidBox" hidden>
+      <span class="format-avoid-icon" aria-hidden="true">⚠️</span>
+      <span><strong data-i18n="formatAvoidPrefix">À éviter pour cet objectif :</strong> <span id="formatAvoidLabel"></span> — <span id="formatAvoidText"></span></span>
+    </div>
     <div class="format-links">
       <a class="format-link" id="formatSpecLink" href="#" target="_blank" rel="noopener" data-i18n="formatLinkLabel">Voir les spécifications officielles Reddit →</a>
       <a class="format-link" href="https://business.reddit.com/success-stories" target="_blank" rel="noopener" data-i18n="formatCaseStudiesLabel">Voir les case studies annonceurs Reddit →</a>
@@ -1538,69 +1568,81 @@
             <label><span data-i18n="slgPhaseMofu">MOFU — Génération de leads</span> <span class="val" id="slgMofuPctVal">53 %</span></label>
             <input type="range" id="slgMofuPct" min="0" max="100" step="1" value="53">
           </div>
-          <p class="hint" id="slgBofuPctNote" style="margin:-8px 0 14px;"></p>
-
-          <hr class="divider">
-          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseTofu">TOFU — Notoriété</strong></p>
-          <div class="field">
-            <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="slgTofuCpmVal">5,0 €</span></label>
-            <input type="range" id="slgTofuCpm" min="1" max="15" step="0.1" value="5">
+          <p class="hint" id="slgBofuPctNote" style="margin:-8px 0 10px;"></p>
+          <div class="phase-split-bar" id="slgSplitBar">
+            <div class="phase-split-seg tofu" id="slgSplitTofu"></div>
+            <div class="phase-split-seg mofu" id="slgSplitMofu"></div>
+            <div class="phase-split-seg bofu" id="slgSplitBofu"></div>
           </div>
-          <div class="field">
-            <label><span data-i18n="slgLblTofu2Mofu">Taux Impression → Lead MOFU</span> <span class="val" id="slgTofu2MofuVal">0,80 %</span></label>
-            <input type="range" id="slgTofu2Mofu" min="0.05" max="5" step="0.05" value="0.8">
-          </div>
-
-          <hr class="divider">
-          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseMofu">MOFU — Génération de leads</strong></p>
-          <div class="field">
-            <label><span data-i18n="ffLblCpl">Coût par lead (CPL)</span> <span class="val" id="slgMofuCplVal">250 €</span></label>
-            <input type="range" id="slgMofuCpl" min="5" max="1000" step="5" value="250">
-          </div>
-          <div class="field">
-            <label><span data-i18n="slgLblLeadQual">Taux de qualification des leads</span> <span class="val" id="slgLeadQualVal">85,0 %</span></label>
-            <input type="range" id="slgLeadQual" min="20" max="100" step="1" value="85">
+          <div class="phase-split-legend">
+            <span class="phase-split-legend-item"><span class="phase-split-dot tofu"></span><span data-i18n="slgPhaseTofu">TOFU — Notoriété</span> — <span id="slgSplitTofuLabel"></span></span>
+            <span class="phase-split-legend-item"><span class="phase-split-dot mofu"></span><span data-i18n="slgPhaseMofu">MOFU — Génération de leads</span> — <span id="slgSplitMofuLabel"></span></span>
+            <span class="phase-split-legend-item"><span class="phase-split-dot bofu"></span><span data-i18n="slgPhaseBofu">BOFU — Accélération commerciale</span> — <span id="slgSplitBofuLabel"></span></span>
           </div>
 
-          <hr class="divider">
-          <p class="hint" style="margin-bottom:14px;" data-i18n="ffHintRates">Taux de conversion du funnel</p>
-          <div class="field">
-            <label><span data-i18n="ffLblL2m">Lead → MQL</span> <span class="val" id="slgL2mVal">40,0 %</span></label>
-            <input type="range" id="slgL2m" min="5" max="90" step="1" value="40">
-          </div>
-          <div class="field">
-            <label><span data-i18n="ffLblM2s">MQL → SQL</span> <span class="val" id="slgM2sVal">9,0 %</span></label>
-            <input type="range" id="slgM2s" min="2" max="60" step="1" value="9">
-          </div>
-          <div class="field">
-            <label><span data-i18n="ffLblS2o">SQL → Opportunité</span> <span class="val" id="slgS2oVal">40,0 %</span></label>
-            <input type="range" id="slgS2o" min="5" max="80" step="1" value="40">
-          </div>
-          <div class="field">
-            <label><span data-i18n="ffLblO2w">Opportunité → Gagné</span> <span class="val" id="slgO2wVal">25,0 %</span></label>
-            <input type="range" id="slgO2w" min="5" max="70" step="1" value="25">
-          </div>
-
-          <hr class="divider">
-          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="slgPhaseBofu">BOFU — Accélération commerciale</strong></p>
-          <div class="field">
-            <label data-i18n="slgLblLift">Synergie Full-Funnel Lift</label>
-            <div class="tabs" data-target="slgLift" role="tablist">
-              <button type="button" class="tab-btn" data-value="off" data-i18n="lblOff">Désactivée</button>
-              <button type="button" class="tab-btn" data-value="on" data-i18n="lblOn">Activée</button>
+          <details class="advanced-settings">
+            <summary data-i18n="slgDetailsTofu">Détails TOFU — Notoriété</summary>
+            <div class="field" style="margin-top:12px;">
+              <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="slgTofuCpmVal">5,0 €</span></label>
+              <input type="range" id="slgTofuCpm" min="1" max="15" step="0.1" value="5">
             </div>
-            <select id="slgLift" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
-              <option value="off" selected>Désactivée</option>
-              <option value="on">Activée</option>
-            </select>
-            <p class="hint" id="slgLiftHint" style="margin:8px 0 0;"></p>
-          </div>
+            <div class="field">
+              <label><span data-i18n="slgLblTofu2Mofu">Taux Impression → Lead MOFU</span> <span class="val" id="slgTofu2MofuVal">0,80 %</span></label>
+              <input type="range" id="slgTofu2Mofu" min="0.05" max="5" step="0.05" value="0.8">
+            </div>
+          </details>
 
-          <hr class="divider">
-          <div class="field">
-            <label><span data-i18n="ffLblDeal">Valeur moyenne du deal</span> <span class="val" id="slgDealVal">15 000 €</span></label>
-            <input type="range" id="slgDeal" min="500" max="200000" step="500" value="15000">
-          </div>
+          <details class="advanced-settings">
+            <summary data-i18n="slgDetailsMofu">Détails MOFU — Génération de leads</summary>
+            <div class="field" style="margin-top:12px;">
+              <label><span data-i18n="ffLblCpl">Coût par lead (CPL)</span> <span class="val" id="slgMofuCplVal">250 €</span></label>
+              <input type="range" id="slgMofuCpl" min="5" max="1000" step="5" value="250">
+            </div>
+            <div class="field">
+              <label><span data-i18n="slgLblLeadQual">Taux de qualification des leads</span> <span class="val" id="slgLeadQualVal">85,0 %</span></label>
+              <input type="range" id="slgLeadQual" min="20" max="100" step="1" value="85">
+            </div>
+          </details>
+
+          <details class="advanced-settings">
+            <summary data-i18n="ffHintRates">Taux de conversion du funnel</summary>
+            <div class="field" style="margin-top:12px;">
+              <label><span data-i18n="ffLblL2m">Lead → MQL</span> <span class="val" id="slgL2mVal">40,0 %</span></label>
+              <input type="range" id="slgL2m" min="5" max="90" step="1" value="40">
+            </div>
+            <div class="field">
+              <label><span data-i18n="ffLblM2s">MQL → SQL</span> <span class="val" id="slgM2sVal">9,0 %</span></label>
+              <input type="range" id="slgM2s" min="2" max="60" step="1" value="9">
+            </div>
+            <div class="field">
+              <label><span data-i18n="ffLblS2o">SQL → Opportunité</span> <span class="val" id="slgS2oVal">40,0 %</span></label>
+              <input type="range" id="slgS2o" min="5" max="80" step="1" value="40">
+            </div>
+            <div class="field">
+              <label><span data-i18n="ffLblO2w">Opportunité → Gagné</span> <span class="val" id="slgO2wVal">25,0 %</span></label>
+              <input type="range" id="slgO2w" min="5" max="70" step="1" value="25">
+            </div>
+          </details>
+
+          <details class="advanced-settings">
+            <summary data-i18n="slgDetailsBofu">Détails BOFU — Accélération commerciale</summary>
+            <div class="field" style="margin-top:12px;">
+              <label data-i18n="slgLblLift">Synergie Full-Funnel Lift</label>
+              <div class="tabs" data-target="slgLift" role="tablist">
+                <button type="button" class="tab-btn" data-value="off" data-i18n="lblOff">Désactivée</button>
+                <button type="button" class="tab-btn" data-value="on" data-i18n="lblOn">Activée</button>
+              </div>
+              <select id="slgLift" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
+                <option value="off" selected>Désactivée</option>
+                <option value="on">Activée</option>
+              </select>
+              <p class="hint" id="slgLiftHint" style="margin:8px 0 0;"></p>
+            </div>
+            <div class="field">
+              <label><span data-i18n="ffLblDeal">Valeur moyenne du deal</span> <span class="val" id="slgDealVal">15 000 €</span></label>
+              <input type="range" id="slgDeal" min="500" max="200000" step="500" value="15000">
+            </div>
+          </details>
         </div>
 
         <div class="panel" id="slgOutputPanel">
@@ -1638,53 +1680,64 @@
             <label><span data-i18n="plgPhaseGen">Demand Generation</span> <span class="val" id="plgGenPctVal">67 %</span></label>
             <input type="range" id="plgGenPct" min="0" max="100" step="1" value="67">
           </div>
-          <p class="hint" id="plgCapturePctNote" style="margin:-8px 0 14px;"></p>
-
-          <hr class="divider">
-          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="plgPhaseGen">Demand Generation</strong></p>
-          <div class="field">
-            <label><span data-i18n="plgLblVideoPct">Part Vidéo</span> <span class="val" id="plgVideoPctVal">40 %</span></label>
-            <input type="range" id="plgVideoPct" min="0" max="100" step="5" value="40">
+          <p class="hint" id="plgCapturePctNote" style="margin:-8px 0 10px;"></p>
+          <div class="phase-split-bar" id="plgSplitBar">
+            <div class="phase-split-seg gen" id="plgSplitGen"></div>
+            <div class="phase-split-seg capture" id="plgSplitCapture"></div>
           </div>
-          <div class="field">
-            <label><span data-i18n="plgLblImagePct">Part Image seule</span> <span class="val" id="plgImagePctVal">35 %</span></label>
-            <input type="range" id="plgImagePct" min="0" max="100" step="5" value="35">
-          </div>
-          <p class="hint" id="plgConversionPctNote" style="margin:-8px 0 14px;"></p>
-          <div class="field">
-            <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="plgCpmVal">6,0 €</span></label>
-            <input type="range" id="plgCpm" min="1" max="15" step="0.1" value="6">
-          </div>
-          <div class="field">
-            <label><span data-i18n="plgLblEngagement">Taux d'engagement (Reach → Engagé)</span> <span class="val" id="plgEngagementVal">8,0 %</span></label>
-            <input type="range" id="plgEngagement" min="0.5" max="40" step="0.5" value="8">
-          </div>
-          <div class="field">
-            <label><span data-i18n="plgLblGenToSignup">Taux Engagé → Inscription (organique)</span> <span class="val" id="plgGenToSignupVal">3,0 %</span></label>
-            <input type="range" id="plgGenToSignup" min="0.1" max="20" step="0.1" value="3">
+          <div class="phase-split-legend">
+            <span class="phase-split-legend-item"><span class="phase-split-dot gen"></span><span data-i18n="plgPhaseGen">Demand Generation</span> — <span id="plgSplitGenLabel"></span></span>
+            <span class="phase-split-legend-item"><span class="phase-split-dot capture"></span><span data-i18n="plgPhaseCapture">Demand Capture</span> — <span id="plgSplitCaptureLabel"></span></span>
           </div>
 
-          <hr class="divider">
-          <p class="hint" style="margin-bottom:10px;"><strong data-i18n="plgPhaseCapture">Demand Capture</strong></p>
-          <div class="field">
-            <label><span data-i18n="plgLblCostPerSignup">Coût par inscription</span> <span class="val" id="plgCostPerSignupVal">40 €</span></label>
-            <input type="range" id="plgCostPerSignup" min="1" max="500" step="1" value="40">
-          </div>
+          <details class="advanced-settings">
+            <summary data-i18n="plgDetailsGen">Détails Demand Generation</summary>
+            <div class="field" style="margin-top:12px;">
+              <label><span data-i18n="plgLblVideoPct">Part Vidéo</span> <span class="val" id="plgVideoPctVal">40 %</span></label>
+              <input type="range" id="plgVideoPct" min="0" max="100" step="5" value="40">
+            </div>
+            <div class="field">
+              <label><span data-i18n="plgLblImagePct">Part Image seule</span> <span class="val" id="plgImagePctVal">35 %</span></label>
+              <input type="range" id="plgImagePct" min="0" max="100" step="5" value="35">
+            </div>
+            <p class="hint" id="plgConversionPctNote" style="margin:-8px 0 14px;"></p>
+            <div class="field">
+              <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="plgCpmVal">6,0 €</span></label>
+              <input type="range" id="plgCpm" min="1" max="15" step="0.1" value="6">
+            </div>
+            <div class="field">
+              <label><span data-i18n="plgLblEngagement">Taux d'engagement (Reach → Engagé)</span> <span class="val" id="plgEngagementVal">8,0 %</span></label>
+              <input type="range" id="plgEngagement" min="0.5" max="40" step="0.5" value="8">
+            </div>
+            <div class="field">
+              <label><span data-i18n="plgLblGenToSignup">Taux Engagé → Inscription (organique)</span> <span class="val" id="plgGenToSignupVal">3,0 %</span></label>
+              <input type="range" id="plgGenToSignup" min="0.1" max="20" step="0.1" value="3">
+            </div>
+          </details>
 
-          <hr class="divider">
-          <p class="hint" style="margin-bottom:14px;"><strong data-i18n="plgPhaseProduct">Funnel produit</strong></p>
-          <div class="field">
-            <label><span data-i18n="plgLblSignupToPql">Inscription → PQL</span> <span class="val" id="plgSignupToPqlVal">25,0 %</span></label>
-            <input type="range" id="plgSignupToPql" min="1" max="90" step="1" value="25">
-          </div>
-          <div class="field">
-            <label><span data-i18n="plgLblPqlToPaid">PQL → Payant</span> <span class="val" id="plgPqlToPaidVal">20,0 %</span></label>
-            <input type="range" id="plgPqlToPaid" min="1" max="90" step="1" value="20">
-          </div>
-          <div class="field">
-            <label><span data-i18n="plgLblArpu">Revenu moyen par client payant (ARPU)</span> <span class="val" id="plgArpuVal">1 200 €</span></label>
-            <input type="range" id="plgArpu" min="50" max="20000" step="50" value="1200">
-          </div>
+          <details class="advanced-settings">
+            <summary data-i18n="plgDetailsCapture">Détails Demand Capture</summary>
+            <div class="field" style="margin-top:12px;">
+              <label><span data-i18n="plgLblCostPerSignup">Coût par inscription</span> <span class="val" id="plgCostPerSignupVal">40 €</span></label>
+              <input type="range" id="plgCostPerSignup" min="1" max="500" step="1" value="40">
+            </div>
+          </details>
+
+          <details class="advanced-settings">
+            <summary data-i18n="plgPhaseProduct">Funnel produit</summary>
+            <div class="field" style="margin-top:12px;">
+              <label><span data-i18n="plgLblSignupToPql">Inscription → PQL</span> <span class="val" id="plgSignupToPqlVal">25,0 %</span></label>
+              <input type="range" id="plgSignupToPql" min="1" max="90" step="1" value="25">
+            </div>
+            <div class="field">
+              <label><span data-i18n="plgLblPqlToPaid">PQL → Payant</span> <span class="val" id="plgPqlToPaidVal">20,0 %</span></label>
+              <input type="range" id="plgPqlToPaid" min="1" max="90" step="1" value="20">
+            </div>
+            <div class="field">
+              <label><span data-i18n="plgLblArpu">Revenu moyen par client payant (ARPU)</span> <span class="val" id="plgArpuVal">1 200 €</span></label>
+              <input type="range" id="plgArpu" min="50" max="20000" step="50" value="1200">
+            </div>
+          </details>
         </div>
 
         <div class="panel" id="plgOutputPanel">
@@ -1735,6 +1788,7 @@ const translations = {
     ob_obj_conversion_desc: "Construis un plan basé sur le funnel, des leads jusqu'au client.",
     objAppInstall: "Téléchargement d'app",
     objAppInstallDesc: "Générer des installations de ton application mobile.",
+    objVideoViewsDesc: "Maximiser les vues vidéo pour construire la mémorisation de marque à moindre coût.",
     ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impressions', ob_tag_reach: 'Portée',
     ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clics',
     ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
@@ -1793,6 +1847,7 @@ const translations = {
     ob_bench_ctr: 'CTR (taux de clic)',
     ob_bench_c2l: 'Clic → Lead',
     ob_bench_l2c: 'Lead → Client',
+    ob_bench_viewrate: 'Taux de vue',
     ob_bench_range: 'Fourchette',
     ob_source: "Source : hypothèses de marché Reddit Ads par secteur — à ajuster avec les vrais chiffres de ton compte.",
     ob_apply_cta: 'Démarrer avec ces hypothèses',
@@ -1809,6 +1864,9 @@ const translations = {
     ob_target_appinstall_label: "Combien d'installations vises-tu par mois ?",
     ob_reveal_appinstall_lead: 'Avec ce budget, les comptes {industry} génèrent environ',
     ob_reveal_appinstall_sub: "d'installations par mois, pour un budget de {budget}/mois.",
+    ob_target_videoviews_label: 'Combien de vues vidéo vises-tu par mois ?',
+    ob_reveal_videoviews_lead: 'Avec ce budget, les comptes {industry} génèrent environ',
+    ob_reveal_videoviews_sub: 'de vues vidéo par mois, pour un budget de {budget}/mois.',
     btnCopyLink: 'Copier le lien',
     btnPresentMode: 'Mode présentation',
     btnExitPresentMode: 'Quitter la présentation',
@@ -1942,6 +2000,9 @@ const translations = {
     slgPhaseTofu: 'TOFU — Notoriété',
     slgPhaseMofu: 'MOFU — Génération de leads',
     slgPhaseBofu: 'BOFU — Accélération commerciale',
+    slgDetailsTofu: 'Détails TOFU — Notoriété',
+    slgDetailsMofu: 'Détails MOFU — Génération de leads',
+    slgDetailsBofu: 'Détails BOFU — Accélération commerciale',
     slgLblTofuBudget: 'Budget TOFU',
     slgLblTofu2Mofu: 'Taux Impression → Lead MOFU',
     slgLblMofuBudget: 'Budget MOFU',
@@ -1972,6 +2033,8 @@ const translations = {
     plgPhaseGen: 'Demand Generation',
     plgPhaseCapture: 'Demand Capture',
     plgPhaseProduct: 'Funnel produit',
+    plgDetailsGen: 'Détails Demand Generation',
+    plgDetailsCapture: 'Détails Demand Capture',
     plgLblGenBudget: 'Budget Demand Gen',
     plgLblVideoPct: 'Part Vidéo',
     plgLblImagePct: 'Part Image seule',
@@ -2031,8 +2094,8 @@ const translations = {
     formatLinkLabel: 'Voir les spécifications officielles Reddit →',
     formatReasonAwareness: "Selon l'étude créative KarmaLab de Reddit, associer vidéo et image dans une même campagne multiplie par 10 la mémorisation, par 14 le rappel du message et par 3 la préférence de marque — pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic.",
     formatReasonTraffic: 'Les visuels statiques surperforment généralement la vidéo en CTR pour les objectifs orientés clic direct (benchmarks tiers 2026, AdControlCenter) ; le carousel permet de tester plusieurs accroches en une seule annonce.',
-    formatReasonConversion: 'Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats (données officielles de lancement) ; activer les commentaires renforce la preuve sociale.',
-    formatReasonAppInstall: "La démonstration produit/gameplay en vidéo est la norme du secteur mobile UA pour convertir en installation ; le carousel montre plusieurs écrans de l'app. (Pratique standard du secteur, non un chiffre publié par Reddit spécifiquement pour cet objectif.)",
+    formatReasonConversion: "Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats (données officielles de lancement) : le fil de commentaires natif agit comme preuve sociale directement dans l'annonce, ce qui réduit la friction avant le clic vers le formulaire ou la landing page. En secondaire, l'image reste le format le plus rapide à décliner en plusieurs accroches/offres pour A/B tester la conversion sans repartir d'un tournage vidéo.",
+    formatReasonAppInstall: "La vidéo native (gameplay ou démo produit) est le format le plus efficace pour driver l'installation sur Reddit : elle montre l'expérience réelle de l'app en quelques secondes, ce qui correlle avec un CPI plus bas que les formats statiques (pratique standard du secteur mobile UA, cohérente avec les specs Reddit qui positionnent la vidéo comme format prioritaire en direct-response). L'image reste une déclinaison secondaire utile pour tester rapidement des accroches produit.",
     formatLabel_image: 'Image',
     formatLabel_video: 'Vidéo',
     formatLabel_carousel: 'Carousel',
@@ -2041,6 +2104,10 @@ const translations = {
     formatCountHelp: "Combiner plusieurs formats/placements réduit le coût par résultat (donnée Reddit : Feed + Conversation ≈ -12 %). Au-delà de 2 formats, il s'agit d'une estimation prudente à valider par test.",
     formatTransparencyNote: "Recommandations basées sur les données publiques Reddit (spécifications officielles, étude créative KarmaLab, statistiques de lancement des ads free-form) et des benchmarks tiers 2026 (AdControlCenter). L'accélérateur multi-format au-delà de 2 formats est une estimation, pas un chiffre garanti par Reddit. Pour des exemples chiffrés par marque, consulte les case studies officielles ci-dessous.",
     formatCaseStudiesLabel: 'Voir les case studies annonceurs Reddit →',
+    formatAvoidPrefix: 'À éviter pour cet objectif :',
+    formatAvoidConversion: "c'est un format pensé pour faire naviguer entre plusieurs cartes (notoriété, engagement, trafic) : sur un objectif de conversion, il détourne l'attention du call-to-action unique et dilue le message plutôt que de le concentrer sur l'action attendue.",
+    formatAvoidAppInstall: "c'est un format d'engagement/considération : il montre plusieurs écrans mais ne remplace pas la démonstration en mouvement (gameplay, interaction) qui donne le vrai déclic à l'installation.",
+    formatAvoidVideoViews: "cet objectif est facturé à la vue et ne peut être servi que par une création vidéo : le carousel (comme l'image ou le free-form) n'est tout simplement pas éligible ici.",
     formatCpmEffectiveLabel: 'CPM effectif après accélérateur : ',
     footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
   },
@@ -2056,6 +2123,7 @@ const translations = {
     ob_obj_conversion_desc: 'Build a funnel-backed plan, from leads to closed customers.',
     objAppInstall: 'App installs',
     objAppInstallDesc: 'Drive installs of your mobile app.',
+    objVideoViewsDesc: 'Maximize video views to build brand memorability at the lowest cost.',
     ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impressions', ob_tag_reach: 'Reach',
     ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clicks',
     ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
@@ -2114,6 +2182,7 @@ const translations = {
     ob_bench_ctr: 'CTR (click-through rate)',
     ob_bench_c2l: 'Click → Lead',
     ob_bench_l2c: 'Lead → Customer',
+    ob_bench_viewrate: 'View rate',
     ob_bench_range: 'Range',
     ob_source: "Source: sector-level Reddit Ads market assumptions — adjust with your account's real numbers.",
     ob_apply_cta: 'Start with these assumptions',
@@ -2130,6 +2199,9 @@ const translations = {
     ob_target_appinstall_label: 'How many installs are you aiming for per month?',
     ob_reveal_appinstall_lead: 'With this budget, {industry} accounts generate about',
     ob_reveal_appinstall_sub: 'installs per month, for a budget of {budget}/month.',
+    ob_target_videoviews_label: 'How many video views are you aiming for per month?',
+    ob_reveal_videoviews_lead: 'With this budget, {industry} accounts generate about',
+    ob_reveal_videoviews_sub: 'video views per month, for a budget of {budget}/month.',
     btnCopyLink: 'Copy link',
     btnPresentMode: 'Presentation mode',
     btnExitPresentMode: 'Exit presentation',
@@ -2263,6 +2335,9 @@ const translations = {
     slgPhaseTofu: 'TOFU — Awareness',
     slgPhaseMofu: 'MOFU — Lead generation',
     slgPhaseBofu: 'BOFU — Sales acceleration',
+    slgDetailsTofu: 'TOFU details — Awareness',
+    slgDetailsMofu: 'MOFU details — Lead generation',
+    slgDetailsBofu: 'BOFU details — Sales acceleration',
     slgLblTofuBudget: 'TOFU budget',
     slgLblTofu2Mofu: 'Impression → MOFU lead rate',
     slgLblMofuBudget: 'MOFU budget',
@@ -2293,6 +2368,8 @@ const translations = {
     plgPhaseGen: 'Demand Generation',
     plgPhaseCapture: 'Demand Capture',
     plgPhaseProduct: 'Product funnel',
+    plgDetailsGen: 'Demand Generation details',
+    plgDetailsCapture: 'Demand Capture details',
     plgLblGenBudget: 'Demand Gen budget',
     plgLblVideoPct: 'Video share',
     plgLblImagePct: 'Single-image share',
@@ -2352,8 +2429,8 @@ const translations = {
     formatLinkLabel: 'View official Reddit specs →',
     formatReasonAwareness: "Per Reddit's KarmaLab creative study, pairing video with image in the same campaign drives a 10x lift in memorability, a 14x lift in message recall, and a 3x lift in brand favorability — relevant for a CPM-billed objective chasing reach rather than clicks.",
     formatReasonTraffic: 'Static visuals generally outperform video on CTR for click-driven objectives (third-party 2026 benchmarks, AdControlCenter); carousel lets you test several hooks in a single ad.',
-    formatReasonConversion: "Reddit reports free-form ads drive +28% average CTR vs other formats (official launch data); enabling comments strengthens social proof before the action.",
-    formatReasonAppInstall: 'Video product/gameplay demos are the mobile UA industry standard for driving installs; carousel lets you show several app screens. (Industry-standard practice, not a figure Reddit publishes specifically for this objective.)',
+    formatReasonConversion: "Reddit reports free-form ads drive +28% average CTR vs other formats (official launch data): the native comment thread acts as social proof right inside the ad, cutting friction before the click to your form or landing page. Image is the fastest secondary format to spin up several offers/hooks for A/B testing conversion without a new video shoot.",
+    formatReasonAppInstall: "Native video (gameplay or product demo) is the most effective format for driving installs on Reddit: it shows the real app experience in seconds, which correlates with a lower CPI than static formats (mobile UA industry-standard practice, consistent with Reddit's specs positioning video as the priority direct-response format). Image remains a useful secondary format for quickly testing product hooks.",
     formatLabel_image: 'Image',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carousel',
@@ -2362,6 +2439,10 @@ const translations = {
     formatCountHelp: 'Combining several formats/placements lowers cost per result (Reddit data: Feed + Conversation ≈ -12%). Beyond 2 formats this is a conservative estimate to validate via A/B testing.',
     formatTransparencyNote: 'Recommendations based on public Reddit data (official specs, the KarmaLab creative study, free-form ad launch stats) and third-party 2026 benchmarks (AdControlCenter). The multi-format accelerator beyond 2 formats is an estimate, not a figure guaranteed by Reddit. For brand-specific numbers, see the official case studies below.',
     formatCaseStudiesLabel: 'View Reddit advertiser case studies →',
+    formatAvoidPrefix: 'Avoid for this objective:',
+    formatAvoidConversion: "it's a format built for browsing between several cards (awareness, engagement, traffic) — on a conversion objective it splits attention away from the single call-to-action instead of concentrating the message on the intended action.",
+    formatAvoidAppInstall: "it's an engagement/consideration format: it shows several screens but doesn't replace the in-motion demo (gameplay, interaction) that actually drives the install decision.",
+    formatAvoidVideoViews: "this objective is billed per view and can only be served by video creative: carousel (like image or free-form) simply isn't eligible here.",
     formatCpmEffectiveLabel: 'Effective CPM after accelerator: ',
     footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
   },
@@ -2377,6 +2458,7 @@ const translations = {
     ob_obj_conversion_desc: 'Construye un plan basado en el funnel, desde leads hasta clientes.',
     objAppInstall: 'Descargas de app',
     objAppInstallDesc: 'Generar descargas de tu app móvil.',
+    objVideoViewsDesc: 'Maximizar las vistas de vídeo para construir recuerdo de marca al menor coste.',
     ob_tag_cpm: 'CPM', ob_tag_impressions: 'Impresiones', ob_tag_reach: 'Alcance',
     ob_tag_cpc: 'CPC', ob_tag_ctr: 'CTR', ob_tag_clicks: 'Clics',
     ob_tag_cpl: 'CPL', ob_tag_leads: 'Leads', ob_tag_pipeline: 'Pipeline',
@@ -2435,6 +2517,7 @@ const translations = {
     ob_bench_ctr: 'CTR (tasa de clics)',
     ob_bench_c2l: 'Clic → Lead',
     ob_bench_l2c: 'Lead → Cliente',
+    ob_bench_viewrate: 'Tasa de vista',
     ob_bench_range: 'Rango',
     ob_source: 'Fuente: hipótesis de mercado de Reddit Ads por sector — ajusta con los datos reales de tu cuenta.',
     ob_apply_cta: 'Empezar con estas hipótesis',
@@ -2451,6 +2534,9 @@ const translations = {
     ob_target_appinstall_label: '¿Cuántas instalaciones quieres conseguir al mes?',
     ob_reveal_appinstall_lead: 'Con este presupuesto, las cuentas de {industry} generan aproximadamente',
     ob_reveal_appinstall_sub: 'instalaciones al mes, con un presupuesto de {budget}/mes.',
+    ob_target_videoviews_label: '¿Cuántas vistas de vídeo quieres conseguir al mes?',
+    ob_reveal_videoviews_lead: 'Con este presupuesto, las cuentas de {industry} generan aproximadamente',
+    ob_reveal_videoviews_sub: 'vistas de vídeo al mes, con un presupuesto de {budget}/mes.',
     btnCopyLink: 'Copiar enlace',
     btnPresentMode: 'Modo presentación',
     btnExitPresentMode: 'Salir de la presentación',
@@ -2584,6 +2670,9 @@ const translations = {
     slgPhaseTofu: 'TOFU — Sensibilización',
     slgPhaseMofu: 'MOFU — Generación de leads',
     slgPhaseBofu: 'BOFU — Aceleración comercial',
+    slgDetailsTofu: 'Detalles TOFU — Sensibilización',
+    slgDetailsMofu: 'Detalles MOFU — Generación de leads',
+    slgDetailsBofu: 'Detalles BOFU — Aceleración comercial',
     slgLblTofuBudget: 'Presupuesto TOFU',
     slgLblTofu2Mofu: 'Tasa Impresión → Lead MOFU',
     slgLblMofuBudget: 'Presupuesto MOFU',
@@ -2614,6 +2703,8 @@ const translations = {
     plgPhaseGen: 'Demand Generation',
     plgPhaseCapture: 'Demand Capture',
     plgPhaseProduct: 'Funnel de producto',
+    plgDetailsGen: 'Detalles Demand Generation',
+    plgDetailsCapture: 'Detalles Demand Capture',
     plgLblGenBudget: 'Presupuesto Demand Gen',
     plgLblVideoPct: 'Parte Vídeo',
     plgLblImagePct: 'Parte Imagen única',
@@ -2673,8 +2764,8 @@ const translations = {
     formatLinkLabel: 'Ver especificaciones oficiales de Reddit →',
     formatReasonAwareness: 'Según el estudio creativo KarmaLab de Reddit, combinar vídeo e imagen en la misma campaña multiplica por 10 el recuerdo, por 14 el recuerdo del mensaje y por 3 la preferencia de marca — relevante para un objetivo facturado por CPM que busca alcance más que clics.',
     formatReasonTraffic: 'Los visuales estáticos suelen superar al vídeo en CTR para objetivos orientados al clic directo (benchmarks de terceros 2026, AdControlCenter); el carrusel permite probar varios ganchos en un solo anuncio.',
-    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos (datos oficiales de lanzamiento); activar los comentarios refuerza la prueba social antes de la acción.',
-    formatReasonAppInstall: 'La demostración en vídeo del producto/gameplay es el estándar del sector UA móvil para convertir en instalación; el carrusel permite mostrar varias pantallas de la app. (Práctica estándar del sector, no una cifra publicada por Reddit específicamente para este objetivo.)',
+    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos (datos oficiales de lanzamiento): el hilo de comentarios nativo actúa como prueba social directamente en el anuncio, lo que reduce la fricción antes del clic al formulario o landing page. La imagen es el formato secundario más rápido para testear varios ganchos/ofertas sin necesidad de un nuevo rodaje de vídeo.',
+    formatReasonAppInstall: 'El vídeo nativo (gameplay o demo de producto) es el formato más eficaz para impulsar la instalación en Reddit: muestra la experiencia real de la app en segundos, lo que se correlaciona con un CPI más bajo que los formatos estáticos (práctica estándar del sector UA móvil, coherente con las specs de Reddit que posicionan el vídeo como formato prioritario en direct-response). La imagen sigue siendo una opción secundaria útil para testear rápido ganchos de producto.',
     formatLabel_image: 'Imagen',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carrusel',
@@ -2683,6 +2774,10 @@ const translations = {
     formatCountHelp: 'Combinar varios formatos/ubicaciones reduce el coste por resultado (dato de Reddit: Feed + Conversación ≈ -12%). Más allá de 2 formatos es una estimación prudente a validar con pruebas A/B.',
     formatTransparencyNote: 'Recomendaciones basadas en datos públicos de Reddit (especificaciones oficiales, el estudio creativo KarmaLab, estadísticas de lanzamiento de los anuncios free-form) y benchmarks de terceros 2026 (AdControlCenter). El acelerador multi-formato más allá de 2 formatos es una estimación, no una cifra garantizada por Reddit. Para cifras concretas por marca, consulta las case studies oficiales a continuación.',
     formatCaseStudiesLabel: 'Ver case studies de anunciantes de Reddit →',
+    formatAvoidPrefix: 'Evitar para este objetivo:',
+    formatAvoidConversion: 'es un formato pensado para navegar entre varias tarjetas (notoriedad, engagement, tráfico): en un objetivo de conversión, desvía la atención del call-to-action único y diluye el mensaje en lugar de concentrarlo en la acción esperada.',
+    formatAvoidAppInstall: 'es un formato de engagement/consideración: muestra varias pantallas pero no sustituye la demo en movimiento (gameplay, interacción) que realmente impulsa la decisión de instalar.',
+    formatAvoidVideoViews: 'este objetivo se factura por vista y solo puede servirse con una creatividad de vídeo: el carrusel (como la imagen o el free-form) simplemente no es elegible aquí.',
     formatCpmEffectiveLabel: 'CPM efectivo tras el acelerador: ',
     footer_note: 'Benchmarks de Reddit Ads 2026 recopilados de fuentes públicas (AdBacklog, Benly, StackMatix, Marketing LTB) — ajusta con los datos reales de la cuenta de Reddit Ads Manager del cliente en cuanto estén disponibles.',
   },
@@ -2740,12 +2835,15 @@ const objectiveMultipliers = {
 const platformC2iMultipliers = { ios: 0.4, android: 1.5, blended: 1 };
 
 // Recommandation de format publicitaire par objectif (specs et stats officielles Reddit).
+// Le carousel est un format d'engagement/notoriété/trafic (MOFU) selon Reddit — jamais
+// recommandé ici en conversion ou en app install, où il ferait doublon avec un format
+// plus performant. Chaque objectif à risque de confusion porte un champ "avoid" explicite.
 const formatRecommendations = {
   awareness:  { primary: 'video', secondary: 'image', reasonKey: 'formatReasonAwareness' },
   traffic:    { primary: 'image', secondary: 'carousel', reasonKey: 'formatReasonTraffic' },
-  conversion: { primary: 'freeform', secondary: 'carousel', reasonKey: 'formatReasonConversion' },
-  appInstall: { primary: 'video', secondary: 'carousel', reasonKey: 'formatReasonAppInstall' },
-  videoViews: { primary: 'video', secondary: 'image', reasonKey: 'formatReasonVideoViews' },
+  conversion: { primary: 'freeform', secondary: 'image', reasonKey: 'formatReasonConversion', avoid: 'carousel', avoidReasonKey: 'formatAvoidConversion' },
+  appInstall: { primary: 'video', secondary: 'image', reasonKey: 'formatReasonAppInstall', avoid: 'carousel', avoidReasonKey: 'formatAvoidAppInstall' },
+  videoViews: { primary: 'video', secondary: null, reasonKey: 'formatReasonVideoViews', avoid: 'carousel', avoidReasonKey: 'formatAvoidVideoViews' },
 };
 const formatLinks = {
   image: 'https://business.reddithelp.com/s/article/image-ad-specifications',
@@ -3138,9 +3236,26 @@ function renderFormatRecommendation() {
   if (!rec) { panel.hidden = true; return; }
   panel.hidden = false;
   document.getElementById('formatPrimaryLabel').textContent = formatLabel(rec.primary);
-  document.getElementById('formatSecondaryLabel').textContent = formatLabel(rec.secondary);
+  const cardsWrap = document.getElementById('formatCards');
+  const secCard = document.getElementById('formatSecondaryCard');
+  if (rec.secondary) {
+    secCard.hidden = false;
+    cardsWrap.classList.remove('single-format');
+    document.getElementById('formatSecondaryLabel').textContent = formatLabel(rec.secondary);
+  } else {
+    secCard.hidden = true;
+    cardsWrap.classList.add('single-format');
+  }
   document.getElementById('formatReasonText').textContent = t(rec.reasonKey);
   document.getElementById('formatSpecLink').href = formatLinks[rec.primary] || '#';
+  const avoidBox = document.getElementById('formatAvoidBox');
+  if (rec.avoid) {
+    avoidBox.hidden = false;
+    document.getElementById('formatAvoidLabel').textContent = formatLabel(rec.avoid);
+    document.getElementById('formatAvoidText').textContent = t(rec.avoidReasonKey);
+  } else {
+    avoidBox.hidden = true;
+  }
 }
 
 function applyPreset() {
@@ -4111,10 +4226,17 @@ function slgPcts() {
 
 function slgSyncLabels() {
   const { tofuPct, mofuPct, bofuPct } = slgPcts();
-  document.getElementById('slgTotalBudgetVal').textContent = fmtEUR(+slgEls.totalBudget.value);
+  const totalBudget = +slgEls.totalBudget.value;
+  document.getElementById('slgTotalBudgetVal').textContent = fmtEUR(totalBudget);
   document.getElementById('slgTofuPctVal').textContent = tofuPct + ' %';
   document.getElementById('slgMofuPctVal').textContent = mofuPct + ' %';
   document.getElementById('slgBofuPctNote').textContent = t('slgBofuPctNote', { pct: bofuPct });
+  document.getElementById('slgSplitTofu').style.width = tofuPct + '%';
+  document.getElementById('slgSplitMofu').style.width = mofuPct + '%';
+  document.getElementById('slgSplitBofu').style.width = bofuPct + '%';
+  document.getElementById('slgSplitTofuLabel').textContent = `${tofuPct}% · ${fmtEUR(totalBudget * tofuPct / 100)}`;
+  document.getElementById('slgSplitMofuLabel').textContent = `${mofuPct}% · ${fmtEUR(totalBudget * mofuPct / 100)}`;
+  document.getElementById('slgSplitBofuLabel').textContent = `${bofuPct}% · ${fmtEUR(totalBudget * bofuPct / 100)}`;
   document.getElementById('slgTofuCpmVal').textContent = (+slgEls.tofuCpm.value).toFixed(1).replace('.', ',') + ' €';
   document.getElementById('slgTofu2MofuVal').textContent = (+slgEls.tofu2Mofu.value).toFixed(2).replace('.', ',') + ' %';
   document.getElementById('slgMofuCplVal').textContent = fmtEUR(+slgEls.mofuCpl.value);
@@ -4191,7 +4313,7 @@ function slgRenderCampaignPlan(cfg, totalBudget, tofuImpressions, mofuLeads) {
   const rows = [
     { phase: 'TOFU', objective: t('ob_obj_awareness_title'), format: formatLabel('video'), budget: cfg.tofuBudget, output: `${t('kpiImpressions')} : ${fmtNum(tofuImpressions)}` },
     { phase: 'MOFU', objective: t('slgMofuObjective'), format: formatLabel('freeform'), budget: cfg.mofuBudget, output: `${t('ffStageLeads')} : ${fmtNum(mofuLeads)}` },
-    { phase: 'BOFU', objective: t('slgBofuObjective'), format: formatLabel('carousel'), budget: cfg.bofuBudget, output: cfg.liftEnabled ? t('slgLiftActive') : t('slgLiftInactive') },
+    { phase: 'BOFU', objective: t('slgBofuObjective'), format: formatLabel('image'), budget: cfg.bofuBudget, output: cfg.liftEnabled ? t('slgLiftActive') : t('slgLiftInactive') },
   ];
   document.getElementById('slgCampaignPlanTable').innerHTML = `
     <thead>
@@ -4292,9 +4414,14 @@ function plgPcts() {
 
 function plgSyncLabels() {
   const { genPct, capturePct } = plgPcts();
-  document.getElementById('plgTotalBudgetVal').textContent = fmtEUR(+plgEls.totalBudget.value);
+  const totalBudget = +plgEls.totalBudget.value;
+  document.getElementById('plgTotalBudgetVal').textContent = fmtEUR(totalBudget);
   document.getElementById('plgGenPctVal').textContent = genPct + ' %';
   document.getElementById('plgCapturePctNote').textContent = t('plgCapturePctNote', { pct: capturePct });
+  document.getElementById('plgSplitGen').style.width = genPct + '%';
+  document.getElementById('plgSplitCapture').style.width = capturePct + '%';
+  document.getElementById('plgSplitGenLabel').textContent = `${genPct}% · ${fmtEUR(totalBudget * genPct / 100)}`;
+  document.getElementById('plgSplitCaptureLabel').textContent = `${capturePct}% · ${fmtEUR(totalBudget * capturePct / 100)}`;
   document.getElementById('plgVideoPctVal').textContent = plgEls.videoPct.value + ' %';
   document.getElementById('plgImagePctVal').textContent = plgEls.imagePct.value + ' %';
   const conversionPct = Math.max(0, 100 - (+plgEls.videoPct.value) - (+plgEls.imagePct.value));
@@ -4490,6 +4617,7 @@ function obObjectiveOptions() {
     { key: 'traffic', icon: '👆', title: t('ob_obj_traffic_title'), desc: t('ob_obj_traffic_desc'), tags: [t('ob_tag_cpc'), t('ob_tag_ctr'), t('ob_tag_clicks')] },
     { key: 'conversion', icon: '🎯', title: t('ob_obj_conversion_title'), desc: t('ob_obj_conversion_desc'), tags: [t('ob_tag_cpl'), t('ob_tag_leads'), t('ob_tag_pipeline')], recommended: true },
     { key: 'appInstall', icon: '📲', title: t('objAppInstall'), desc: t('objAppInstallDesc'), tags: ['CPC', t('kpiCpi'), t('stageInstalls')] },
+    { key: 'videoViews', icon: '▶️', title: t('objVideoViews'), desc: t('objVideoViewsDesc'), tags: ['CPM', t('kpiCostPerView'), t('stageViews')] },
   ];
 }
 function obLtvOptions() {
@@ -4533,6 +4661,9 @@ function obGetStepList() {
   return steps;
 }
 
+// Le brief de découverte ne demande pas le taux de vue : on reprend la valeur par défaut
+// du curseur "Taux de vue" du dashboard (réglable ensuite librement une fois le brief appliqué).
+const OB_DEFAULT_VIEW_RATE = 40;
 function computeOnboardingResult() {
   const objective = onboarding.objectiveKey || 'conversion';
   const industry = onboarding.industry || state.industry || 'saas';
@@ -4568,6 +4699,10 @@ function computeOnboardingResult() {
       const clicksNeeded = effectiveC2i > 0 ? target / effectiveC2i : 0;
       const impressionsNeeded = ctr > 0 ? clicksNeeded / (ctr / 100) : 0;
       budget = (impressionsNeeded / 1000) * cpm;
+    } else if (objective === 'videoViews') {
+      // budget = vues / taux de vue par défaut (40 %, même hypothèse que le curseur du dashboard) -> impressions -> budget
+      const impressionsNeeded = target / (OB_DEFAULT_VIEW_RATE / 100);
+      budget = (impressionsNeeded / 1000) * cpm;
     } else {
       // conversion : on remonte clients/leads -> clics -> impressions -> budget
       const leadsNeeded = onboarding.targetKind === 'clients' && l2c > 0 ? target / (l2c / 100) : target;
@@ -4585,17 +4720,20 @@ function computeOnboardingResult() {
   const impressions = cpm > 0 ? (budget / cpm) * 1000 : 0;
   const clicks = impressions * (ctr / 100);
   const reach = (base.freq || 3) > 0 ? impressions / (base.freq || 3) : impressions;
+  const views = impressions * (OB_DEFAULT_VIEW_RATE / 100);
 
   let leads = 0, clients = 0, revenue = 0, installs = 0;
   if (objective === 'appInstall') {
     installs = clicks * (c2i / 100) * platformMult;
+  } else if (objective === 'videoViews') {
+    // Pas de funnel leads/clients pour cet objectif : la métrique clé est la vue, pas le clic.
   } else {
     leads = clicks * (c2l / 100);
     clients = leads * (l2c / 100);
     revenue = clients * ltv;
   }
 
-  return { objective, industry, market: marketValue, mix, cpm, ctr, c2l, l2c, c2i, budget, ltv, impressions, reach, clicks, leads, clients, revenue, installs, annual: revenue * 12 };
+  return { objective, industry, market: marketValue, mix, cpm, ctr, c2l, l2c, c2i, budget, ltv, impressions, reach, clicks, leads, clients, revenue, installs, views, viewRate: OB_DEFAULT_VIEW_RATE, annual: revenue * 12 };
 }
 
 function obProgressBarHtml(filled, total) {
@@ -4731,6 +4869,13 @@ function startingScreenHtml() {
           <input type="number" id="obTargetInput" min="10" step="10" value="${onboarding.targetValue || 300}">
         </div>
       `;
+    } else if (objective === 'videoViews') {
+      subField = `
+        <div class="ob-field">
+          <label class="ob-field-label">${t('ob_target_videoviews_label')}</label>
+          <input type="number" id="obTargetInput" min="1000" step="1000" value="${onboarding.targetValue || 20000}">
+        </div>
+      `;
     } else {
       const kind = onboarding.targetKind || 'leads';
       subField = `
@@ -4804,6 +4949,9 @@ function obRevealHeadline(r) {
   if (r.objective === 'appInstall') {
     return { lead: t('ob_reveal_appinstall_lead', { industry }), highlight: `${fmtNum(r.installs)}`, sub: t('ob_reveal_appinstall_sub', { industry, budget }) };
   }
+  if (r.objective === 'videoViews') {
+    return { lead: t('ob_reveal_videoviews_lead', { industry }), highlight: `${fmtNum(r.views)}`, sub: t('ob_reveal_videoviews_sub', { industry, budget }) };
+  }
   return { lead: t('ob_reveal_conversion_lead', { industry }), highlight: fmtEUR(r.annual), sub: t('ob_reveal_conversion_sub', { industry, budget, ltv: fmtEUR(r.ltv) }) };
 }
 
@@ -4816,9 +4964,11 @@ function revealScreenHtml() {
     <p class="ob-hero-sub">${h.sub}</p>
     <div class="ob-bench-card">
       <div class="ob-card-head">◎ ${t('ob_bench_title')}</div>
-      ${obBenchRow(t('ob_bench_ctr'), r.ctr)}
-      ${r.objective === 'appInstall' ? obBenchRow(t('fieldC2i'), r.c2i) : obBenchRow(t('ob_bench_c2l'), r.c2l)}
-      ${r.objective === 'appInstall' ? '' : obBenchRow(t('ob_bench_l2c'), r.l2c)}
+      ${r.objective === 'videoViews' ? obBenchRow(t('ob_bench_viewrate'), r.viewRate) : obBenchRow(t('ob_bench_ctr'), r.ctr)}
+      ${r.objective === 'appInstall' ? obBenchRow(t('fieldC2i'), r.c2i)
+        : r.objective === 'videoViews' ? ''
+        : obBenchRow(t('ob_bench_c2l'), r.c2l)}
+      ${r.objective === 'appInstall' || r.objective === 'videoViews' ? '' : obBenchRow(t('ob_bench_l2c'), r.l2c)}
       <div class="ob-source">${t('ob_source')}</div>
     </div>
     <button type="button" class="ob-cta" data-action="apply-benchmarks">${t('ob_apply_cta')} →</button>
