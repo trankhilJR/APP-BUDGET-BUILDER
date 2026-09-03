@@ -224,7 +224,11 @@
     accent-color: var(--ember);
   }
 
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  /* Empilé en une colonne : à la largeur de la sidebar (~320-380px), deux colonnes rendaient
+     "Marché géographique" plus haut que "Secteur" (retour à la ligne du label), ce qui
+     décalait verticalement les deux select — et tronquait les valeurs longues (ex. "Gaming /
+     Loisirs"). Une seule colonne règle les deux problèmes définitivement. */
+  .field-row { display: flex; flex-direction: column; }
 
   /* Tab / pill selector — scrolls horizontally on narrow screens instead of wrapping */
   .tabs {
