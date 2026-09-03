@@ -636,6 +636,7 @@
     border-top: 1px solid var(--line);
     padding-top: 14px;
   }
+  .footer-credit { margin: 8px 0 0; font-size: 11.5px; color: var(--ink-soft); }
 
   /* Toast */
   .toast {
@@ -1040,7 +1041,7 @@
 <section class="cover-page" id="coverPage">
   <div class="cover-inner">
     <img id="coverLogo" class="cover-logo" hidden alt="Logo agence">
-    <h1 class="cover-title">Simulateur de budget Reddit Ads</h1>
+    <h1 class="cover-title" data-i18n="appTitle">Simulateur de budget Reddit Ads</h1>
     <p class="cover-subtitle">Proposition de plan média</p>
     <div class="cover-meta">
       <div><span class="cover-meta-label">Client</span><strong id="coverClient">—</strong></div>
@@ -1056,8 +1057,8 @@
     <div class="masthead-title">
       <img id="mastheadLogo" class="masthead-logo" hidden alt="Logo agence">
       <div>
-        <h1>Simulateur de budget Reddit Ads</h1>
-        <p>Planification de campagne et projection de pipeline</p>
+        <h1 data-i18n="appTitle">Simulateur de budget Reddit Ads</h1>
+        <p data-i18n="appSubtitle">Planification de campagne et projection de pipeline</p>
       </div>
     </div>
     <div class="masthead-side">
@@ -1716,6 +1717,7 @@
 
   <footer class="note">
     <span id="footerNote">Les hypothèses de coûts (CPM, CTR) sont des ordres de grandeur de marché à ajuster selon le secteur et la période. Elles ne remplacent pas les données réelles issues d'un compte Reddit Ads actif.</span>
+    <p class="footer-credit" data-i18n="footerCredit">Créé par Tranquille Tabard</p>
   </footer>
 
 </div>
@@ -1729,6 +1731,9 @@ const STORAGE_KEY = 'redditBudgetBuilder:v1';
    l'assistant, son sélecteur de langue et la note du footer sont traduits. */
 const translations = {
   fr: {
+    appTitle: 'Simulateur de budget Reddit Ads',
+    appSubtitle: 'Planification de campagne et projection de pipeline',
+    footerCredit: 'Créé par Tranquille Tabard',
     ob_landing_title: 'Simulateur de budget Reddit Ads',
     ob_landing_sub: "Traduis ton investissement Reddit Ads en pipeline, revenu et portée.",
     ob_choose_objective: 'Choisis ton objectif',
@@ -2093,6 +2098,9 @@ const translations = {
     footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
   },
   en: {
+    appTitle: 'Reddit Ads Budget Simulator',
+    appSubtitle: 'Campaign planning and pipeline projection',
+    footerCredit: 'Created by Tranquille Tabard',
     ob_landing_title: 'Reddit Ads Budget Simulator',
     ob_landing_sub: 'Translate your Reddit Ads investment into pipeline, revenue and reach.',
     ob_choose_objective: 'Choose your objective',
@@ -2457,6 +2465,9 @@ const translations = {
     footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
   },
   es: {
+    appTitle: 'Simulador de presupuesto de Reddit Ads',
+    appSubtitle: 'Planificación de campaña y proyección de pipeline',
+    footerCredit: 'Creado por Tranquille Tabard',
     ob_landing_title: 'Simulador de presupuesto de Reddit Ads',
     ob_landing_sub: 'Traduce tu inversión en Reddit Ads en pipeline, ingresos y alcance.',
     ob_choose_objective: 'Elige tu objetivo',
@@ -2885,11 +2896,16 @@ const formatRecommendations = {
   appInstall: { primary: 'video', secondary: 'image', tertiary: 'carousel', reasonKey: 'formatReasonAppInstall', placementKey: 'formatPlacementAppInstall' },
   videoViews: { primary: 'video', secondary: null, tertiary: null, reasonKey: 'formatReasonVideoViews', placementKey: 'formatPlacementVideoViews' },
 };
+// Liens vérifiés vers le site officiel Reddit Business (business.reddithelp.com, le centre
+// d'aide officiel Reddit Ads) pour chaque format du catalogue. Le format Texte n'a pas de page
+// de specs dédiée chez Reddit : il pointe vers le hub général des specs par unité publicitaire.
 const formatLinks = {
   image: 'https://business.reddithelp.com/s/article/image-ad-specifications',
   video: 'https://business.reddithelp.com/s/article/video-ad-specifications',
   carousel: 'https://business.reddithelp.com/s/article/carousel-ad-specifications',
-  freeform: 'https://business.reddithelp.com/s/article/Free-form-Ads',
+  freeform: 'https://business.reddithelp.com/s/article/free-form-ad-specifications',
+  product: 'https://business.reddithelp.com/s/article/dynamic-product-ads',
+  text: 'https://business.reddithelp.com/en/categories/campaign-setup/reddit-ad-unit-specifications',
 };
 function formatLabel(key) { return t('formatLabel_' + key); }
 
@@ -2901,8 +2917,8 @@ const adFormatCatalog = [
   { key: 'video', descKey: 'formatCatalogVideo', link: formatLinks.video },
   { key: 'carousel', descKey: 'formatCatalogCarousel', link: formatLinks.carousel },
   { key: 'freeform', descKey: 'formatCatalogFreeform', link: formatLinks.freeform },
-  { key: 'product', descKey: 'formatCatalogProduct', link: null },
-  { key: 'text', descKey: 'formatCatalogText', link: null },
+  { key: 'product', descKey: 'formatCatalogProduct', link: formatLinks.product },
+  { key: 'text', descKey: 'formatCatalogText', link: formatLinks.text },
 ];
 function renderFormatCatalog() {
   const list = document.getElementById('formatCatalogList');
@@ -3238,6 +3254,7 @@ function initTheme() {
 /* ---------- Language (assistant + footer only, see i18n comment above) ---------- */
 function applyLangToUi() {
   document.documentElement.setAttribute('lang', state.lang);
+  document.title = t('appTitle');
   const footerNote = document.getElementById('footerNote');
   if (footerNote) footerNote.textContent = t('footer_note');
   if (langSwitch.value !== state.lang) langSwitch.value = state.lang;
