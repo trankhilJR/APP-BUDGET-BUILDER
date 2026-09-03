@@ -557,6 +557,7 @@
   .format-card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
   .format-card-value { font-family: 'Fraunces', serif; font-size: 19px; color: var(--ink); }
   .format-reason { font-size: 13.5px; color: var(--ink); line-height: 1.55; margin: 0 0 10px; }
+  .format-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
   .format-link { font-size: 13px; font-weight: 600; color: var(--ember); text-decoration: none; }
   .format-link:hover { text-decoration: underline; }
   .format-transparency-note { margin: 14px 0 0; padding-top: 12px; border-top: 1px solid var(--line); }
@@ -1485,7 +1486,10 @@
       </div>
     </div>
     <p class="format-reason" id="formatReasonText"></p>
-    <a class="format-link" id="formatSpecLink" href="#" target="_blank" rel="noopener" data-i18n="formatLinkLabel">Voir les spécifications officielles Reddit →</a>
+    <div class="format-links">
+      <a class="format-link" id="formatSpecLink" href="#" target="_blank" rel="noopener" data-i18n="formatLinkLabel">Voir les spécifications officielles Reddit →</a>
+      <a class="format-link" href="https://business.reddit.com/success-stories" target="_blank" rel="noopener" data-i18n="formatCaseStudiesLabel">Voir les case studies annonceurs Reddit →</a>
+    </div>
     <p class="hint format-transparency-note" data-i18n="formatTransparencyNote">Recommandations basées sur les données publiques Reddit et des benchmarks tiers 2026.</p>
   </div>
 
@@ -1856,7 +1860,7 @@ const translations = {
     kpiCompletedViews: 'Vues complètes',
     kpiCostPerView: 'Coût par vue',
     kpiCostPerCompleted: 'Coût par vue complète',
-    formatReasonVideoViews: "Le format vidéo est nécessaire pour générer des vues : Reddit facture cet objectif à la vue, la vidéo est donc le format natif de la mécanique.",
+    formatReasonVideoViews: "Le format vidéo est nécessaire pour générer des vues : Reddit facture cet objectif à la vue. Conseil créatif Reddit : 80 % des campagnes vidéo les plus performantes révèlent la marque dans les 3 premières secondes, et plus de la moitié de l'audience décroche avant la 30e seconde — privilégie des formats courts avec la marque visible dès le début.",
     funnelTitleConversion: 'Funnel de génération de leads',
     ffPlaceholderTitle: '🚧 Bientôt disponible',
     ffPlaceholderBody: "Cette vue accueillera prochainement une réplication complète des systèmes de planification SLG (Sales-Led Growth) et PLG (Product-Led Growth) — répartition de budget par phase (TOFU/MOFU/BOFU ou Génération/Capture), plan de campagnes par phase, et funnel chaîné complet. En attendant, la logique de prévision B2B (funnel Lead → MQL → SQL → Opportunité → Client, scénarios Bear/Base/Bull, prévision mensuelle) est disponible directement dans la Vue simple, sous l'objectif Conversion.",
@@ -2011,17 +2015,18 @@ const translations = {
     formatPrimary: 'Format principal',
     formatSecondary: 'Format secondaire',
     formatLinkLabel: 'Voir les spécifications officielles Reddit →',
-    formatReasonAwareness: 'La vidéo gagne sur les métriques de mémorisation (view-through), pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic.',
-    formatReasonTraffic: 'Les visuels statiques surperforment la vidéo en CTR pour les objectifs orientés clic direct (benchmarks 2026, AdControlCenter).',
-    formatReasonConversion: 'Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats ; activer les commentaires renforce la preuve sociale.',
-    formatReasonAppInstall: "La démonstration produit/gameplay en vidéo est la norme du secteur pour convertir en installation ; le carousel montre plusieurs écrans de l'app.",
+    formatReasonAwareness: "Selon l'étude créative KarmaLab de Reddit, associer vidéo et image dans une même campagne multiplie par 10 la mémorisation, par 14 le rappel du message et par 3 la préférence de marque — pertinent pour un objectif facturé au CPM qui cherche la portée plutôt que le clic.",
+    formatReasonTraffic: 'Les visuels statiques surperforment généralement la vidéo en CTR pour les objectifs orientés clic direct (benchmarks tiers 2026, AdControlCenter) ; le carousel permet de tester plusieurs accroches en une seule annonce.',
+    formatReasonConversion: 'Reddit indique que les ads free-form génèrent en moyenne +28 % de CTR vs les autres formats (données officielles de lancement) ; activer les commentaires renforce la preuve sociale.',
+    formatReasonAppInstall: "La démonstration produit/gameplay en vidéo est la norme du secteur mobile UA pour convertir en installation ; le carousel montre plusieurs écrans de l'app. (Pratique standard du secteur, non un chiffre publié par Reddit spécifiquement pour cet objectif.)",
     formatLabel_image: 'Image',
     formatLabel_video: 'Vidéo',
     formatLabel_carousel: 'Carousel',
     formatLabel_freeform: 'Free-form',
     formatCountLabel: 'Nombre de formats combinés',
     formatCountHelp: "Combiner plusieurs formats/placements réduit le coût par résultat (donnée Reddit : Feed + Conversation ≈ -12 %). Au-delà de 2 formats, il s'agit d'une estimation prudente à valider par test.",
-    formatTransparencyNote: "Recommandations basées sur les données publiques Reddit (spécifications officielles, statistiques de performance des ads free-form) et des benchmarks tiers 2026 (AdControlCenter). L'accélérateur multi-format au-delà de 2 formats est une estimation, pas un chiffre garanti par Reddit.",
+    formatTransparencyNote: "Recommandations basées sur les données publiques Reddit (spécifications officielles, étude créative KarmaLab, statistiques de lancement des ads free-form) et des benchmarks tiers 2026 (AdControlCenter). L'accélérateur multi-format au-delà de 2 formats est une estimation, pas un chiffre garanti par Reddit. Pour des exemples chiffrés par marque, consulte les case studies officielles ci-dessous.",
+    formatCaseStudiesLabel: 'Voir les case studies annonceurs Reddit →',
     formatCpmEffectiveLabel: 'CPM effectif après accélérateur : ',
     footer_note: "Benchmarks Reddit Ads 2026 compilés à partir de sources publiques (AdBacklog, Benly, StackMatix, Marketing LTB) — à ajuster avec les données réelles du compte Reddit Ads Manager du client dès qu'elles sont disponibles.",
   },
@@ -2172,7 +2177,7 @@ const translations = {
     kpiCompletedViews: 'Completed views',
     kpiCostPerView: 'Cost per view',
     kpiCostPerCompleted: 'Cost per completed view',
-    formatReasonVideoViews: 'Video is required to generate views: Reddit bills this objective per view, so video is the native format for the mechanic.',
+    formatReasonVideoViews: "Video is required to generate views: Reddit bills this objective per view. Reddit creative tip: 80% of top-performing video campaigns reveal the brand within the first 3 seconds, and more than half the audience drops off before the 30-second mark — favor short cuts with the brand visible early.",
     funnelTitleConversion: 'Lead generation funnel',
     ffPlaceholderTitle: '🚧 Coming soon',
     ffPlaceholderBody: "This view will soon host a full replication of the SLG (Sales-Led Growth) and PLG (Product-Led Growth) planning systems — phase-based budget split (TOFU/MOFU/BOFU or Demand Gen/Capture), a per-phase campaign plan, and a full chained funnel. In the meantime, the B2B forecasting logic (Lead → MQL → SQL → Opportunity → Customer funnel, Bear/Base/Bull scenarios, monthly forecast) is available directly in Simple view, under the Conversion objective.",
@@ -2327,17 +2332,18 @@ const translations = {
     formatPrimary: 'Primary format',
     formatSecondary: 'Secondary format',
     formatLinkLabel: 'View official Reddit specs →',
-    formatReasonAwareness: 'Video wins on view-through/recall metrics, which matters for a CPM-billed objective chasing reach rather than clicks.',
-    formatReasonTraffic: 'Static visuals outperform video on CTR for click-driven objectives, per 2026 benchmarks compiled by AdControlCenter.',
-    formatReasonConversion: 'Reddit reports free-form ads drive +28% average CTR vs other formats; enabling comments strengthens social proof before the action.',
-    formatReasonAppInstall: 'Video product/gameplay demos are the mobile UA industry standard for driving installs; carousel lets you show several app screens.',
+    formatReasonAwareness: "Per Reddit's KarmaLab creative study, pairing video with image in the same campaign drives a 10x lift in memorability, a 14x lift in message recall, and a 3x lift in brand favorability — relevant for a CPM-billed objective chasing reach rather than clicks.",
+    formatReasonTraffic: 'Static visuals generally outperform video on CTR for click-driven objectives (third-party 2026 benchmarks, AdControlCenter); carousel lets you test several hooks in a single ad.',
+    formatReasonConversion: "Reddit reports free-form ads drive +28% average CTR vs other formats (official launch data); enabling comments strengthens social proof before the action.",
+    formatReasonAppInstall: 'Video product/gameplay demos are the mobile UA industry standard for driving installs; carousel lets you show several app screens. (Industry-standard practice, not a figure Reddit publishes specifically for this objective.)',
     formatLabel_image: 'Image',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carousel',
     formatLabel_freeform: 'Free-form',
     formatCountLabel: 'Number of combined formats',
     formatCountHelp: 'Combining several formats/placements lowers cost per result (Reddit data: Feed + Conversation ≈ -12%). Beyond 2 formats this is a conservative estimate to validate via A/B testing.',
-    formatTransparencyNote: 'Recommendations based on public Reddit data (official specs, free-form ad performance stats) and third-party 2026 benchmarks (AdControlCenter). The multi-format accelerator beyond 2 formats is an estimate, not a figure guaranteed by Reddit.',
+    formatTransparencyNote: 'Recommendations based on public Reddit data (official specs, the KarmaLab creative study, free-form ad launch stats) and third-party 2026 benchmarks (AdControlCenter). The multi-format accelerator beyond 2 formats is an estimate, not a figure guaranteed by Reddit. For brand-specific numbers, see the official case studies below.',
+    formatCaseStudiesLabel: 'View Reddit advertiser case studies →',
     formatCpmEffectiveLabel: 'Effective CPM after accelerator: ',
     footer_note: 'Reddit Ads 2026 benchmarks compiled from public sources (AdBacklog, Benly, StackMatix, Marketing LTB) — adjust with the real data from the client’s Reddit Ads Manager account as soon as it is available.',
   },
@@ -2488,7 +2494,7 @@ const translations = {
     kpiCompletedViews: 'Vistas completas',
     kpiCostPerView: 'Coste por vista',
     kpiCostPerCompleted: 'Coste por vista completa',
-    formatReasonVideoViews: 'El vídeo es necesario para generar vistas: Reddit factura este objetivo por vista, por lo que el vídeo es el formato nativo de la mecánica.',
+    formatReasonVideoViews: 'El vídeo es necesario para generar vistas: Reddit factura este objetivo por vista. Consejo creativo de Reddit: el 80% de las campañas de vídeo más exitosas muestran la marca en los primeros 3 segundos, y más de la mitad de la audiencia abandona antes del segundo 30 — prioriza formatos cortos con la marca visible desde el inicio.',
     funnelTitleConversion: 'Funnel de generación de leads',
     ffPlaceholderTitle: '🚧 Próximamente',
     ffPlaceholderBody: 'Esta vista incorporará próximamente una réplica completa de los sistemas de planificación SLG (Sales-Led Growth) y PLG (Product-Led Growth) — reparto de presupuesto por fase (TOFU/MOFU/BOFU o Generación/Captura de demanda), plan de campañas por fase, y un funnel encadenado completo. Mientras tanto, la lógica de previsión B2B (funnel Lead → MQL → SQL → Oportunidad → Cliente, escenarios Bear/Base/Bull, previsión mensual) está disponible directamente en la Vista simple, en el objetivo Conversión.',
@@ -2643,17 +2649,18 @@ const translations = {
     formatPrimary: 'Formato principal',
     formatSecondary: 'Formato secundario',
     formatLinkLabel: 'Ver especificaciones oficiales de Reddit →',
-    formatReasonAwareness: 'El vídeo gana en métricas de recuerdo (view-through), relevante para un objetivo facturado por CPM que busca alcance más que clics.',
-    formatReasonTraffic: 'Los visuales estáticos superan al vídeo en CTR para objetivos orientados al clic directo, según los benchmarks 2026 de AdControlCenter.',
-    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos; activar los comentarios refuerza la prueba social antes de la acción.',
-    formatReasonAppInstall: 'La demostración en vídeo del producto/gameplay es el estándar del sector UA móvil para convertir en instalación; el carrusel permite mostrar varias pantallas de la app.',
+    formatReasonAwareness: 'Según el estudio creativo KarmaLab de Reddit, combinar vídeo e imagen en la misma campaña multiplica por 10 el recuerdo, por 14 el recuerdo del mensaje y por 3 la preferencia de marca — relevante para un objetivo facturado por CPM que busca alcance más que clics.',
+    formatReasonTraffic: 'Los visuales estáticos suelen superar al vídeo en CTR para objetivos orientados al clic directo (benchmarks de terceros 2026, AdControlCenter); el carrusel permite probar varios ganchos en un solo anuncio.',
+    formatReasonConversion: 'Reddit indica que los anuncios free-form generan un +28% de CTR de media frente a otros formatos (datos oficiales de lanzamiento); activar los comentarios refuerza la prueba social antes de la acción.',
+    formatReasonAppInstall: 'La demostración en vídeo del producto/gameplay es el estándar del sector UA móvil para convertir en instalación; el carrusel permite mostrar varias pantallas de la app. (Práctica estándar del sector, no una cifra publicada por Reddit específicamente para este objetivo.)',
     formatLabel_image: 'Imagen',
     formatLabel_video: 'Video',
     formatLabel_carousel: 'Carrusel',
     formatLabel_freeform: 'Free-form',
     formatCountLabel: 'Número de formatos combinados',
     formatCountHelp: 'Combinar varios formatos/ubicaciones reduce el coste por resultado (dato de Reddit: Feed + Conversación ≈ -12%). Más allá de 2 formatos es una estimación prudente a validar con pruebas A/B.',
-    formatTransparencyNote: 'Recomendaciones basadas en datos públicos de Reddit (especificaciones oficiales, estadísticas de rendimiento de los anuncios free-form) y benchmarks de terceros 2026 (AdControlCenter). El acelerador multi-formato más allá de 2 formatos es una estimación, no una cifra garantizada por Reddit.',
+    formatTransparencyNote: 'Recomendaciones basadas en datos públicos de Reddit (especificaciones oficiales, el estudio creativo KarmaLab, estadísticas de lanzamiento de los anuncios free-form) y benchmarks de terceros 2026 (AdControlCenter). El acelerador multi-formato más allá de 2 formatos es una estimación, no una cifra garantizada por Reddit. Para cifras concretas por marca, consulta las case studies oficiales a continuación.',
+    formatCaseStudiesLabel: 'Ver case studies de anunciantes de Reddit →',
     formatCpmEffectiveLabel: 'CPM efectivo tras el acelerador: ',
     footer_note: 'Benchmarks de Reddit Ads 2026 recopilados de fuentes públicas (AdBacklog, Benly, StackMatix, Marketing LTB) — ajusta con los datos reales de la cuenta de Reddit Ads Manager del cliente en cuanto estén disponibles.',
   },
