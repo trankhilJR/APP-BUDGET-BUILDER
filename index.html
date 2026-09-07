@@ -621,6 +621,7 @@
     gap: 10px;
   }
   .log-scale-badge { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; }
+  .log-scale-badge-wrap { display: inline-flex; align-items: center; gap: 4px; }
 
   .stage-list { display: flex; flex-direction: column; }
   /* Un simple attribut [hidden] perdrait face à .stage-list/.kpi-row (même spécificité,
@@ -651,6 +652,14 @@
     background: var(--ember);
     border-radius: 2px;
     transition: width 0.3s ease;
+  }
+
+  .stage .bar-col { display: flex; flex-direction: column; gap: 4px; }
+  .stage .stage-dropoff {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    cursor: default;
   }
 
   .stage .figure {
@@ -1673,7 +1682,10 @@
       <p class="hint ff-scenario-explainer" id="ffScenarioExplainer" hidden></p>
       <div class="funnel-header">
         <h2 id="funnelTitle">Projection du pipeline</h2>
-        <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+        <span class="log-scale-badge-wrap">
+          <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+          <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-main" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-main" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
+        </span>
       </div>
 
       <div class="stage-list" id="stageList"></div>
@@ -1892,7 +1904,10 @@
         <div class="panel" id="slgOutputPanel">
           <div class="funnel-header">
             <h2 data-i18n="slgFunnelTitle">Funnel Sales-Led chaîné</h2>
-            <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+            <span class="log-scale-badge-wrap">
+              <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+              <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-slg" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-slg" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
+            </span>
           </div>
           <div class="kpi-row kpi-row-4" id="slgKpiRow"></div>
           <div class="stage-list" id="slgStageList" style="margin-top:20px;"></div>
@@ -1987,7 +2002,10 @@
         <div class="panel" id="plgOutputPanel">
           <div class="funnel-header">
             <h2 data-i18n="plgFunnelTitle">Funnel Product-Led chaîné</h2>
-            <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+            <span class="log-scale-badge-wrap">
+              <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+              <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-plg" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-plg" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
+            </span>
           </div>
           <div class="kpi-row kpi-row-4" id="plgKpiRow"></div>
           <div class="stage-list" id="plgStageList" style="margin-top:20px;"></div>
@@ -2048,6 +2066,8 @@ const translations = {
     ffScenarioDescBull: '🐂 Bull (optimiste) : +20 % d’efficacité de conversion par rapport à Base. Hypothèse ambitieuse, à réserver aux comptes matures avec un historique de performance solide.',
     ffScenarioRecommendedForBudget: 'Scénario recommandé pour ce budget mensuel',
     ffScenarioSuggest: 'Pour ce budget, {scenario} est souvent un point de départ plus réaliste.',
+    infoLogScale: "Les barres utilisent une échelle logarithmique : chaque étape reste visible même quand les volumes varient de plusieurs ordres de grandeur (ex. des millions d'impressions vs quelques dizaines de clients). Le vrai chiffre de chaque étape est toujours affiché à droite ; la perte en % entre deux étapes est indiquée sous chaque barre.",
+    stageDropoffTitle: 'Perte de {pct} % entre {from} et {to}',
     scenarioMgrLabel: 'Scénario actuel',
     scenarioMgrUnsaved: 'Sans nom (non enregistré)',
     scenarioMgrNew: '+ Nouveau',
@@ -2484,6 +2504,8 @@ const translations = {
     ffScenarioDescBull: '🐂 Bull (optimistic): +20% conversion efficiency vs. Base. An ambitious assumption, best reserved for mature accounts with a solid performance track record.',
     ffScenarioRecommendedForBudget: 'Recommended scenario for this monthly budget',
     ffScenarioSuggest: 'For this budget, {scenario} is often a more realistic starting point.',
+    infoLogScale: "Bars use a logarithmic scale: every stage stays visible even when volumes span several orders of magnitude (e.g. millions of impressions vs. a few dozen clients). Each stage's real number is always shown on the right; the % drop between two stages is shown under each bar.",
+    stageDropoffTitle: '{pct}% drop between {from} and {to}',
     scenarioMgrLabel: 'Current scenario',
     scenarioMgrUnsaved: 'Unsaved',
     scenarioMgrNew: '+ New',
@@ -2920,6 +2942,8 @@ const translations = {
     ffScenarioDescBull: '🐂 Bull (optimista): +20% de eficacia de conversión respecto a Base. Hipótesis ambiciosa, reservada a cuentas maduras con un historial de rendimiento sólido.',
     ffScenarioRecommendedForBudget: 'Escenario recomendado para este presupuesto mensual',
     ffScenarioSuggest: 'Para este presupuesto, {scenario} suele ser un punto de partida más realista.',
+    infoLogScale: 'Las barras usan una escala logarítmica: cada etapa sigue siendo visible aunque los volúmenes varíen en varios órdenes de magnitud (p. ej. millones de impresiones frente a unas decenas de clientes). El número real de cada etapa siempre se muestra a la derecha; la pérdida en % entre dos etapas se indica debajo de cada barra.',
+    stageDropoffTitle: 'Pérdida del {pct}% entre {from} y {to}',
     scenarioMgrLabel: 'Escenario actual',
     scenarioMgrUnsaved: 'Sin guardar',
     scenarioMgrNew: '+ Nuevo',
@@ -4522,7 +4546,32 @@ function stageBarPct(value, ref) {
   return Math.min(100, Math.max(2, pct));
 }
 
+// Ajoute `dropPct` (perte en % vs. l'étape précédente) à chaque étape après la
+// première, quand l'étape précédente a une valeur positive. Affiché directement sous
+// chaque barre pour éviter à l'agence de faire le calcul mental entre deux chiffres
+// bruts qui peuvent différer de plusieurs ordres de grandeur.
+function computeStageDropoffs(stages) {
+  return stages.map((s, i) => {
+    if (i === 0) return s;
+    const prev = stages[i - 1].value;
+    if (!(prev > 0)) return s;
+    const dropPct = ((prev - s.value) / prev) * 100;
+    if (!(dropPct > 0.05)) return s; // valeur en hausse ou quasi stable : rien à signaler
+    return Object.assign({}, s, { dropPct, dropFrom: stages[i - 1].label });
+  });
+}
+
+// Rounding a 99.7% drop (a typical CTR-driven Impressions -> Clics loss) to 0 decimals
+// would read "↓ 100 %", which looks like zero clicks rather than a tiny-but-real trickle —
+// keep one decimal any time the rounded value would otherwise hit 100 without truly being it.
+function fmtDropPct(pct) {
+  if (pct >= 99.95) return '100';
+  if (pct >= 99) return pct.toFixed(1);
+  return String(Math.round(pct));
+}
+
 function renderStageListAnimated(containerId, stages) {
+  stages = computeStageDropoffs(stages);
   const container = document.getElementById(containerId);
   const existing = container.querySelectorAll(':scope > .stage');
 
@@ -4544,6 +4593,16 @@ function renderStageListAnimated(containerId, stages) {
     if (badge && s.badgeLabel) badge.textContent = s.badgeLabel;
     const costLabel = row.querySelector('.cost-label');
     if (s.cost != null && costLabel) costLabel.textContent = `${s.costLabel} : ${fmtEUR(s.cost)}`;
+    const dropoffEl = row.querySelector('.stage-dropoff');
+    if (dropoffEl) {
+      if (s.dropPct != null) {
+        dropoffEl.hidden = false;
+        dropoffEl.textContent = '↓ ' + fmtDropPct(s.dropPct) + ' %';
+        dropoffEl.title = t('stageDropoffTitle', { pct: fmtDropPct(s.dropPct), from: s.dropFrom, to: s.label });
+      } else {
+        dropoffEl.hidden = true;
+      }
+    }
   });
 }
 
@@ -4552,15 +4611,20 @@ function renderStageListAnimated(containerId, stages) {
 // unique across the whole document — several funnels (ff/slg) can render a stage
 // with the same name (e.g. "MQLs") at the same time, just hidden, so a shared id
 // would produce invalid duplicate DOM ids.
+// s.dropPct/s.dropFrom (optional, set by computeStageDropoffs): renders a "↓ X %"
+// indicator under the bar showing the loss vs. the previous stage.
 function stageRowHtml(s) {
-  const pct = Math.max(2, (s.value / (s.ref || 1)) * 100);
+  const pct = stageBarPct(s.value, s.ref);
+  const dropoff = s.dropPct != null
+    ? `<div class="stage-dropoff" title="${escapeHtml(t('stageDropoffTitle', { pct: fmtDropPct(s.dropPct), from: s.dropFrom, to: s.label }))}">↓ ${fmtDropPct(s.dropPct)} %</div>`
+    : `<div class="stage-dropoff" hidden></div>`;
   const badge = s.badge ? `<span class="stage-badge ${s.badge}">${s.badgeLabel}</span>` : '';
   const info = s.info ? `<span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-${s.infoId}" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-${s.infoId}">${escapeHtml(s.info)}</span></span>` : '';
   if (s.cost != null || s.badge) {
     return `
       <div class="stage">
         <div class="label"><span class="label-text">${s.label}</span>${info}${badge}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>${dropoff}</div>
         <div class="figure-wrap">
           <div class="figure">${fmtNum(s.value)}</div>
           ${s.cost != null ? `<div class="cost-label">${s.costLabel} : ${fmtEUR(s.cost)}</div>` : ''}
@@ -4570,7 +4634,7 @@ function stageRowHtml(s) {
   return `
     <div class="stage">
       <div class="label"><span class="label-text">${s.label}</span>${info}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>${dropoff}</div>
       <div class="figure">${fmtNum(s.value)}</div>
     </div>`;
 }
