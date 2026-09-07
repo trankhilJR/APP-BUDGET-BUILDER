@@ -328,6 +328,75 @@
   }
   .advanced-settings[open] summary { margin-bottom: 4px; }
 
+  /* Scenario Manager: save/load/rename/delete named snapshots */
+  .scenario-manager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 0 0 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .scenario-manager-current { display: flex; align-items: center; gap: 8px; flex: 1 1 240px; min-width: 0; }
+  .scenario-manager-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); white-space: nowrap; }
+  .scenario-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  .scenario-unsaved-dot { color: var(--ember); font-weight: 700; font-size: 18px; line-height: 1; flex: none; }
+  .scenario-unsaved-dot[hidden] { display: none; }
+  .scenario-manager-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .scenario-manager-actions button { font-size: 12.5px; padding: 7px 12px; }
+  .scenario-manager-actions .danger { border-color: var(--ember); color: var(--ember); background: transparent; }
+  .scenario-manager-actions .danger:hover { background: var(--ember-soft); }
+  .scenario-manager-hint { margin: 8px 0 0; width: 100%; }
+  .scenario-manager-hint.is-warning { color: var(--ember); }
+
+  .scenario-save-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .scenario-save-modal-overlay[hidden] { display: none; }
+  .scenario-save-modal {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  .scenario-save-modal h3 { margin: 0 0 14px; font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; color: var(--ink); }
+  .scenario-save-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .scenario-save-input:focus { outline: none; border-color: var(--ember); }
+  .scenario-save-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
   /* InfoIcon: small "?" tooltip icon for annotating labels/metrics */
   .info-icon-wrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; line-height: 0; }
   .info-icon {
@@ -1044,6 +1113,7 @@
   body.presentation-mode #inputPanel,
   body.presentation-mode footer.note,
   body.presentation-mode header.masthead .brand-fields,
+  body.presentation-mode .scenario-manager,
   body.presentation-mode #funnelPanel .actions {
     display: none;
   }
@@ -1074,7 +1144,7 @@
     }
     .field select, .field input, .actions, .brand-fields input,
     .header-actions, .advanced-settings, .tabs, .visually-hidden-select,
-    .logo-field, .toast,
+    .logo-field, .toast, .scenario-manager,
     .view-tabs, #fullFunnelView {
       display: none !important;
     }
@@ -1196,6 +1266,35 @@
       <span data-i18n="btnRestartGuide">Reprendre le guidage</span>
     </button>
   </header>
+
+  <div class="scenario-manager" id="scenarioManager">
+    <div class="scenario-manager-current">
+      <label class="scenario-manager-label" for="scenarioSelect" data-i18n="scenarioMgrLabel">Scénario actuel</label>
+      <select id="scenarioSelect" class="scenario-select">
+        <option value="" data-i18n="scenarioMgrUnsaved">Sans nom (non enregistré)</option>
+      </select>
+      <span class="scenario-unsaved-dot" id="scenarioUnsavedDot" title="Modifications non enregistrées" hidden>*</span>
+    </div>
+    <div class="scenario-manager-actions">
+      <button type="button" class="secondary" id="scenarioNewBtn" data-i18n="scenarioMgrNew">+ Nouveau</button>
+      <button type="button" id="scenarioSaveBtn" data-i18n="scenarioMgrSave">💾 Enregistrer</button>
+      <button type="button" class="secondary" id="scenarioRenameBtn" data-i18n="scenarioMgrRename" hidden>Renommer</button>
+      <button type="button" class="secondary danger" id="scenarioDeleteBtn" data-i18n="scenarioMgrDelete" hidden>🗑 Supprimer</button>
+      <button type="button" class="secondary danger" id="scenarioClearAllBtn" data-i18n="scenarioMgrClearAll" hidden>Tout effacer</button>
+    </div>
+    <p class="hint scenario-manager-hint" id="scenarioManagerHint" data-i18n="scenarioMgrHint">Enregistre des scénarios nommés pour les retrouver plus tard, ou les comparer entre eux.</p>
+  </div>
+
+  <div class="scenario-save-modal-overlay" id="scenarioSaveModalOverlay" hidden>
+    <div class="scenario-save-modal" role="dialog" aria-modal="true" aria-labelledby="scenarioSaveModalTitle">
+      <h3 id="scenarioSaveModalTitle" data-i18n="scenarioMgrSaveModalTitle">Enregistrer ce scénario sous :</h3>
+      <input type="text" id="scenarioSaveNameInput" class="scenario-save-input" maxlength="60">
+      <div class="scenario-save-modal-actions">
+        <button type="button" class="secondary" id="scenarioSaveCancelBtn" data-i18n="scenarioMgrCancel">Annuler</button>
+        <button type="button" id="scenarioSaveConfirmBtn" data-i18n="scenarioMgrSaveConfirm">Enregistrer</button>
+      </div>
+    </div>
+  </div>
 
   <div class="tabs view-tabs" data-target="viewSwitch" role="tablist">
     <button type="button" class="tab-btn" data-value="simple" data-i18n="tabSimpleView">Vue simple</button>
@@ -1857,6 +1956,30 @@ const translations = {
     infoSalesLed: "Se concentre sur la génération de leads et le suivi commercial. Idéal pour le B2B à ticket élevé (5 000 € et plus).",
     infoProductLed: "Génère des inscriptions gratuites et de l'usage en essai. La conversion se fait dans le produit. Idéal pour le SaaS.",
     infoFullFunnelLift: "Gain de conversion supplémentaire lorsque notoriété et génération de leads tournent ensemble (15 à 30 % de hausse typique).",
+    scenarioMgrLabel: 'Scénario actuel',
+    scenarioMgrUnsaved: 'Sans nom (non enregistré)',
+    scenarioMgrNew: '+ Nouveau',
+    scenarioMgrSave: '💾 Enregistrer',
+    scenarioMgrRename: 'Renommer',
+    scenarioMgrDelete: '🗑 Supprimer',
+    scenarioMgrClearAll: 'Tout effacer',
+    scenarioMgrSaveModalTitle: 'Enregistrer ce scénario sous :',
+    scenarioMgrCancel: 'Annuler',
+    scenarioMgrSaveConfirm: 'Enregistrer',
+    scenarioMgrNameRequired: "Donne un nom au scénario avant d'enregistrer.",
+    scenarioMgrRenamePrompt: 'Nouveau nom du scénario :',
+    scenarioMgrConfirmDelete: 'Supprimer le scénario « {name} » ? Cette action est irréversible.',
+    scenarioMgrConfirmClearAll: 'Supprimer tous les scénarios enregistrés ? Cette action est irréversible.',
+    scenarioMgrConfirmDiscard: 'Ce scénario a des modifications non enregistrées. Les abandonner ?',
+    scenarioMgrSavedToast: 'Scénario « {name} » enregistré.',
+    scenarioMgrLoadedToast: 'Scénario « {name} » chargé.',
+    scenarioMgrDeletedToast: 'Scénario supprimé.',
+    scenarioMgrClearedToast: 'Tous les scénarios ont été supprimés.',
+    scenarioMgrNewToast: 'Nouveau scénario vierge. Enregistre-le pour le conserver.',
+    scenarioMgrQuotaError: "Stockage local plein : libère de la place (supprime d'anciens scénarios) pour en enregistrer un nouveau.",
+    scenarioMgrStorageError: "Impossible d'enregistrer : le stockage local est indisponible dans ce navigateur (navigation privée ?).",
+    scenarioMgrUnavailable: "Le stockage local est indisponible dans ce navigateur : les scénarios enregistrés ne persisteront pas après fermeture.",
+    scenarioMgrHint: 'Enregistre des scénarios nommés pour les retrouver plus tard.',
     ob_landing_title: 'Simulateur de budget Reddit Ads',
     ob_landing_sub: "Traduis ton investissement Reddit Ads en pipeline, revenu et portée.",
     ob_choose_objective: 'Choisis ton objectif',
@@ -2241,6 +2364,30 @@ const translations = {
     infoSalesLed: 'Focus on lead generation & sales follow-up. Best for high-ticket B2B (€5k+).',
     infoProductLed: 'Drive free signups & trial usage. Conversion happens in-product. Best for SaaS.',
     infoFullFunnelLift: 'Bonus conversion lift when running awareness + lead gen together (15-30% lift typical).',
+    scenarioMgrLabel: 'Current scenario',
+    scenarioMgrUnsaved: 'Unsaved',
+    scenarioMgrNew: '+ New',
+    scenarioMgrSave: '💾 Save',
+    scenarioMgrRename: 'Rename',
+    scenarioMgrDelete: '🗑 Delete',
+    scenarioMgrClearAll: 'Clear all',
+    scenarioMgrSaveModalTitle: 'Save this scenario as:',
+    scenarioMgrCancel: 'Cancel',
+    scenarioMgrSaveConfirm: 'Save',
+    scenarioMgrNameRequired: 'Give the scenario a name before saving.',
+    scenarioMgrRenamePrompt: 'New scenario name:',
+    scenarioMgrConfirmDelete: 'Delete scenario "{name}"? This cannot be undone.',
+    scenarioMgrConfirmClearAll: 'Delete all saved scenarios? This cannot be undone.',
+    scenarioMgrConfirmDiscard: 'This scenario has unsaved changes. Discard them?',
+    scenarioMgrSavedToast: 'Scenario "{name}" saved.',
+    scenarioMgrLoadedToast: 'Scenario "{name}" loaded.',
+    scenarioMgrDeletedToast: 'Scenario deleted.',
+    scenarioMgrClearedToast: 'All scenarios deleted.',
+    scenarioMgrNewToast: 'New blank scenario. Save it to keep it.',
+    scenarioMgrQuotaError: 'Local storage is full: free up space (delete old scenarios) to save a new one.',
+    scenarioMgrStorageError: "Couldn't save: local storage is unavailable in this browser (private browsing?).",
+    scenarioMgrUnavailable: "Local storage is unavailable in this browser: saved scenarios won't persist after you close it.",
+    scenarioMgrHint: 'Save named scenarios to come back to later.',
     ob_landing_title: 'Reddit Ads Budget Simulator',
     ob_landing_sub: 'Translate your Reddit Ads investment into pipeline, revenue and reach.',
     ob_choose_objective: 'Choose your objective',
@@ -2625,6 +2772,30 @@ const translations = {
     infoSalesLed: 'Se centra en la generación de leads y el seguimiento comercial. Ideal para B2B de ticket alto (5.000 € o más).',
     infoProductLed: 'Genera registros gratuitos y uso en prueba. La conversión ocurre dentro del producto. Ideal para SaaS.',
     infoFullFunnelLift: 'Aumento adicional de conversión al combinar notoriedad y generación de leads (entre 15 y 30% de mejora habitual).',
+    scenarioMgrLabel: 'Escenario actual',
+    scenarioMgrUnsaved: 'Sin guardar',
+    scenarioMgrNew: '+ Nuevo',
+    scenarioMgrSave: '💾 Guardar',
+    scenarioMgrRename: 'Renombrar',
+    scenarioMgrDelete: '🗑 Eliminar',
+    scenarioMgrClearAll: 'Borrar todo',
+    scenarioMgrSaveModalTitle: 'Guardar este escenario como:',
+    scenarioMgrCancel: 'Cancelar',
+    scenarioMgrSaveConfirm: 'Guardar',
+    scenarioMgrNameRequired: 'Ponle un nombre al escenario antes de guardar.',
+    scenarioMgrRenamePrompt: 'Nuevo nombre del escenario:',
+    scenarioMgrConfirmDelete: '¿Eliminar el escenario «{name}»? Esta acción no se puede deshacer.',
+    scenarioMgrConfirmClearAll: '¿Eliminar todos los escenarios guardados? Esta acción no se puede deshacer.',
+    scenarioMgrConfirmDiscard: 'Este escenario tiene cambios sin guardar. ¿Descartarlos?',
+    scenarioMgrSavedToast: 'Escenario «{name}» guardado.',
+    scenarioMgrLoadedToast: 'Escenario «{name}» cargado.',
+    scenarioMgrDeletedToast: 'Escenario eliminado.',
+    scenarioMgrClearedToast: 'Todos los escenarios han sido eliminados.',
+    scenarioMgrNewToast: 'Nuevo escenario en blanco. Guárdalo para conservarlo.',
+    scenarioMgrQuotaError: 'Almacenamiento local lleno: libera espacio (elimina escenarios antiguos) para guardar uno nuevo.',
+    scenarioMgrStorageError: 'No se pudo guardar: el almacenamiento local no está disponible en este navegador (¿navegación privada?).',
+    scenarioMgrUnavailable: 'El almacenamiento local no está disponible en este navegador: los escenarios guardados no persistirán al cerrarlo.',
+    scenarioMgrHint: 'Guarda escenarios con nombre para volver a ellos más tarde.',
     ob_landing_title: 'Simulador de presupuesto de Reddit Ads',
     ob_landing_sub: 'Traduce tu inversión en Reddit Ads en pipeline, ingresos y alcance.',
     ob_choose_objective: 'Elige tu objetivo',
@@ -3498,6 +3669,250 @@ function copyShareLink() {
   }
 }
 
+/* ---------- Scenario Manager: save/load/rename/delete named snapshots ----------
+   Distinct from the app's own continuous autosave (STORAGE_KEY / saveState /
+   loadSavedState above), which already persists whatever's currently on screen so a
+   refresh never loses work in progress. This is a separate, user-named library of
+   snapshots ("E-commerce Conservative", "Q4 agressif"...) someone explicitly chooses
+   to keep and revisit — stored under its own localStorage key so the two never collide. */
+const SCENARIOS_STORAGE_KEY = 'redditBudgetBuilder:scenarios:v1';
+const scenarioManagerState = { currentId: null, dirty: false, storageOk: true };
+
+function localStorageAvailable() {
+  try {
+    const testKey = '__rbb_test__';
+    localStorage.setItem(testKey, '1');
+    localStorage.removeItem(testKey);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function loadScenarios() {
+  try {
+    const raw = localStorage.getItem(SCENARIOS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Defensive filtering: a corrupted/malformed single entry shouldn't break the whole list.
+    return parsed.filter(s => s && typeof s === 'object' && typeof s.id === 'string' && s.state && typeof s.state === 'object');
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveScenarios(list) {
+  try {
+    localStorage.setItem(SCENARIOS_STORAGE_KEY, JSON.stringify(list));
+    return true;
+  } catch (e) {
+    if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014)) {
+      toast(t('scenarioMgrQuotaError'));
+    } else {
+      toast(t('scenarioMgrStorageError'));
+    }
+    return false;
+  }
+}
+
+function snapshotCurrentState() {
+  syncStateFromFields();
+  return JSON.parse(JSON.stringify(state));
+}
+
+// Mirrors the boot-time hydration sequence (see bottom of file) so loading a saved
+// scenario repaints every field exactly the way a fresh page load would.
+function applyScenarioSnapshot(snapshot) {
+  Object.assign(state, snapshot);
+  ffHydrateFieldsFromState();
+  slgHydrateFieldsFromState();
+  plgHydrateFieldsFromState();
+  ffgMode.value = state.ffgMode || 'slg';
+  updateFfgModeUI();
+  hydrateFieldsFromState();
+  syncLabels();
+  renderFunnel();
+  setView(viewSwitch.value);
+}
+
+function fmtScenarioTimestamp(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const locale = state.lang === 'fr' ? 'fr-FR' : state.lang === 'es' ? 'es-ES' : 'en-US';
+  return d.toLocaleString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderScenarioManager() {
+  const select = document.getElementById('scenarioSelect');
+  const list = loadScenarios().sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+  select.innerHTML = `<option value="">${escapeHtml(t('scenarioMgrUnsaved'))}</option>` +
+    list.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(fmtScenarioTimestamp(s.savedAt))}</option>`).join('');
+  select.value = scenarioManagerState.currentId || '';
+
+  const hasCurrent = !!scenarioManagerState.currentId;
+  document.getElementById('scenarioRenameBtn').hidden = !hasCurrent;
+  document.getElementById('scenarioDeleteBtn').hidden = !hasCurrent;
+  document.getElementById('scenarioClearAllBtn').hidden = list.length === 0;
+  document.getElementById('scenarioUnsavedDot').hidden = !scenarioManagerState.dirty;
+
+  const hint = document.getElementById('scenarioManagerHint');
+  const saveBtn = document.getElementById('scenarioSaveBtn');
+  if (!scenarioManagerState.storageOk) {
+    hint.textContent = t('scenarioMgrUnavailable');
+    hint.classList.add('is-warning');
+    saveBtn.disabled = true;
+  } else {
+    hint.textContent = t('scenarioMgrHint');
+    hint.classList.remove('is-warning');
+    saveBtn.disabled = false;
+  }
+}
+
+// Dirty-tracking: any real input/change on the actual budget fields marks the current
+// scenario as having unsaved changes. Excludes the scenario-manager's own controls
+// (switching the dropdown, typing a name) so managing scenarios doesn't mark itself dirty.
+function markScenarioDirty(e) {
+  if (e && e.target && e.target.closest && e.target.closest('.scenario-manager, .scenario-save-modal-overlay')) return;
+  if (!scenarioManagerState.dirty) {
+    scenarioManagerState.dirty = true;
+    const dot = document.getElementById('scenarioUnsavedDot');
+    if (dot) dot.hidden = false;
+  }
+}
+function markScenarioClean() {
+  scenarioManagerState.dirty = false;
+  const dot = document.getElementById('scenarioUnsavedDot');
+  if (dot) dot.hidden = true;
+}
+
+function confirmDiscardIfDirty() {
+  return !scenarioManagerState.dirty || confirm(t('scenarioMgrConfirmDiscard'));
+}
+
+function newScenario() {
+  scenarioManagerState.currentId = null;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrNewToast'));
+}
+
+function saveScenario(name, idToOverwrite) {
+  const list = loadScenarios();
+  const snapshot = snapshotCurrentState();
+  const now = new Date().toISOString();
+  let targetId = idToOverwrite;
+  if (idToOverwrite) {
+    const idx = list.findIndex(s => s.id === idToOverwrite);
+    if (idx >= 0) list[idx] = { ...list[idx], name, savedAt: now, state: snapshot };
+    else targetId = null;
+  }
+  if (!targetId) {
+    targetId = 'scenario-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    list.push({ id: targetId, name, savedAt: now, state: snapshot });
+  }
+  if (!saveScenarios(list)) return false;
+  scenarioManagerState.currentId = targetId;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrSavedToast', { name }));
+  return true;
+}
+
+function loadScenario(id) {
+  const found = loadScenarios().find(s => s.id === id);
+  if (!found) return;
+  applyScenarioSnapshot(found.state);
+  scenarioManagerState.currentId = id;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrLoadedToast', { name: found.name }));
+}
+
+function renameScenario(id, newName) {
+  const list = loadScenarios();
+  const idx = list.findIndex(s => s.id === id);
+  if (idx < 0) return;
+  list[idx].name = newName;
+  if (!saveScenarios(list)) return;
+  renderScenarioManager();
+}
+
+function deleteScenario(id) {
+  const list = loadScenarios().filter(s => s.id !== id);
+  if (!saveScenarios(list)) return;
+  if (scenarioManagerState.currentId === id) {
+    scenarioManagerState.currentId = null;
+    markScenarioClean();
+  }
+  renderScenarioManager();
+  toast(t('scenarioMgrDeletedToast'));
+}
+
+function clearAllScenarios() {
+  if (!saveScenarios([])) return;
+  scenarioManagerState.currentId = null;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrClearedToast'));
+}
+
+function openScenarioSaveModal(prefillName) {
+  const overlay = document.getElementById('scenarioSaveModalOverlay');
+  const input = document.getElementById('scenarioSaveNameInput');
+  input.value = prefillName || '';
+  overlay.hidden = false;
+  input.focus();
+  input.select();
+}
+function closeScenarioSaveModal() {
+  document.getElementById('scenarioSaveModalOverlay').hidden = true;
+}
+
+document.getElementById('scenarioSelect').addEventListener('change', e => {
+  const id = e.target.value;
+  if (!confirmDiscardIfDirty()) { e.target.value = scenarioManagerState.currentId || ''; return; }
+  if (!id) newScenario();
+  else loadScenario(id);
+});
+document.getElementById('scenarioNewBtn').addEventListener('click', () => {
+  if (confirmDiscardIfDirty()) newScenario();
+});
+document.getElementById('scenarioSaveBtn').addEventListener('click', () => {
+  const current = loadScenarios().find(s => s.id === scenarioManagerState.currentId);
+  openScenarioSaveModal(current ? current.name : '');
+});
+document.getElementById('scenarioSaveCancelBtn').addEventListener('click', closeScenarioSaveModal);
+document.getElementById('scenarioSaveModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'scenarioSaveModalOverlay') closeScenarioSaveModal();
+});
+document.getElementById('scenarioSaveConfirmBtn').addEventListener('click', () => {
+  const name = document.getElementById('scenarioSaveNameInput').value.trim();
+  if (!name) { toast(t('scenarioMgrNameRequired')); return; }
+  if (saveScenario(name, scenarioManagerState.currentId)) closeScenarioSaveModal();
+});
+document.getElementById('scenarioSaveNameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('scenarioSaveConfirmBtn').click(); }
+  if (e.key === 'Escape') closeScenarioSaveModal();
+});
+document.getElementById('scenarioRenameBtn').addEventListener('click', () => {
+  const current = loadScenarios().find(s => s.id === scenarioManagerState.currentId);
+  if (!current) return;
+  const name = window.prompt(t('scenarioMgrRenamePrompt'), current.name);
+  if (name && name.trim()) renameScenario(current.id, name.trim());
+});
+document.getElementById('scenarioDeleteBtn').addEventListener('click', () => {
+  const current = loadScenarios().find(s => s.id === scenarioManagerState.currentId);
+  if (!current) return;
+  if (confirm(t('scenarioMgrConfirmDelete', { name: current.name }))) deleteScenario(current.id);
+});
+document.getElementById('scenarioClearAllBtn').addEventListener('click', () => {
+  if (confirm(t('scenarioMgrConfirmClearAll'))) clearAllScenarios();
+});
+// Any real user input anywhere in the form marks the loaded scenario dirty.
+document.addEventListener('input', markScenarioDirty, true);
+document.addEventListener('change', markScenarioDirty, true);
+
 /* ---------- Theme ---------- */
 function initTheme() {
   document.documentElement.setAttribute('data-theme', state.theme === 'dark' ? 'dark' : 'light');
@@ -3523,6 +3938,7 @@ function applyLangToUi() {
   presentBtn.textContent = presentationActive ? t('btnExitPresentMode') : t('btnPresentMode');
   if (state.view === 'full') ffgCompute();
   if (!document.getElementById('onboarding').hidden) renderOnboarding();
+  renderScenarioManager();
 }
 langSwitch.addEventListener('change', () => {
   state.lang = langSwitch.value;
@@ -5649,6 +6065,8 @@ if (!hadSaved && !hadShare) {
 }
 setView(viewSwitch.value);
 saveState();
+scenarioManagerState.storageOk = localStorageAvailable();
+renderScenarioManager();
 
 if (hadShare) toast('Scénario partagé chargé');
 </script>
