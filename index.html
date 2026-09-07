@@ -328,6 +328,100 @@
   }
   .advanced-settings[open] summary { margin-bottom: 4px; }
 
+  /* InfoIcon: small "?" tooltip icon for annotating labels/metrics */
+  .info-icon-wrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; line-height: 0; }
+  .info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    padding: 0;
+    border: 1.5px solid var(--ink-soft);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+  .info-icon::before { content: "?"; }
+  .info-icon:hover {
+    background: var(--line);
+    color: var(--ink);
+    border-color: var(--ink);
+    transform: scale(1.12);
+  }
+  .info-icon:focus { outline: none; }
+  .info-icon:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--ember-rgb), 0.35);
+  }
+  .tab-with-info { display: inline-flex; align-items: center; }
+  .tab-with-info .info-icon { margin-left: 6px; }
+
+  .info-icon-tooltip {
+    position: absolute;
+    z-index: 80;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    width: max-content;
+    max-width: 200px;
+    background: #1B2420;
+    color: #F5F3EE;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.45;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(calc(-50% + var(--info-tip-shift-x, 0px))) translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
+  }
+  .info-icon-tooltip.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(calc(-50% + var(--info-tip-shift-x, 0px))) translateY(0);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear;
+  }
+  .info-icon-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: calc(50% - var(--info-tip-shift-x, 0px));
+    margin-left: -4px;
+    width: 8px;
+    height: 8px;
+    background: #1B2420;
+    transform: rotate(45deg);
+  }
+  .info-icon-tooltip--below {
+    bottom: auto;
+    top: calc(100% + 8px);
+    transform: translateX(calc(-50% + var(--info-tip-shift-x, 0px))) translateY(-4px);
+  }
+  .info-icon-tooltip--below.is-open { transform: translateX(calc(-50% + var(--info-tip-shift-x, 0px))) translateY(0); }
+  .info-icon-tooltip--below::after { top: auto; bottom: 100%; transform: rotate(225deg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .info-icon-tooltip, .info-icon-tooltip.is-open,
+    .info-icon-tooltip--below, .info-icon-tooltip--below.is-open {
+      transition: opacity 0.12s linear !important;
+      transform: translateX(calc(-50% + var(--info-tip-shift-x, 0px))) !important;
+    }
+    .info-icon { transition: background-color 0.12s linear, color 0.12s linear; transform: none !important; }
+  }
+
   /* Phase budget split bar (SLG/PLG) */
   .phase-split-bar { display: flex; height: 10px; border-radius: 6px; overflow: hidden; margin: 2px 0 10px; background: var(--line); }
   .phase-split-seg { transition: width 0.35s ease; }
@@ -1121,7 +1215,7 @@
       <p class="hint" data-i18n="hintAssumptions">Ajuste les valeurs par défaut selon ce que tu sais du client.</p>
 
       <div class="field">
-        <label data-i18n="lblPlanDuration">Durée du plan</label>
+        <label><span data-i18n="lblPlanDuration">Durée du plan</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-plan-duration" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-plan-duration" data-i18n="infoDureeDuPlan">Durée de la campagne. Une durée plus longue permet à l'algorithme d'apprendre l'audience et d'optimiser la diffusion.</span></span></label>
         <div class="tabs tabs-wrap" data-target="planDuration" role="tablist">
           <button type="button" class="tab-btn" data-value="1" data-i18n="planDuration1">1 mois</button>
           <button type="button" class="tab-btn" data-value="3" data-i18n="planDuration3">3 mois</button>
@@ -1138,7 +1232,7 @@
       </div>
 
       <div class="field" id="budgetField">
-        <label><span data-i18n="lblBudget">Budget mensuel</span> <span class="val" id="budgetVal">3 000 €</span></label>
+        <label><span data-i18n="lblBudget">Budget mensuel</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-budget" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-budget" data-i18n="infoBudgetMensuel">Budget mensuel alloué aux publicités Reddit. Influence la portée, la fréquence et le volume de leads.</span></span> <span class="val" id="budgetVal">3 000 €</span></label>
         <input type="range" id="budget" min="200" max="30000" step="100" value="3000">
       </div>
 
@@ -1168,8 +1262,14 @@
       <div class="field">
         <label data-i18n="lblTargeting">Ciblage</label>
         <div class="tabs" data-target="mix" role="tablist">
-          <button type="button" class="tab-btn" data-value="broad" data-i18n="ob_targeting_broad">Large</button>
-          <button type="button" class="tab-btn" data-value="niche" data-i18n="ob_targeting_niche">Niche</button>
+          <span class="tab-with-info">
+            <button type="button" class="tab-btn" data-value="broad" data-i18n="ob_targeting_broad">Large</button>
+            <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-targeting-broad" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-targeting-broad" data-i18n="infoCiblageLarge">Audience plus large, plus d'impressions, qualité moyenne plus faible. Adapté à la notoriété.</span></span>
+          </span>
+          <span class="tab-with-info">
+            <button type="button" class="tab-btn" data-value="niche" data-i18n="ob_targeting_niche">Niche</button>
+            <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-targeting-niche" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-targeting-niche" data-i18n="infoCiblageNiche">Audience ciblée, moins d'impressions, leads de meilleure qualité. Plus adapté à la conversion.</span></span>
+          </span>
         </div>
         <select id="mix" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
           <option value="broad" data-i18n="ob_targeting_broad">Large</option>
@@ -1210,12 +1310,12 @@
         </div>
 
         <div class="field" id="reachTargetField">
-          <label><span data-i18n="lblReachTarget">Reach cible</span> <span class="val" id="reachTargetVal">30 %</span></label>
+          <label><span data-i18n="lblReachTarget">Reach cible</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-reach-target" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-reach-target" data-i18n="infoReachCible">% de ton audience cible à exposer aux publicités ce mois-ci. 30 % est un point de départ courant.</span></span> <span class="val" id="reachTargetVal">30 %</span></label>
           <input type="range" id="reachTarget" min="1" max="100" step="1" value="30">
         </div>
 
         <div class="field">
-          <label><span data-i18n="lblFrequency">Fréquence (par mois)</span> <span class="val" id="frequencyVal">4</span></label>
+          <label><span data-i18n="lblFrequency">Fréquence (par mois)</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-frequency" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-frequency" data-i18n="infoFrequence">Nombre de fois où ta publicité s'affiche à la même personne par mois. 3 à 5 est optimal.</span></span> <span class="val" id="frequencyVal">4</span></label>
           <input type="range" id="frequency" min="1" max="20" step="1" value="4">
         </div>
       </div>
@@ -1226,7 +1326,7 @@
           <input type="range" id="viewRate" min="5" max="90" step="1" value="40">
         </div>
         <div class="field">
-          <label><span data-i18n="lblCompletionRate">Taux de complétion</span> <span class="val" id="completionRateVal">1,0 %</span></label>
+          <label><span data-i18n="lblCompletionRate">Taux de complétion</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-completion-rate" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-completion-rate" data-i18n="infoTauxCompletion">% de personnes regardant la publicité vidéo jusqu'au bout. 1 à 3 % est courant. Indique l'engagement avec la création.</span></span> <span class="val" id="completionRateVal">1,0 %</span></label>
           <input type="range" id="completionRate" min="0.1" max="20" step="0.1" value="1">
         </div>
       </div>
@@ -1237,23 +1337,23 @@
       <p class="hint" style="margin-bottom:14px;" data-i18n="hintFunnelAssumptions">Hypothèses du funnel (éditables)</p>
 
       <div class="field">
-        <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="cpmVal">6,0 €</span></label>
+        <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-cpm" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-cpm" data-i18n="infoCpm">Coût pour 1000 impressions. Fourchette Reddit : 2–12 € selon le secteur. Plus bas = adapté à la notoriété, plus élevé = audiences plus spécifiques.</span></span> <span class="val" id="cpmVal">6,0 €</span></label>
         <input type="range" id="cpm" min="1" max="15" step="0.1" value="6">
         <p class="hint" id="cpmEffectiveNote" style="margin:6px 0 0;"></p>
       </div>
 
       <div class="field" id="ctrField">
-        <label><span data-i18n="lblCtr">CTR (taux de clic)</span> <span class="val" id="ctrVal">0,35 %</span></label>
+        <label><span data-i18n="lblCtr">CTR (taux de clic)</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-ctr" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-ctr" data-i18n="infoCtr">Taux de clic (% de personnes qui cliquent). Moyenne Reddit : 0,25–0,45 %. Plus élevé = meilleure création ou meilleur ciblage.</span></span> <span class="val" id="ctrVal">0,35 %</span></label>
         <input type="range" id="ctr" min="0.05" max="2" step="0.01" value="0.35">
       </div>
 
       <div class="field" id="c2lField">
-        <label><span data-i18n="ob_bench_c2l">Clic → Lead</span> <span class="val" id="c2lVal">5,0 %</span></label>
+        <label><span data-i18n="ob_bench_c2l">Clic → Lead</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-c2l" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-c2l" data-i18n="infoC2l">% de clics qui se transforment en leads. 3 à 7 % est courant. Dépend de la qualité de la landing page.</span></span> <span class="val" id="c2lVal">5,0 %</span></label>
         <input type="range" id="c2l" min="0.5" max="30" step="0.5" value="5">
       </div>
 
       <div class="field" id="l2cField">
-        <label><span data-i18n="ob_bench_l2c">Lead → Client</span> <span class="val" id="l2cVal">12,0 %</span></label>
+        <label><span data-i18n="ob_bench_l2c">Lead → Client</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-l2c" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-l2c" data-i18n="infoL2c">% de leads qui achètent. Dépend du processus de vente et de l'adéquation produit/marché.</span></span> <span class="val" id="l2cVal">12,0 %</span></label>
         <input type="range" id="l2c" min="1" max="50" step="1" value="12">
       </div>
 
@@ -1302,7 +1402,7 @@
           <input type="range" id="ffTargetLeads" min="10" max="2000" step="10" value="100">
         </div>
         <div class="field" id="ffBudgetField" hidden>
-          <label><span data-i18n="lblBudget">Budget mensuel</span> <span class="val" id="ffBudgetVal">25 000 €</span></label>
+          <label><span data-i18n="lblBudget">Budget mensuel</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-ff-budget" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-ff-budget" data-i18n="infoBudgetMensuel">Budget mensuel alloué aux publicités Reddit. Influence la portée, la fréquence et le volume de leads.</span></span> <span class="val" id="ffBudgetVal">25 000 €</span></label>
           <input type="range" id="ffBudget" min="500" max="200000" step="500" value="25000">
         </div>
 
@@ -1492,8 +1592,14 @@
   <div id="fullFunnelView" hidden>
     <div class="funnel-topbar" style="margin-bottom:18px;">
       <div class="tabs" data-target="ffgMode" role="tablist">
-        <button type="button" class="tab-btn" data-value="slg" data-i18n="ffgModeSlg">Sales-Led (SLG)</button>
-        <button type="button" class="tab-btn" data-value="plg" data-i18n="ffgModePlg">Product-Led (PLG)</button>
+        <span class="tab-with-info">
+          <button type="button" class="tab-btn" data-value="slg" data-i18n="ffgModeSlg">Sales-Led (SLG)</button>
+          <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-sales-led" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-sales-led" data-i18n="infoSalesLed">Se concentre sur la génération de leads et le suivi commercial. Idéal pour le B2B à ticket élevé (5 000 € et plus).</span></span>
+        </span>
+        <span class="tab-with-info">
+          <button type="button" class="tab-btn" data-value="plg" data-i18n="ffgModePlg">Product-Led (PLG)</button>
+          <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-product-led" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-product-led" data-i18n="infoProductLed">Génère des inscriptions gratuites et de l'usage en essai. La conversion se fait dans le produit. Idéal pour le SaaS.</span></span>
+        </span>
       </div>
       <select id="ffgMode" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
         <option value="slg" selected data-i18n="ffgModeSlg">Sales-Led (SLG)</option>
@@ -1536,7 +1642,7 @@
           <details class="advanced-settings">
             <summary data-i18n="slgDetailsTofu">Détails TOFU — Notoriété</summary>
             <div class="field" style="margin-top:12px;">
-              <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="slgTofuCpmVal">5,0 €</span></label>
+              <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-slg-cpm" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-slg-cpm" data-i18n="infoCpm">Coût pour 1000 impressions. Fourchette Reddit : 2–12 € selon le secteur. Plus bas = adapté à la notoriété, plus élevé = audiences plus spécifiques.</span></span> <span class="val" id="slgTofuCpmVal">5,0 €</span></label>
               <input type="range" id="slgTofuCpm" min="1" max="15" step="0.1" value="5">
             </div>
             <div class="field">
@@ -1580,7 +1686,7 @@
           <details class="advanced-settings">
             <summary data-i18n="slgDetailsBofu">Détails BOFU — Accélération commerciale</summary>
             <div class="field" style="margin-top:12px;">
-              <label data-i18n="slgLblLift">Synergie Full-Funnel Lift</label>
+              <label><span data-i18n="slgLblLift">Synergie Full-Funnel Lift</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-lift" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-lift" data-i18n="infoFullFunnelLift">Gain de conversion supplémentaire lorsque notoriété et génération de leads tournent ensemble (15 à 30 % de hausse typique).</span></span></label>
               <div class="tabs" data-target="slgLift" role="tablist">
                 <button type="button" class="tab-btn" data-value="off" data-i18n="lblOff">Désactivée</button>
                 <button type="button" class="tab-btn" data-value="on" data-i18n="lblOn">Activée</button>
@@ -1655,7 +1761,7 @@
             </div>
             <p class="hint" id="plgConversionPctNote" style="margin:-8px 0 14px;"></p>
             <div class="field">
-              <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="val" id="plgCpmVal">6,0 €</span></label>
+              <label><span data-i18n="lblCpm">CPM (coût pour 1000 impressions)</span> <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-plg-cpm" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-plg-cpm" data-i18n="infoCpm">Coût pour 1000 impressions. Fourchette Reddit : 2–12 € selon le secteur. Plus bas = adapté à la notoriété, plus élevé = audiences plus spécifiques.</span></span> <span class="val" id="plgCpmVal">6,0 €</span></label>
               <input type="range" id="plgCpm" min="1" max="15" step="0.1" value="6">
             </div>
             <div class="field">
@@ -1734,6 +1840,23 @@ const translations = {
     appTitle: 'Simulateur de budget Reddit Ads',
     appSubtitle: 'Planification de campagne et projection de pipeline',
     footerCredit: 'Créé par Tranquille Tabard',
+    infoIconLabel: "Plus d'informations",
+    infoBudgetMensuel: "Budget mensuel alloué aux publicités Reddit. Influence la portée, la fréquence et le volume de leads.",
+    infoDureeDuPlan: "Durée de la campagne. Une durée plus longue permet à l'algorithme d'apprendre l'audience et d'optimiser la diffusion.",
+    infoCiblageLarge: "Audience plus large, plus d'impressions, qualité moyenne plus faible. Adapté à la notoriété.",
+    infoCiblageNiche: "Audience ciblée, moins d'impressions, leads de meilleure qualité. Plus adapté à la conversion.",
+    infoReachCible: "% de ton audience cible à exposer aux publicités ce mois-ci. 30 % est un point de départ courant.",
+    infoFrequence: "Nombre de fois où ta publicité s'affiche à la même personne par mois. 3 à 5 est optimal.",
+    infoCpm: "Coût pour 1000 impressions. Fourchette Reddit : 2–12 € selon le secteur. Plus bas = adapté à la notoriété, plus élevé = audiences plus spécifiques.",
+    infoCtr: "Taux de clic (% de personnes qui cliquent). Moyenne Reddit : 0,25–0,45 %. Plus élevé = meilleure création ou meilleur ciblage.",
+    infoTauxCompletion: "% de personnes regardant la publicité vidéo jusqu'au bout. 1 à 3 % est courant. Indique l'engagement avec la création.",
+    infoC2l: "% de clics qui se transforment en leads. 3 à 7 % est courant. Dépend de la qualité de la landing page.",
+    infoL2c: "% de leads qui achètent. Dépend du processus de vente et de l'adéquation produit/marché.",
+    infoMql: "Marketing Qualified Lead : lead qui correspond à ton profil de client idéal.",
+    infoSql: "Sales Qualified Lead : lead examiné par l'équipe commerciale et jugé prêt à être traité.",
+    infoSalesLed: "Se concentre sur la génération de leads et le suivi commercial. Idéal pour le B2B à ticket élevé (5 000 € et plus).",
+    infoProductLed: "Génère des inscriptions gratuites et de l'usage en essai. La conversion se fait dans le produit. Idéal pour le SaaS.",
+    infoFullFunnelLift: "Gain de conversion supplémentaire lorsque notoriété et génération de leads tournent ensemble (15 à 30 % de hausse typique).",
     ob_landing_title: 'Simulateur de budget Reddit Ads',
     ob_landing_sub: "Traduis ton investissement Reddit Ads en pipeline, revenu et portée.",
     ob_choose_objective: 'Choisis ton objectif',
@@ -2101,6 +2224,23 @@ const translations = {
     appTitle: 'Reddit Ads Budget Simulator',
     appSubtitle: 'Campaign planning and pipeline projection',
     footerCredit: 'Created by Tranquille Tabard',
+    infoIconLabel: 'More information',
+    infoBudgetMensuel: 'Monthly budget allocated to Reddit ads. Affects reach, frequency, and lead volume.',
+    infoDureeDuPlan: 'Campaign length. Longer campaigns allow audience learning and optimization.',
+    infoCiblageLarge: 'Broader audience, more impressions, lower average quality. Good for awareness.',
+    infoCiblageNiche: 'Specific audience, fewer impressions, higher quality leads. Better for conversion.',
+    infoReachCible: '% of your target audience to expose to ads this month. 30% is typical starting point.',
+    infoFrequence: 'How many times your ad shows to the same person per month. 3-5 is optimal.',
+    infoCpm: 'Cost Per Thousand Impressions. Reddit range: €2–12 by sector. Lower = better for awareness, higher = more specific audiences.',
+    infoCtr: 'Click-Through Rate (% who click). Reddit average: 0.25–0.45%. Higher = better creative or targeting.',
+    infoTauxCompletion: '% watching full video ad. 1-3% is typical. Indicates creative engagement.',
+    infoC2l: '% of clicks that become leads. 3-7% is typical. Depends on landing page quality.',
+    infoL2c: '% of leads that purchase. Depends on sales process & product fit.',
+    infoMql: 'Marketing Qualified Lead: lead that matches your ideal customer profile.',
+    infoSql: 'Sales Qualified Lead: lead that sales team has reviewed and deemed sales-ready.',
+    infoSalesLed: 'Focus on lead generation & sales follow-up. Best for high-ticket B2B (€5k+).',
+    infoProductLed: 'Drive free signups & trial usage. Conversion happens in-product. Best for SaaS.',
+    infoFullFunnelLift: 'Bonus conversion lift when running awareness + lead gen together (15-30% lift typical).',
     ob_landing_title: 'Reddit Ads Budget Simulator',
     ob_landing_sub: 'Translate your Reddit Ads investment into pipeline, revenue and reach.',
     ob_choose_objective: 'Choose your objective',
@@ -2468,6 +2608,23 @@ const translations = {
     appTitle: 'Simulador de presupuesto de Reddit Ads',
     appSubtitle: 'Planificación de campaña y proyección de pipeline',
     footerCredit: 'Creado por Tranquille Tabard',
+    infoIconLabel: 'Más información',
+    infoBudgetMensuel: 'Presupuesto mensual asignado a los anuncios de Reddit. Afecta al alcance, la frecuencia y el volumen de leads.',
+    infoDureeDuPlan: 'Duración de la campaña. Una duración más larga permite que el algoritmo aprenda sobre la audiencia y optimice la entrega.',
+    infoCiblageLarge: 'Audiencia más amplia, más impresiones, calidad media más baja. Adecuado para notoriedad.',
+    infoCiblageNiche: 'Audiencia específica, menos impresiones, leads de mayor calidad. Mejor para conversión.',
+    infoReachCible: '% de tu audiencia objetivo que se expondrá a los anuncios este mes. El 30% es un punto de partida habitual.',
+    infoFrequence: 'Cuántas veces se muestra tu anuncio a la misma persona al mes. Entre 3 y 5 es óptimo.',
+    infoCpm: 'Coste por mil impresiones. Rango en Reddit: 2-12 € según el sector. Más bajo = adecuado para notoriedad, más alto = audiencias más específicas.',
+    infoCtr: 'Tasa de clics (% de personas que hacen clic). Media en Reddit: 0,25-0,45%. Más alto = mejor creatividad o segmentación.',
+    infoTauxCompletion: '% de personas que ven el anuncio de vídeo completo. Entre el 1 y el 3% es habitual. Indica el engagement con la creatividad.',
+    infoC2l: '% de clics que se convierten en leads. Entre el 3 y el 7% es habitual. Depende de la calidad de la landing page.',
+    infoL2c: '% de leads que compran. Depende del proceso de ventas y del ajuste del producto.',
+    infoMql: 'Marketing Qualified Lead: lead que coincide con tu perfil de cliente ideal.',
+    infoSql: 'Sales Qualified Lead: lead revisado por el equipo de ventas y considerado listo para la venta.',
+    infoSalesLed: 'Se centra en la generación de leads y el seguimiento comercial. Ideal para B2B de ticket alto (5.000 € o más).',
+    infoProductLed: 'Genera registros gratuitos y uso en prueba. La conversión ocurre dentro del producto. Ideal para SaaS.',
+    infoFullFunnelLift: 'Aumento adicional de conversión al combinar notoriedad y generación de leads (entre 15 y 30% de mejora habitual).',
     ob_landing_title: 'Simulador de presupuesto de Reddit Ads',
     ob_landing_sub: 'Traduce tu inversión en Reddit Ads en pipeline, ingresos y alcance.',
     ob_choose_objective: 'Elige tu objetivo',
@@ -2845,6 +3002,11 @@ function industryLabelSubI18n(key) { return t('industry_' + key + '_sub'); }
 // dashboard strings (App Install objective/fields) that are translated outside the brief.
 function applyDataI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  // Same pattern as data-i18n, but for aria-label (an attribute, not textContent) —
+  // used by InfoIcon's trigger buttons so screen readers get a localized label.
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));
+  });
 }
 
 // Benchmarks Reddit Ads 2026 (AdBacklog, Benly, StackMatix, AdControlCenter, Marketing LTB, SHNO).
@@ -3182,6 +3344,98 @@ function csvField(v) {
   return s;
 }
 
+/* ---------- InfoIcon: accessible "?" tooltip icon ----------
+   Markup (hand-written in the HTML, or built inline for dynamically-rendered
+   labels such as funnel stage names):
+     <span class="info-icon-wrap">
+       <button type="button" class="info-icon" aria-describedby="info-tip-X"
+               aria-expanded="false" data-i18n-aria-label="infoIconLabel"
+               aria-label="…"></button>
+       <span class="info-icon-tooltip" role="tooltip" id="info-tip-X"
+             data-i18n="infoSomeKey">…</span>
+     </span>
+   A single set of delegated listeners (below, attached once at boot) drives
+   every icon currently in the DOM — including ones added later by an
+   innerHTML re-render — so no per-instance wiring is ever needed:
+     - hover (mouseover/mouseout) and keyboard focus (focusin/focusout) open
+       it on desktop;
+     - click toggles it open/closed, which is what makes it work on touch
+       (there is no real "hover" there);
+     - a document-level pointerdown closes it when tapping/clicking outside;
+     - Escape closes it and returns focus to the trigger;
+     - on open, position is measured and flipped above/below (and nudged
+       horizontally) so the tooltip never overflows the viewport. */
+const infoIconOpenedByClick = new WeakSet();
+
+function closeInfoIcon(btn) {
+  const wrap = btn.closest('.info-icon-wrap');
+  if (wrap) wrap.querySelector('.info-icon-tooltip')?.classList.remove('is-open');
+  btn.setAttribute('aria-expanded', 'false');
+  infoIconOpenedByClick.delete(btn);
+}
+
+function openInfoIcon(btn) {
+  const wrap = btn.closest('.info-icon-wrap');
+  const tooltip = wrap && wrap.querySelector('.info-icon-tooltip');
+  if (!tooltip) return;
+  tooltip.classList.remove('info-icon-tooltip--below');
+  tooltip.style.removeProperty('--info-tip-shift-x');
+  tooltip.classList.add('is-open');
+  btn.setAttribute('aria-expanded', 'true');
+  // Measure after the (still off-flow) tooltip is visible, then flip/clamp
+  // so it never overflows the viewport.
+  const margin = 8;
+  const rect = tooltip.getBoundingClientRect();
+  if (rect.top < margin) tooltip.classList.add('info-icon-tooltip--below');
+  const rectAfterFlip = tooltip.getBoundingClientRect();
+  if (rectAfterFlip.left < margin) {
+    tooltip.style.setProperty('--info-tip-shift-x', `${margin - rectAfterFlip.left}px`);
+  } else if (rectAfterFlip.right > window.innerWidth - margin) {
+    tooltip.style.setProperty('--info-tip-shift-x', `${(window.innerWidth - margin) - rectAfterFlip.right}px`);
+  }
+}
+
+document.addEventListener('mouseover', e => {
+  const btn = e.target.closest('.info-icon');
+  if (btn) openInfoIcon(btn);
+});
+document.addEventListener('mouseout', e => {
+  const btn = e.target.closest('.info-icon');
+  if (btn && !infoIconOpenedByClick.has(btn) && !btn.contains(e.relatedTarget)) closeInfoIcon(btn);
+});
+document.addEventListener('focusin', e => {
+  const btn = e.target.closest('.info-icon');
+  if (btn) openInfoIcon(btn);
+});
+document.addEventListener('focusout', e => {
+  const btn = e.target.closest('.info-icon');
+  if (btn && !infoIconOpenedByClick.has(btn)) closeInfoIcon(btn);
+});
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.info-icon');
+  if (!btn) return;
+  e.stopPropagation();
+  if (btn.getAttribute('aria-expanded') === 'true') {
+    closeInfoIcon(btn);
+  } else {
+    infoIconOpenedByClick.add(btn);
+    openInfoIcon(btn);
+  }
+});
+document.addEventListener('pointerdown', e => {
+  if (e.target.closest('.info-icon-wrap')) return;
+  document.querySelectorAll('.info-icon[aria-expanded="true"]').forEach(closeInfoIcon);
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  const active = document.activeElement;
+  const focusedIcon = active && active.closest && active.closest('.info-icon');
+  const openIcons = document.querySelectorAll('.info-icon[aria-expanded="true"]');
+  if (!openIcons.length) return;
+  openIcons.forEach(closeInfoIcon);
+  if (focusedIcon) focusedIcon.blur();
+});
+
 /* ---------- Toast ---------- */
 let toastTimer = null;
 function toast(msg) {
@@ -3513,6 +3767,8 @@ function renderStageListAnimated(containerId, stages) {
     row.querySelector('.figure').textContent = fmtNum(s.value);
     const labelText = row.querySelector('.label-text');
     if (labelText) labelText.textContent = s.label;
+    const tooltipEl = row.querySelector('.info-icon-tooltip');
+    if (tooltipEl && s.info) tooltipEl.textContent = s.info;
     const badge = row.querySelector('.stage-badge');
     if (badge && s.badgeLabel) badge.textContent = s.badgeLabel;
     const costLabel = row.querySelector('.cost-label');
@@ -3520,13 +3776,19 @@ function renderStageListAnimated(containerId, stages) {
   });
 }
 
+// s.info + s.infoId (optional): renders an InfoIcon right after the stage label
+// (e.g. defining "MQL"/"SQL" where they appear as funnel stages). infoId must be
+// unique across the whole document — several funnels (ff/slg) can render a stage
+// with the same name (e.g. "MQLs") at the same time, just hidden, so a shared id
+// would produce invalid duplicate DOM ids.
 function stageRowHtml(s) {
   const pct = Math.max(2, (s.value / (s.ref || 1)) * 100);
   const badge = s.badge ? `<span class="stage-badge ${s.badge}">${s.badgeLabel}</span>` : '';
+  const info = s.info ? `<span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-${s.infoId}" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-${s.infoId}">${escapeHtml(s.info)}</span></span>` : '';
   if (s.cost != null || s.badge) {
     return `
       <div class="stage">
-        <div class="label"><span class="label-text">${s.label}</span>${badge}</div>
+        <div class="label"><span class="label-text">${s.label}</span>${info}${badge}</div>
         <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
         <div class="figure-wrap">
           <div class="figure">${fmtNum(s.value)}</div>
@@ -3536,7 +3798,7 @@ function stageRowHtml(s) {
   }
   return `
     <div class="stage">
-      <div class="label"><span class="label-text">${s.label}</span></div>
+      <div class="label"><span class="label-text">${s.label}</span>${info}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
       <div class="figure">${fmtNum(s.value)}</div>
     </div>`;
@@ -4225,8 +4487,8 @@ function ffRenderFunnelStages(funnel, budget) {
   const ref = funnel.leads || 1;
   const stages = [
     { label: t('ffStageLeads'), value: funnel.leads, ref, badge: 'media', badgeLabel: t('ffBadgeMedia') },
-    { label: t('ffStageMqls'), value: funnel.mqls, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.mqls > 0 ? budget / funnel.mqls : null, costLabel: t('ffCostMql') },
-    { label: t('ffStageSqls'), value: funnel.sqls, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.sqls > 0 ? budget / funnel.sqls : null, costLabel: t('ffCostSql') },
+    { label: t('ffStageMqls'), value: funnel.mqls, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.mqls > 0 ? budget / funnel.mqls : null, costLabel: t('ffCostMql'), info: t('infoMql'), infoId: 'ff-mql' },
+    { label: t('ffStageSqls'), value: funnel.sqls, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.sqls > 0 ? budget / funnel.sqls : null, costLabel: t('ffCostSql'), info: t('infoSql'), infoId: 'ff-sql' },
     { label: t('ffStageOpportunities'), value: funnel.opportunities, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.opportunities > 0 ? budget / funnel.opportunities : null, costLabel: t('ffCostOpp') },
     { label: t('ffStageWon'), value: funnel.closedWon, ref, badge: 'sales', badgeLabel: t('ffBadgeSales'), cost: funnel.closedWon > 0 ? budget / funnel.closedWon : null, costLabel: t('ffCostCac') },
   ];
@@ -4452,8 +4714,8 @@ function slgRenderStages(d) {
     { label: t('stageImpressions'), value: d.tofuImpressions, ref },
     { label: t('slgStageMofuLeads'), value: d.mofuLeads, ref },
     { label: t('ffStageLeads'), value: d.leads, ref },
-    { label: t('ffStageMqls'), value: d.mqls, ref },
-    { label: t('ffStageSqls'), value: d.sqls, ref },
+    { label: t('ffStageMqls'), value: d.mqls, ref, info: t('infoMql'), infoId: 'slg-mql' },
+    { label: t('ffStageSqls'), value: d.sqls, ref, info: t('infoSql'), infoId: 'slg-sql' },
     { label: t('ffStageOpportunities'), value: d.opportunities, ref },
     { label: t('ffStageWon'), value: d.closedWon, ref },
   ];
