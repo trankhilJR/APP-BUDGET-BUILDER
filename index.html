@@ -16,6 +16,10 @@
     --line: #D8D9D1;
     --ember: #BF4E2C;
     --ember-soft: #F4E2DA;
+    /* --ember itself is only 3.86:1 on --ember-soft — fine for large text (KPI values)
+       but fails WCAG AA (4.5:1) for small badge text; this darker shade (4.6:1) is used
+       specifically where ember text sits on an ember-soft background at small sizes. */
+    --ember-strong: #AB4627;
     --moss: #3F5A47;
     --moss-soft: #E1E9E1;
     --moss-rgb: 63,90,71;
@@ -36,6 +40,7 @@
     --line: #2E3336;
     --ember: #E8734A;
     --ember-soft: #3A2620;
+    --ember-strong: #E8734A;
     --moss: #7FBE98;
     --moss-soft: #1E2A22;
     --moss-rgb: 127,190,152;
@@ -49,6 +54,13 @@
 
   * { box-sizing: border-box; }
 
+  /* Safety net against page-level horizontal scroll: an invisible element positioned near
+     a viewport edge (e.g. an InfoIcon tooltip, which is only clamped on-screen once it's
+     actually opened) can still extend past the edge while at rest and inflate scrollWidth.
+     Intentionally-scrollable inner regions (.tabs, .table-scroll) are unaffected — this
+     only clips overflow at the document level. */
+  html { overflow-x: hidden; }
+
   body {
     margin: 0;
     background: var(--bg);
@@ -56,18 +68,23 @@
     font-family: 'Inter', sans-serif;
     font-size: 15px;
     line-height: 1.5;
+    overflow-x: hidden;
     transition: background 0.2s ease, color 0.2s ease;
   }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 68px 28px 100px; }
 
+  /* Native <select> elements can refuse to shrink below their longest <option>'s
+     content width even with width:1px set — clip-based visually-hidden techniques
+     don't stop that box from still extending past the viewport edge and inflating
+     scrollWidth. Moving it off-canvas sidesteps the issue instead of fighting it. */
   .visually-hidden-select {
     position: absolute;
+    left: -9999px;
     width: 1px; height: 1px;
     overflow: hidden;
-    clip: rect(0,0,0,0);
     white-space: nowrap;
-    border: 0; padding: 0; margin: -1px;
+    border: 0; padding: 0; margin: 0;
   }
 
   header.masthead {
@@ -102,9 +119,9 @@
 
   header.masthead p { margin: 0; color: var(--ink-soft); font-size: 14px; }
 
-  .masthead-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  .masthead-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; max-width: 100%; }
 
-  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 
   .icon-toggle {
     width: 38px; height: 38px; padding: 0;
@@ -172,10 +189,73 @@
     gap: 24px;
     align-items: start;
   }
+  /* Grid tracks default to a content-based min size: a <select> with a long option
+     (e.g. "Amérique latine") or a wide table can force its track — and the whole
+     page — wider than the viewport instead of shrinking. min-width:0 opts back into
+     the track's own width so width:100% children actually shrink to fit. */
+  .layout > .panel { min-width: 0; }
 
   @media (max-width: 860px) {
     .layout { grid-template-columns: 1fr; }
   }
+
+  /* ==================== Mobile (<=640px) ====================
+     Real bug fixed here: header-actions (lang pills + theme toggle + Copier/Mode
+     présentation buttons) had no wrap and no width bound, so on narrow viewports it
+     forced the whole page wider than the screen (horizontal scroll). Also bumps tap
+     targets to ~44px and input font-size to 16px (iOS auto-zooms on focus below 16px). */
+  @media (max-width: 640px) {
+    /* Extra top padding clears the floating "Reprendre le guidage" pill (fixed, top:12px),
+       which otherwise overlaps the title on narrow screens where it wraps to 2 lines. */
+    .wrap { padding: 68px 16px 96px; }
+    header.masthead h1 { font-size: 24px; }
+    header.masthead { flex-direction: column; align-items: stretch; }
+    .masthead-side { align-items: stretch; width: 100%; }
+    .header-actions { width: 100%; }
+    .brand-fields { width: 100%; }
+    .brand-fields > div { flex: 1 1 130px; }
+    .brand-fields input[type="text"] { width: 100%; }
+
+    button { min-height: 44px; }
+    .icon-toggle { width: 44px; height: 44px; }
+
+    /* Export actions become a persistent bottom bar instead of scrolling away at the
+       end of a long form — the two calls to action agencies actually need on a client call. */
+    .actions {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 60;
+      margin: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--line);
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.12);
+    }
+    .actions button { flex: 1 1 0; min-width: 0; }
+    body.presentation-mode .actions { position: static; box-shadow: none; padding: 0; border-top: none; }
+
+    #backToTopBtn.visible { display: flex; }
+  }
+
+  #backToTopBtn {
+    display: none;
+    position: fixed;
+    right: 16px;
+    bottom: 84px;
+    z-index: 55;
+    width: 44px; height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  }
+  body.onboarding-active #backToTopBtn,
+  body.presentation-mode #backToTopBtn { display: none !important; }
 
   .panel {
     background: var(--surface);
@@ -225,6 +305,16 @@
     color: var(--ink);
   }
 
+  /* iOS Safari auto-zooms the page on focus for any text-capable field under 16px —
+     bumped here (after the base rule, so it actually wins the cascade) rather than in
+     the earlier [max-width:640px] block. Range sliders (the majority of inputs in this
+     app) don't trigger that zoom and are left alone. */
+  @media (max-width: 640px) {
+    .field select,
+    .field input[type="number"] { font-size: 16px; padding: 11px 10px; }
+    .brand-fields input[type="text"] { font-size: 16px; }
+  }
+
   .field input[type="range"] {
     width: 100%;
     accent-color: var(--ember);
@@ -247,6 +337,20 @@
   }
   .tabs::-webkit-scrollbar { display: none; }
   #ffScenarioWrap[hidden] { display: none; }
+  .ff-scenario-explainer { margin: -6px 0 16px; line-height: 1.5; }
+  .ff-scenario-badge {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    /* Holds a full sentence, not a short label — must wrap on narrow screens instead
+       of forcing the page wider (nowrap would push it straight past the viewport). */
+    white-space: normal;
+  }
+  .ff-scenario-badge-match { background: var(--moss-soft); color: var(--moss); }
+  .ff-scenario-badge-suggest { background: var(--ember-soft); color: var(--ember-strong); }
   /* Variant for narrow sidebars where a long label (e.g. "iOS + Android (mixte)")
      shouldn't be clipped by horizontal scroll — wraps onto a second row instead. */
   .tabs.tabs-wrap { flex-wrap: wrap; overflow: visible; }
@@ -294,7 +398,7 @@
     text-transform: uppercase;
     vertical-align: middle;
   }
-  .stage-badge.media { background: var(--ember-soft); color: var(--ember); }
+  .stage-badge.media { background: var(--ember-soft); color: var(--ember-strong); }
   .stage-badge.sales { background: var(--moss-soft); color: var(--moss); }
 
   .figure-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 110px; }
@@ -327,6 +431,126 @@
     color: var(--ink);
   }
   .advanced-settings[open] summary { margin-bottom: 4px; }
+
+  /* Scenario Manager: save/load/rename/delete named snapshots */
+  .scenario-manager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 0 0 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .scenario-manager-current { display: flex; align-items: center; gap: 8px; flex: 1 1 240px; min-width: 0; }
+  .scenario-manager-label { font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); white-space: nowrap; }
+  .scenario-select {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  .scenario-unsaved-dot { color: var(--ember); font-weight: 700; font-size: 18px; line-height: 1; flex: none; }
+  .scenario-unsaved-dot[hidden] { display: none; }
+  .scenario-manager-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .scenario-manager-actions button { font-size: 12.5px; padding: 7px 12px; }
+  .scenario-manager-actions .danger { border-color: var(--ember); color: var(--ember); background: transparent; }
+  .scenario-manager-actions .danger:hover { background: var(--ember-soft); }
+  .scenario-manager-hint { margin: 8px 0 0; width: 100%; }
+  .scenario-manager-hint.is-warning { color: var(--ember); }
+
+  .scenario-save-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .scenario-save-modal-overlay[hidden] { display: none; }
+  .scenario-save-modal {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  .scenario-save-modal h3 { margin: 0 0 14px; font-family: 'Fraunces', serif; font-size: 17px; font-weight: 500; color: var(--ink); }
+  .scenario-save-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .scenario-save-input:focus { outline: none; border-color: var(--ember); }
+  .scenario-save-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+  .scenario-compare-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .scenario-compare-modal-overlay[hidden] { display: none; }
+  .scenario-compare-modal {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  .scenario-compare-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .scenario-compare-modal-header h3 { margin: 0; font-family: 'Fraunces', serif; font-size: 19px; font-weight: 500; color: var(--ink); }
+  .scenario-compare-picker { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+  .scenario-compare-picker-slot { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); flex: 1 1 180px; }
+  .scenario-compare-picker-slot select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 13px; text-transform: none; letter-spacing: normal; }
+  table.scenario-compare-table th:first-child { text-align: left; font-variant-numeric: initial; }
+  table.scenario-compare-table td { text-align: center; position: relative; }
+  table.scenario-compare-table td.scenario-compare-best { background: var(--moss-soft); font-weight: 600; }
+  .scenario-compare-delta { display: block; font-size: 10.5px; font-weight: 600; margin-top: 1px; }
+  .scenario-compare-delta.is-positive { color: var(--moss); }
+  .scenario-compare-delta.is-negative { color: var(--ember); }
+  .scenario-compare-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 8px; }
+  .scenario-compare-actions button { font-size: 12.5px; padding: 8px 14px; }
+
+  @media print {
+    body.printing-comparison .cover-page { display: none !important; }
+    body.printing-comparison .wrap > *:not(#scenarioCompareModalOverlay) { display: none !important; }
+    body.printing-comparison #scenarioCompareModalOverlay {
+      position: static !important;
+      background: none !important;
+      padding: 0 !important;
+      display: block !important;
+      inset: auto !important;
+    }
+    body.printing-comparison .scenario-compare-modal { box-shadow: none !important; max-width: 100% !important; max-height: none !important; overflow: visible !important; }
+    body.printing-comparison .scenario-compare-picker,
+    body.printing-comparison .scenario-compare-actions,
+    body.printing-comparison #scenarioCompareCloseBtn { display: none !important; }
+  }
 
   /* InfoIcon: small "?" tooltip icon for annotating labels/metrics */
   .info-icon-wrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; line-height: 0; }
@@ -489,6 +713,7 @@
     gap: 10px;
   }
   .log-scale-badge { font-size: 11px; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.03em; }
+  .log-scale-badge-wrap { display: inline-flex; align-items: center; gap: 4px; }
 
   .stage-list { display: flex; flex-direction: column; }
   /* Un simple attribut [hidden] perdrait face à .stage-list/.kpi-row (même spécificité,
@@ -519,6 +744,14 @@
     background: var(--ember);
     border-radius: 2px;
     transition: width 0.3s ease;
+  }
+
+  .stage .bar-col { display: flex; flex-direction: column; gap: 4px; }
+  .stage .stage-dropoff {
+    font-size: 10.5px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    cursor: default;
   }
 
   .stage .figure {
@@ -605,6 +838,34 @@
     color: var(--ink);
   }
   button:hover { opacity: 0.85; }
+  button:disabled { cursor: default; }
+  button:disabled:hover { opacity: 1; }
+
+  /* Loading/success micro-feedback (withButtonFeedback) for actions with no other
+     visible confirmation, e.g. Export CSV/PDF — a spinner while the action runs, then a
+     brief checkmark instead of the button silently going back to idle. */
+  button.btn-loading { position: relative; color: transparent !important; opacity: 0.85; }
+  button.btn-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 15px; height: 15px;
+    margin: -7.5px 0 0 -7.5px;
+    border: 2px solid currentColor;
+    border-color: var(--surface) var(--surface) transparent transparent;
+    border-radius: 50%;
+    animation: btnSpin 0.6s linear infinite;
+  }
+  button.secondary.btn-loading::after { border-color: var(--ink) var(--ink) transparent transparent; }
+  @keyframes btnSpin { to { transform: rotate(360deg); } }
+  button.btn-success {
+    background: var(--moss) !important;
+    border-color: var(--moss) !important;
+    color: #fff !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    button.btn-loading::after { animation-duration: 1.4s; }
+  }
 
   :root[data-theme="dark"] button:not(.secondary):not(.icon-toggle):not(.tab-btn):not(.restart-guide-btn) {
     background: var(--ember);
@@ -1044,6 +1305,7 @@
   body.presentation-mode #inputPanel,
   body.presentation-mode footer.note,
   body.presentation-mode header.masthead .brand-fields,
+  body.presentation-mode .scenario-manager,
   body.presentation-mode #funnelPanel .actions {
     display: none;
   }
@@ -1074,7 +1336,7 @@
     }
     .field select, .field input, .actions, .brand-fields input,
     .header-actions, .advanced-settings, .tabs, .visually-hidden-select,
-    .logo-field, .toast,
+    .logo-field, .toast, .scenario-manager,
     .view-tabs, #fullFunnelView {
       display: none !important;
     }
@@ -1196,6 +1458,56 @@
       <span data-i18n="btnRestartGuide">Reprendre le guidage</span>
     </button>
   </header>
+
+  <button type="button" id="backToTopBtn" data-i18n-aria-label="btnBackToTop" aria-label="Revenir en haut">↑</button>
+
+  <div class="scenario-manager" id="scenarioManager">
+    <div class="scenario-manager-current">
+      <label class="scenario-manager-label" for="scenarioSelect" data-i18n="scenarioMgrLabel">Scénario actuel</label>
+      <select id="scenarioSelect" class="scenario-select">
+        <option value="" data-i18n="scenarioMgrUnsaved">Sans nom (non enregistré)</option>
+      </select>
+      <span class="scenario-unsaved-dot" id="scenarioUnsavedDot" title="Modifications non enregistrées" hidden>*</span>
+    </div>
+    <div class="scenario-manager-actions">
+      <button type="button" class="secondary" id="scenarioNewBtn" data-i18n="scenarioMgrNew">+ Nouveau</button>
+      <button type="button" id="scenarioSaveBtn" data-i18n="scenarioMgrSave">💾 Enregistrer</button>
+      <button type="button" class="secondary" id="scenarioRenameBtn" data-i18n="scenarioMgrRename" hidden>Renommer</button>
+      <button type="button" class="secondary danger" id="scenarioDeleteBtn" data-i18n="scenarioMgrDelete" hidden>🗑 Supprimer</button>
+      <button type="button" class="secondary" id="scenarioCompareBtn" data-i18n="scenarioMgrCompare" hidden>📊 Comparer</button>
+      <button type="button" class="secondary danger" id="scenarioClearAllBtn" data-i18n="scenarioMgrClearAll" hidden>Tout effacer</button>
+    </div>
+    <p class="hint scenario-manager-hint" id="scenarioManagerHint" data-i18n="scenarioMgrHint">Enregistre des scénarios nommés pour les retrouver plus tard.</p>
+  </div>
+
+  <div class="scenario-save-modal-overlay" id="scenarioSaveModalOverlay" hidden>
+    <div class="scenario-save-modal" role="dialog" aria-modal="true" aria-labelledby="scenarioSaveModalTitle">
+      <h3 id="scenarioSaveModalTitle" data-i18n="scenarioMgrSaveModalTitle">Enregistrer ce scénario sous :</h3>
+      <input type="text" id="scenarioSaveNameInput" class="scenario-save-input" maxlength="60">
+      <div class="scenario-save-modal-actions">
+        <button type="button" class="secondary" id="scenarioSaveCancelBtn" data-i18n="scenarioMgrCancel">Annuler</button>
+        <button type="button" id="scenarioSaveConfirmBtn" data-i18n="scenarioMgrSaveConfirm">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario-compare-modal-overlay" id="scenarioCompareModalOverlay" hidden>
+    <div class="scenario-compare-modal" role="dialog" aria-modal="true" aria-labelledby="scenarioCompareModalTitle">
+      <div class="scenario-compare-modal-header">
+        <h3 id="scenarioCompareModalTitle" data-i18n="scenarioCompareTitle">Comparer des scénarios</h3>
+        <button type="button" class="icon-toggle" id="scenarioCompareCloseBtn" aria-label="Fermer">✕</button>
+      </div>
+      <div class="scenario-compare-picker" id="scenarioComparePicker"></div>
+      <div class="table-scroll">
+        <table class="scenario-table scenario-compare-table" id="scenarioCompareTable"></table>
+      </div>
+      <div class="scenario-compare-actions">
+        <button type="button" class="secondary" id="scenarioCompareCopyBtn" data-i18n="scenarioCompareCopy">📋 Copier le tableau</button>
+        <button type="button" class="secondary" id="scenarioCompareExportBtn" data-i18n="scenarioCompareExport">📊 Exporter en PDF</button>
+      </div>
+      <p class="hint" data-i18n="scenarioCompareHint">Estimation simplifiée à partir des hypothèses enregistrées de chaque scénario (sans les modes de planification avancés du tableau de bord).</p>
+    </div>
+  </div>
 
   <div class="tabs view-tabs" data-target="viewSwitch" role="tablist">
     <button type="button" class="tab-btn" data-value="simple" data-i18n="tabSimpleView">Vue simple</button>
@@ -1475,20 +1787,27 @@
           </select>
           <span class="objective-chevron" aria-hidden="true">▾</span>
         </div>
-        <div class="tabs" data-target="ffScenario" role="tablist" id="ffScenarioWrap" hidden>
-          <button type="button" class="tab-btn" data-value="bear">Bear</button>
-          <button type="button" class="tab-btn" data-value="base">Base</button>
-          <button type="button" class="tab-btn" data-value="bull">Bull</button>
-        </div>
+        <span class="tab-with-info" id="ffScenarioWrap" hidden>
+          <div class="tabs" data-target="ffScenario" role="tablist">
+            <button type="button" class="tab-btn" data-value="bear">Bear</button>
+            <button type="button" class="tab-btn" data-value="base">Base</button>
+            <button type="button" class="tab-btn" data-value="bull">Bull</button>
+          </div>
+          <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-ff-scenario" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-ff-scenario" data-i18n="infoFfScenario">Bear/Base/Bull modélisent 3 niveaux d'efficacité de conversion pour le même budget mensuel.</span></span>
+        </span>
         <select id="ffScenario" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
           <option value="bear">Bear</option>
           <option value="base" selected>Base</option>
           <option value="bull">Bull</option>
         </select>
       </div>
+      <p class="hint ff-scenario-explainer" id="ffScenarioExplainer" hidden></p>
       <div class="funnel-header">
         <h2 id="funnelTitle">Projection du pipeline</h2>
-        <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+        <span class="log-scale-badge-wrap">
+          <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+          <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-main" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-main" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
+        </span>
       </div>
 
       <div class="stage-list" id="stageList"></div>
@@ -1707,7 +2026,10 @@
         <div class="panel" id="slgOutputPanel">
           <div class="funnel-header">
             <h2 data-i18n="slgFunnelTitle">Funnel Sales-Led chaîné</h2>
-            <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+            <span class="log-scale-badge-wrap">
+              <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+              <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-slg" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-slg" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
+            </span>
           </div>
           <div class="kpi-row kpi-row-4" id="slgKpiRow"></div>
           <div class="stage-list" id="slgStageList" style="margin-top:20px;"></div>
@@ -1802,7 +2124,10 @@
         <div class="panel" id="plgOutputPanel">
           <div class="funnel-header">
             <h2 data-i18n="plgFunnelTitle">Funnel Product-Led chaîné</h2>
-            <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+            <span class="log-scale-badge-wrap">
+              <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
+              <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-plg" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-plg" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
+            </span>
           </div>
           <div class="kpi-row kpi-row-4" id="plgKpiRow"></div>
           <div class="stage-list" id="plgStageList" style="margin-top:20px;"></div>
@@ -1857,6 +2182,60 @@ const translations = {
     infoSalesLed: "Se concentre sur la génération de leads et le suivi commercial. Idéal pour le B2B à ticket élevé (5 000 € et plus).",
     infoProductLed: "Génère des inscriptions gratuites et de l'usage en essai. La conversion se fait dans le produit. Idéal pour le SaaS.",
     infoFullFunnelLift: "Gain de conversion supplémentaire lorsque notoriété et génération de leads tournent ensemble (15 à 30 % de hausse typique).",
+    infoFfScenario: "Bear/Base/Bull modélisent 3 niveaux d'efficacité de conversion pour le même budget mensuel : Bear (-20 %) simule un scénario prudent, Base la performance de référence de ton secteur, Bull (+20 %) un scénario optimiste. Le budget engagé ne change jamais — seul son rendement varie.",
+    ffScenarioDescBear: '🐻 Bear (prudent) : -20 % d’efficacité de conversion par rapport à Base. Hypothèse conservatrice, utile pour un premier test ou en période d’incertitude.',
+    ffScenarioDescBase: '⚖️ Base : performance de référence, basée sur les taux de conversion moyens observés sur ce type de compte.',
+    ffScenarioDescBull: '🐂 Bull (optimiste) : +20 % d’efficacité de conversion par rapport à Base. Hypothèse ambitieuse, à réserver aux comptes matures avec un historique de performance solide.',
+    ffScenarioRecommendedForBudget: 'Scénario recommandé pour ce budget mensuel',
+    ffScenarioSuggest: 'Pour ce budget, {scenario} est souvent un point de départ plus réaliste.',
+    infoLogScale: "Les barres utilisent une échelle logarithmique : chaque étape reste visible même quand les volumes varient de plusieurs ordres de grandeur (ex. des millions d'impressions vs quelques dizaines de clients). Le vrai chiffre de chaque étape est toujours affiché à droite ; la perte en % entre deux étapes est indiquée sous chaque barre.",
+    stageDropoffTitle: 'Perte de {pct} % entre {from} et {to}',
+    scenarioMgrLabel: 'Scénario actuel',
+    scenarioMgrUnsaved: 'Sans nom (non enregistré)',
+    scenarioMgrNew: '+ Nouveau',
+    scenarioMgrSave: '💾 Enregistrer',
+    scenarioMgrRename: 'Renommer',
+    scenarioMgrDelete: '🗑 Supprimer',
+    scenarioMgrClearAll: 'Tout effacer',
+    scenarioMgrSaveModalTitle: 'Enregistrer ce scénario sous :',
+    scenarioMgrCancel: 'Annuler',
+    scenarioMgrSaveConfirm: 'Enregistrer',
+    scenarioMgrNameRequired: "Donne un nom au scénario avant d'enregistrer.",
+    scenarioMgrRenamePrompt: 'Nouveau nom du scénario :',
+    scenarioMgrConfirmDelete: 'Supprimer le scénario « {name} » ? Cette action est irréversible.',
+    scenarioMgrConfirmClearAll: 'Supprimer tous les scénarios enregistrés ? Cette action est irréversible.',
+    scenarioMgrConfirmDiscard: 'Ce scénario a des modifications non enregistrées. Les abandonner ?',
+    scenarioMgrSavedToast: 'Scénario « {name} » enregistré.',
+    scenarioMgrLoadedToast: 'Scénario « {name} » chargé.',
+    scenarioMgrDeletedToast: 'Scénario supprimé.',
+    scenarioMgrClearedToast: 'Tous les scénarios ont été supprimés.',
+    scenarioMgrNewToast: 'Nouveau scénario vierge. Enregistre-le pour le conserver.',
+    scenarioMgrQuotaError: "Stockage local plein : libère de la place (supprime d'anciens scénarios) pour en enregistrer un nouveau.",
+    scenarioMgrStorageError: "Impossible d'enregistrer : le stockage local est indisponible dans ce navigateur (navigation privée ?).",
+    scenarioMgrUnavailable: "Le stockage local est indisponible dans ce navigateur : les scénarios enregistrés ne persisteront pas après fermeture.",
+    scenarioMgrHint: 'Enregistre des scénarios nommés pour les retrouver plus tard.',
+    scenarioMgrCompare: '📊 Comparer',
+    scenarioCompareTitle: 'Comparer des scénarios',
+    scenarioCompareCopy: '📋 Copier le tableau',
+    scenarioCompareExport: '📊 Exporter en PDF',
+    scenarioCompareHint: 'Estimation simplifiée à partir des hypothèses enregistrées de chaque scénario (sans les modes de planification avancés du tableau de bord).',
+    scenarioCompareNone: '— Aucun —',
+    scenarioCompareNeedTwo: 'Choisis au moins 2 scénarios ci-dessus pour les comparer.',
+    scenarioCompareCopied: 'Tableau copié dans le presse-papiers.',
+    scenarioCompareRowObjective: 'Objectif',
+    scenarioCompareRowBudget: 'Budget mensuel',
+    scenarioCompareRowImpressions: 'Impressions',
+    scenarioCompareRowReach: 'Reach',
+    scenarioCompareRowLeads: 'Leads / mois',
+    scenarioCompareRowClients: 'Clients / mois',
+    scenarioCompareRowInstalls: 'Installations / mois',
+    scenarioCompareRowViews: 'Vues / mois',
+    scenarioCompareRowCpa: 'CPA',
+    scenarioCompareRowCpi: 'CPI',
+    scenarioCompareRowCostPerView: 'Coût par vue',
+    scenarioCompareRowPipeline: 'Pipeline généré',
+    scenarioCompareRowRevenue: 'Revenu estimé / mois',
+    scenarioCompareRowRoas: 'ROAS',
     ob_landing_title: 'Simulateur de budget Reddit Ads',
     ob_landing_sub: "Traduis ton investissement Reddit Ads en pipeline, revenu et portée.",
     ob_choose_objective: 'Choisis ton objectif',
@@ -1951,6 +2330,7 @@ const translations = {
     btnPresentMode: 'Mode présentation',
     btnExitPresentMode: 'Quitter la présentation',
     btnRestartGuide: 'Reprendre le guidage',
+    btnBackToTop: 'Revenir en haut',
     lblAgency: 'Ton agence',
     lblClient: 'Client',
     lblLogo: 'Logo agence',
@@ -2148,6 +2528,8 @@ const translations = {
     kpiRoas: 'ROAS projeté',
     btnExportCsv: 'Exporter en CSV',
     btnExportPdf: 'Exporter en PDF',
+    btnExportedCsv: 'Exporté',
+    btnExportedPdf: 'Exporté',
     formatSectionTitle: 'Format recommandé',
     formatPrimary: 'Format principal',
     formatSecondary: 'Format secondaire',
@@ -2241,6 +2623,60 @@ const translations = {
     infoSalesLed: 'Focus on lead generation & sales follow-up. Best for high-ticket B2B (€5k+).',
     infoProductLed: 'Drive free signups & trial usage. Conversion happens in-product. Best for SaaS.',
     infoFullFunnelLift: 'Bonus conversion lift when running awareness + lead gen together (15-30% lift typical).',
+    infoFfScenario: "Bear/Base/Bull model 3 levels of conversion efficiency for the same monthly budget: Bear (-20%) simulates a cautious scenario, Base your account's reference performance, Bull (+20%) an optimistic scenario. The committed budget never changes — only its yield does.",
+    ffScenarioDescBear: '🐻 Bear (cautious): -20% conversion efficiency vs. Base. A conservative assumption, useful for a first test or in uncertain periods.',
+    ffScenarioDescBase: '⚖️ Base: reference performance, based on average conversion rates observed for this type of account.',
+    ffScenarioDescBull: '🐂 Bull (optimistic): +20% conversion efficiency vs. Base. An ambitious assumption, best reserved for mature accounts with a solid performance track record.',
+    ffScenarioRecommendedForBudget: 'Recommended scenario for this monthly budget',
+    ffScenarioSuggest: 'For this budget, {scenario} is often a more realistic starting point.',
+    infoLogScale: "Bars use a logarithmic scale: every stage stays visible even when volumes span several orders of magnitude (e.g. millions of impressions vs. a few dozen clients). Each stage's real number is always shown on the right; the % drop between two stages is shown under each bar.",
+    stageDropoffTitle: '{pct}% drop between {from} and {to}',
+    scenarioMgrLabel: 'Current scenario',
+    scenarioMgrUnsaved: 'Unsaved',
+    scenarioMgrNew: '+ New',
+    scenarioMgrSave: '💾 Save',
+    scenarioMgrRename: 'Rename',
+    scenarioMgrDelete: '🗑 Delete',
+    scenarioMgrClearAll: 'Clear all',
+    scenarioMgrSaveModalTitle: 'Save this scenario as:',
+    scenarioMgrCancel: 'Cancel',
+    scenarioMgrSaveConfirm: 'Save',
+    scenarioMgrNameRequired: 'Give the scenario a name before saving.',
+    scenarioMgrRenamePrompt: 'New scenario name:',
+    scenarioMgrConfirmDelete: 'Delete scenario "{name}"? This cannot be undone.',
+    scenarioMgrConfirmClearAll: 'Delete all saved scenarios? This cannot be undone.',
+    scenarioMgrConfirmDiscard: 'This scenario has unsaved changes. Discard them?',
+    scenarioMgrSavedToast: 'Scenario "{name}" saved.',
+    scenarioMgrLoadedToast: 'Scenario "{name}" loaded.',
+    scenarioMgrDeletedToast: 'Scenario deleted.',
+    scenarioMgrClearedToast: 'All scenarios deleted.',
+    scenarioMgrNewToast: 'New blank scenario. Save it to keep it.',
+    scenarioMgrQuotaError: 'Local storage is full: free up space (delete old scenarios) to save a new one.',
+    scenarioMgrStorageError: "Couldn't save: local storage is unavailable in this browser (private browsing?).",
+    scenarioMgrUnavailable: "Local storage is unavailable in this browser: saved scenarios won't persist after you close it.",
+    scenarioMgrHint: 'Save named scenarios to come back to later.',
+    scenarioMgrCompare: '📊 Compare',
+    scenarioCompareTitle: 'Compare scenarios',
+    scenarioCompareCopy: '📋 Copy as table',
+    scenarioCompareExport: '📊 Export as PDF',
+    scenarioCompareHint: "Simplified estimate from each scenario's saved assumptions (without the dashboard's advanced planning modes).",
+    scenarioCompareNone: '— None —',
+    scenarioCompareNeedTwo: 'Pick at least 2 scenarios above to compare them.',
+    scenarioCompareCopied: 'Table copied to clipboard.',
+    scenarioCompareRowObjective: 'Objective',
+    scenarioCompareRowBudget: 'Monthly budget',
+    scenarioCompareRowImpressions: 'Impressions',
+    scenarioCompareRowReach: 'Reach',
+    scenarioCompareRowLeads: 'Leads / month',
+    scenarioCompareRowClients: 'Customers / month',
+    scenarioCompareRowInstalls: 'Installs / month',
+    scenarioCompareRowViews: 'Views / month',
+    scenarioCompareRowCpa: 'CPA',
+    scenarioCompareRowCpi: 'CPI',
+    scenarioCompareRowCostPerView: 'Cost per view',
+    scenarioCompareRowPipeline: 'Pipeline generated',
+    scenarioCompareRowRevenue: 'Estimated revenue / month',
+    scenarioCompareRowRoas: 'ROAS',
     ob_landing_title: 'Reddit Ads Budget Simulator',
     ob_landing_sub: 'Translate your Reddit Ads investment into pipeline, revenue and reach.',
     ob_choose_objective: 'Choose your objective',
@@ -2335,6 +2771,7 @@ const translations = {
     btnPresentMode: 'Presentation mode',
     btnExitPresentMode: 'Exit presentation',
     btnRestartGuide: 'Resume the guide',
+    btnBackToTop: 'Back to top',
     lblAgency: 'Your agency',
     lblClient: 'Client',
     lblLogo: 'Agency logo',
@@ -2532,6 +2969,8 @@ const translations = {
     kpiRoas: 'Projected ROAS',
     btnExportCsv: 'Export as CSV',
     btnExportPdf: 'Export as PDF',
+    btnExportedCsv: 'Exported',
+    btnExportedPdf: 'Exported',
     formatSectionTitle: 'Recommended format',
     formatPrimary: 'Primary format',
     formatSecondary: 'Secondary format',
@@ -2625,6 +3064,60 @@ const translations = {
     infoSalesLed: 'Se centra en la generación de leads y el seguimiento comercial. Ideal para B2B de ticket alto (5.000 € o más).',
     infoProductLed: 'Genera registros gratuitos y uso en prueba. La conversión ocurre dentro del producto. Ideal para SaaS.',
     infoFullFunnelLift: 'Aumento adicional de conversión al combinar notoriedad y generación de leads (entre 15 y 30% de mejora habitual).',
+    infoFfScenario: 'Bear/Base/Bull modelan 3 niveles de eficacia de conversión para el mismo presupuesto mensual: Bear (-20%) simula un escenario prudente, Base el rendimiento de referencia de tu cuenta, Bull (+20%) un escenario optimista. El presupuesto comprometido nunca cambia — solo cambia su rendimiento.',
+    ffScenarioDescBear: '🐻 Bear (prudente): -20% de eficacia de conversión respecto a Base. Hipótesis conservadora, útil para una primera prueba o en periodos de incertidumbre.',
+    ffScenarioDescBase: '⚖️ Base: rendimiento de referencia, basado en las tasas de conversión promedio observadas en este tipo de cuenta.',
+    ffScenarioDescBull: '🐂 Bull (optimista): +20% de eficacia de conversión respecto a Base. Hipótesis ambiciosa, reservada a cuentas maduras con un historial de rendimiento sólido.',
+    ffScenarioRecommendedForBudget: 'Escenario recomendado para este presupuesto mensual',
+    ffScenarioSuggest: 'Para este presupuesto, {scenario} suele ser un punto de partida más realista.',
+    infoLogScale: 'Las barras usan una escala logarítmica: cada etapa sigue siendo visible aunque los volúmenes varíen en varios órdenes de magnitud (p. ej. millones de impresiones frente a unas decenas de clientes). El número real de cada etapa siempre se muestra a la derecha; la pérdida en % entre dos etapas se indica debajo de cada barra.',
+    stageDropoffTitle: 'Pérdida del {pct}% entre {from} y {to}',
+    scenarioMgrLabel: 'Escenario actual',
+    scenarioMgrUnsaved: 'Sin guardar',
+    scenarioMgrNew: '+ Nuevo',
+    scenarioMgrSave: '💾 Guardar',
+    scenarioMgrRename: 'Renombrar',
+    scenarioMgrDelete: '🗑 Eliminar',
+    scenarioMgrClearAll: 'Borrar todo',
+    scenarioMgrSaveModalTitle: 'Guardar este escenario como:',
+    scenarioMgrCancel: 'Cancelar',
+    scenarioMgrSaveConfirm: 'Guardar',
+    scenarioMgrNameRequired: 'Ponle un nombre al escenario antes de guardar.',
+    scenarioMgrRenamePrompt: 'Nuevo nombre del escenario:',
+    scenarioMgrConfirmDelete: '¿Eliminar el escenario «{name}»? Esta acción no se puede deshacer.',
+    scenarioMgrConfirmClearAll: '¿Eliminar todos los escenarios guardados? Esta acción no se puede deshacer.',
+    scenarioMgrConfirmDiscard: 'Este escenario tiene cambios sin guardar. ¿Descartarlos?',
+    scenarioMgrSavedToast: 'Escenario «{name}» guardado.',
+    scenarioMgrLoadedToast: 'Escenario «{name}» cargado.',
+    scenarioMgrDeletedToast: 'Escenario eliminado.',
+    scenarioMgrClearedToast: 'Todos los escenarios han sido eliminados.',
+    scenarioMgrNewToast: 'Nuevo escenario en blanco. Guárdalo para conservarlo.',
+    scenarioMgrQuotaError: 'Almacenamiento local lleno: libera espacio (elimina escenarios antiguos) para guardar uno nuevo.',
+    scenarioMgrStorageError: 'No se pudo guardar: el almacenamiento local no está disponible en este navegador (¿navegación privada?).',
+    scenarioMgrUnavailable: 'El almacenamiento local no está disponible en este navegador: los escenarios guardados no persistirán al cerrarlo.',
+    scenarioMgrHint: 'Guarda escenarios con nombre para volver a ellos más tarde.',
+    scenarioMgrCompare: '📊 Comparar',
+    scenarioCompareTitle: 'Comparar escenarios',
+    scenarioCompareCopy: '📋 Copiar como tabla',
+    scenarioCompareExport: '📊 Exportar a PDF',
+    scenarioCompareHint: 'Estimación simplificada a partir de las hipótesis guardadas de cada escenario (sin los modos de planificación avanzados del panel).',
+    scenarioCompareNone: '— Ninguno —',
+    scenarioCompareNeedTwo: 'Elige al menos 2 escenarios arriba para compararlos.',
+    scenarioCompareCopied: 'Tabla copiada al portapapeles.',
+    scenarioCompareRowObjective: 'Objetivo',
+    scenarioCompareRowBudget: 'Presupuesto mensual',
+    scenarioCompareRowImpressions: 'Impresiones',
+    scenarioCompareRowReach: 'Alcance',
+    scenarioCompareRowLeads: 'Leads / mes',
+    scenarioCompareRowClients: 'Clientes / mes',
+    scenarioCompareRowInstalls: 'Instalaciones / mes',
+    scenarioCompareRowViews: 'Vistas / mes',
+    scenarioCompareRowCpa: 'CPA',
+    scenarioCompareRowCpi: 'CPI',
+    scenarioCompareRowCostPerView: 'Coste por vista',
+    scenarioCompareRowPipeline: 'Pipeline generado',
+    scenarioCompareRowRevenue: 'Ingreso estimado / mes',
+    scenarioCompareRowRoas: 'ROAS',
     ob_landing_title: 'Simulador de presupuesto de Reddit Ads',
     ob_landing_sub: 'Traduce tu inversión en Reddit Ads en pipeline, ingresos y alcance.',
     ob_choose_objective: 'Elige tu objetivo',
@@ -2719,6 +3212,7 @@ const translations = {
     btnPresentMode: 'Modo presentación',
     btnExitPresentMode: 'Salir de la presentación',
     btnRestartGuide: 'Retomar la guía',
+    btnBackToTop: 'Volver arriba',
     lblAgency: 'Tu agencia',
     lblClient: 'Cliente',
     lblLogo: 'Logo de la agencia',
@@ -2916,6 +3410,8 @@ const translations = {
     kpiRoas: 'ROAS proyectado',
     btnExportCsv: 'Exportar a CSV',
     btnExportPdf: 'Exportar a PDF',
+    btnExportedCsv: 'Exportado',
+    btnExportedPdf: 'Exportado',
     formatSectionTitle: 'Formato recomendado',
     formatPrimary: 'Formato principal',
     formatSecondary: 'Formato secundario',
@@ -3498,6 +3994,434 @@ function copyShareLink() {
   }
 }
 
+/* ---------- Scenario Manager: save/load/rename/delete named snapshots ----------
+   Distinct from the app's own continuous autosave (STORAGE_KEY / saveState /
+   loadSavedState above), which already persists whatever's currently on screen so a
+   refresh never loses work in progress. This is a separate, user-named library of
+   snapshots ("E-commerce Conservative", "Q4 agressif"...) someone explicitly chooses
+   to keep and revisit — stored under its own localStorage key so the two never collide. */
+const SCENARIOS_STORAGE_KEY = 'redditBudgetBuilder:scenarios:v1';
+const scenarioManagerState = { currentId: null, dirty: false, storageOk: true };
+
+function localStorageAvailable() {
+  try {
+    const testKey = '__rbb_test__';
+    localStorage.setItem(testKey, '1');
+    localStorage.removeItem(testKey);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function loadScenarios() {
+  try {
+    const raw = localStorage.getItem(SCENARIOS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Defensive filtering: a corrupted/malformed single entry shouldn't break the whole list.
+    return parsed.filter(s => s && typeof s === 'object' && typeof s.id === 'string' && s.state && typeof s.state === 'object');
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveScenarios(list) {
+  try {
+    localStorage.setItem(SCENARIOS_STORAGE_KEY, JSON.stringify(list));
+    return true;
+  } catch (e) {
+    if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014)) {
+      toast(t('scenarioMgrQuotaError'));
+    } else {
+      toast(t('scenarioMgrStorageError'));
+    }
+    return false;
+  }
+}
+
+function snapshotCurrentState() {
+  // Mirrors the boot-time read order: the generic fields plus the three nested
+  // sub-states (state.fullFunnel / state.slg / state.plg) each have their own sync
+  // function and aren't covered by syncStateFromFields() alone.
+  syncStateFromFields();
+  ffSyncStateFromFields();
+  slgSyncStateFromFields();
+  plgSyncStateFromFields();
+  return JSON.parse(JSON.stringify(state));
+}
+
+// Mirrors the boot-time hydration sequence (see bottom of file) so loading a saved
+// scenario repaints every field exactly the way a fresh page load would.
+function applyScenarioSnapshot(snapshot) {
+  Object.assign(state, snapshot);
+  ffHydrateFieldsFromState();
+  slgHydrateFieldsFromState();
+  plgHydrateFieldsFromState();
+  ffgMode.value = state.ffgMode || 'slg';
+  updateFfgModeUI();
+  hydrateFieldsFromState();
+  syncLabels();
+  renderFunnel();
+  setView(viewSwitch.value);
+}
+
+function fmtScenarioTimestamp(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const locale = state.lang === 'fr' ? 'fr-FR' : state.lang === 'es' ? 'es-ES' : 'en-US';
+  return d.toLocaleString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderScenarioManager() {
+  const select = document.getElementById('scenarioSelect');
+  const list = loadScenarios().sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+  select.innerHTML = `<option value="">${escapeHtml(t('scenarioMgrUnsaved'))}</option>` +
+    list.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} — ${escapeHtml(fmtScenarioTimestamp(s.savedAt))}</option>`).join('');
+  select.value = scenarioManagerState.currentId || '';
+
+  const hasCurrent = !!scenarioManagerState.currentId;
+  document.getElementById('scenarioRenameBtn').hidden = !hasCurrent;
+  document.getElementById('scenarioDeleteBtn').hidden = !hasCurrent;
+  document.getElementById('scenarioClearAllBtn').hidden = list.length === 0;
+  document.getElementById('scenarioCompareBtn').hidden = list.length < 2;
+  document.getElementById('scenarioUnsavedDot').hidden = !scenarioManagerState.dirty;
+
+  const hint = document.getElementById('scenarioManagerHint');
+  const saveBtn = document.getElementById('scenarioSaveBtn');
+  if (!scenarioManagerState.storageOk) {
+    hint.textContent = t('scenarioMgrUnavailable');
+    hint.classList.add('is-warning');
+    saveBtn.disabled = true;
+  } else {
+    hint.textContent = t('scenarioMgrHint');
+    hint.classList.remove('is-warning');
+    saveBtn.disabled = false;
+  }
+}
+
+// Dirty-tracking: any real input/change on the actual budget fields marks the current
+// scenario as having unsaved changes. Excludes the scenario-manager's own controls
+// (switching the dropdown, typing a name) so managing scenarios doesn't mark itself dirty.
+function markScenarioDirty(e) {
+  if (e && e.target && e.target.closest && e.target.closest('.scenario-manager, .scenario-save-modal-overlay')) return;
+  if (!scenarioManagerState.dirty) {
+    scenarioManagerState.dirty = true;
+    const dot = document.getElementById('scenarioUnsavedDot');
+    if (dot) dot.hidden = false;
+  }
+}
+function markScenarioClean() {
+  scenarioManagerState.dirty = false;
+  const dot = document.getElementById('scenarioUnsavedDot');
+  if (dot) dot.hidden = true;
+}
+
+function confirmDiscardIfDirty() {
+  return !scenarioManagerState.dirty || confirm(t('scenarioMgrConfirmDiscard'));
+}
+
+function newScenario() {
+  scenarioManagerState.currentId = null;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrNewToast'));
+}
+
+function saveScenario(name, idToOverwrite) {
+  const list = loadScenarios();
+  const snapshot = snapshotCurrentState();
+  const now = new Date().toISOString();
+  let targetId = idToOverwrite;
+  if (idToOverwrite) {
+    const idx = list.findIndex(s => s.id === idToOverwrite);
+    if (idx >= 0) list[idx] = { ...list[idx], name, savedAt: now, state: snapshot };
+    else targetId = null;
+  }
+  if (!targetId) {
+    targetId = 'scenario-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+    list.push({ id: targetId, name, savedAt: now, state: snapshot });
+  }
+  if (!saveScenarios(list)) return false;
+  scenarioManagerState.currentId = targetId;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrSavedToast', { name }));
+  return true;
+}
+
+function loadScenario(id) {
+  const found = loadScenarios().find(s => s.id === id);
+  if (!found) return;
+  applyScenarioSnapshot(found.state);
+  scenarioManagerState.currentId = id;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrLoadedToast', { name: found.name }));
+}
+
+function renameScenario(id, newName) {
+  const list = loadScenarios();
+  const idx = list.findIndex(s => s.id === id);
+  if (idx < 0) return;
+  list[idx].name = newName;
+  if (!saveScenarios(list)) return;
+  renderScenarioManager();
+}
+
+function deleteScenario(id) {
+  const list = loadScenarios().filter(s => s.id !== id);
+  if (!saveScenarios(list)) return;
+  if (scenarioManagerState.currentId === id) {
+    scenarioManagerState.currentId = null;
+    markScenarioClean();
+  }
+  renderScenarioManager();
+  toast(t('scenarioMgrDeletedToast'));
+}
+
+function clearAllScenarios() {
+  if (!saveScenarios([])) return;
+  scenarioManagerState.currentId = null;
+  markScenarioClean();
+  renderScenarioManager();
+  toast(t('scenarioMgrClearedToast'));
+}
+
+function openScenarioSaveModal(prefillName) {
+  const overlay = document.getElementById('scenarioSaveModalOverlay');
+  const input = document.getElementById('scenarioSaveNameInput');
+  input.value = prefillName || '';
+  overlay.hidden = false;
+  input.focus();
+  input.select();
+}
+function closeScenarioSaveModal() {
+  document.getElementById('scenarioSaveModalOverlay').hidden = true;
+}
+
+document.getElementById('scenarioSelect').addEventListener('change', e => {
+  const id = e.target.value;
+  if (!confirmDiscardIfDirty()) { e.target.value = scenarioManagerState.currentId || ''; return; }
+  if (!id) newScenario();
+  else loadScenario(id);
+});
+document.getElementById('scenarioNewBtn').addEventListener('click', () => {
+  if (confirmDiscardIfDirty()) newScenario();
+});
+document.getElementById('scenarioSaveBtn').addEventListener('click', () => {
+  const current = loadScenarios().find(s => s.id === scenarioManagerState.currentId);
+  openScenarioSaveModal(current ? current.name : '');
+});
+document.getElementById('scenarioSaveCancelBtn').addEventListener('click', closeScenarioSaveModal);
+document.getElementById('scenarioSaveModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'scenarioSaveModalOverlay') closeScenarioSaveModal();
+});
+document.getElementById('scenarioSaveConfirmBtn').addEventListener('click', () => {
+  const name = document.getElementById('scenarioSaveNameInput').value.trim();
+  if (!name) { toast(t('scenarioMgrNameRequired')); return; }
+  if (saveScenario(name, scenarioManagerState.currentId)) closeScenarioSaveModal();
+});
+document.getElementById('scenarioSaveNameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('scenarioSaveConfirmBtn').click(); }
+  if (e.key === 'Escape') closeScenarioSaveModal();
+});
+document.getElementById('scenarioRenameBtn').addEventListener('click', () => {
+  const current = loadScenarios().find(s => s.id === scenarioManagerState.currentId);
+  if (!current) return;
+  const name = window.prompt(t('scenarioMgrRenamePrompt'), current.name);
+  if (name && name.trim()) renameScenario(current.id, name.trim());
+});
+document.getElementById('scenarioDeleteBtn').addEventListener('click', () => {
+  const current = loadScenarios().find(s => s.id === scenarioManagerState.currentId);
+  if (!current) return;
+  if (confirm(t('scenarioMgrConfirmDelete', { name: current.name }))) deleteScenario(current.id);
+});
+document.getElementById('scenarioClearAllBtn').addEventListener('click', () => {
+  if (confirm(t('scenarioMgrConfirmClearAll'))) clearAllScenarios();
+});
+// Any real user input anywhere in the form marks the loaded scenario dirty.
+document.addEventListener('input', markScenarioDirty, true);
+document.addEventListener('change', markScenarioDirty, true);
+
+/* ---------- Scenario comparison ----------
+   Computes a lightweight, self-contained estimate for each saved scenario directly
+   from its stored field values — it does NOT reuse currentFunnel()/ffCompute()/etc.,
+   because those all read live values straight out of the on-screen form fields
+   (els.*), and writing a scenario's data into those fields just to read it back out
+   would make "compare" destructive to whatever the user currently has open. The
+   conversion branch does reuse the app's own ffFunnelFromLeads() for the MQL → SQL →
+   Opportunity → Won math, since that's already a pure function of (leads, cfg). This
+   is deliberately a simplified estimate (no budget-first/target-based planning modes,
+   no audience diminishing-returns curve) — good enough for a side-by-side comparison,
+   not a replacement for opening the scenario in the dashboard. */
+const SCENARIO_COMPARE_OBJECTIVE_LABEL_KEY = {
+  awareness: 'ob_obj_awareness_title', traffic: 'ob_obj_traffic_title', conversion: 'ob_obj_conversion_title',
+  appInstall: 'objAppInstall', videoViews: 'objVideoViews',
+};
+
+function computeScenarioMetrics(snap) {
+  const cpm = (+snap.cpm || 0) * formatCountMultiplier(snap.formatCount || '1');
+  const ff = snap.fullFunnel || {};
+  // Conversion's own engine (CPL → funnel) bypasses impressions/CPM entirely and reads
+  // its budget from a dedicated nested state (state.fullFunnel), not the shared
+  // top-level budget field used by the other 4 objectives — so it needs its own
+  // budget/impressions resolution rather than the generic one below.
+  let budget, impressions;
+  if (snap.objective === 'conversion') {
+    const cplForBudget = +ff.cpl || 0;
+    budget = ff.planningMode === 'budgetfirst' ? (+ff.budget || 0) : (+ff.targetLeads || 0) * cplForBudget;
+    impressions = null;
+  } else {
+    budget = +snap.budget || 0;
+    impressions = cpm > 0 ? (budget / cpm) * 1000 : 0;
+  }
+  const m = { objective: snap.objective, budget, impressions, cpm: snap.objective === 'conversion' ? null : cpm };
+  if (snap.objective === 'awareness') {
+    const frequency = +snap.frequency || 1;
+    m.reach = frequency > 0 ? impressions / frequency : impressions;
+  } else if (snap.objective === 'appInstall') {
+    const ctr = (+snap.ctr || 0) / 100;
+    const c2i = (+snap.c2i || 0) / 100;
+    const platformMult = platformC2iMultipliers[snap.platform] ?? 1;
+    const clicks = impressions * ctr;
+    m.installs = clicks * c2i * platformMult;
+    m.cpi = m.installs > 0 ? budget / m.installs : 0;
+  } else if (snap.objective === 'videoViews') {
+    const viewRate = (+snap.viewRate || 0) / 100;
+    m.views = impressions * viewRate;
+    m.costPerView = m.views > 0 ? budget / m.views : 0;
+  } else if (snap.objective === 'conversion') {
+    const cpl = +ff.cpl || 0;
+    const leads = cpl > 0 ? budget / cpl : 0;
+    const f = ffFunnelFromLeads(leads, { l2m: +ff.l2m || 0, m2s: +ff.m2s || 0, s2o: +ff.s2o || 0, o2w: +ff.o2w || 0, deal: +ff.deal || 0 });
+    m.leads = f.leads; m.clients = f.closedWon; m.revenue = f.revenue; m.pipeline = f.pipelineValue;
+    m.cpa = f.closedWon > 0 ? budget / f.closedWon : 0;
+    m.roas = budget > 0 ? f.revenue / budget : 0;
+  } else {
+    const ctr = (+snap.ctr || 0) / 100;
+    const c2l = (+snap.c2l || 0) / 100;
+    const l2c = (+snap.l2c || 0) / 100;
+    const ltv = +snap.ltv || 0;
+    const clicks = impressions * ctr;
+    const leads = clicks * c2l;
+    const clients = leads * l2c;
+    m.leads = leads; m.clients = clients; m.revenue = clients * ltv;
+    m.cpa = clients > 0 ? budget / clients : 0;
+    m.roas = budget > 0 ? m.revenue / budget : 0;
+  }
+  return m;
+}
+
+const SCENARIO_COMPARE_ROWS = [
+  { key: 'objective', labelKey: 'scenarioCompareRowObjective', fmt: v => t(SCENARIO_COMPARE_OBJECTIVE_LABEL_KEY[v] || v), always: true },
+  { key: 'budget', labelKey: 'scenarioCompareRowBudget', fmt: fmtEUR, always: true },
+  { key: 'impressions', labelKey: 'scenarioCompareRowImpressions', fmt: fmtNum, always: true, better: 'high' },
+  { key: 'reach', labelKey: 'scenarioCompareRowReach', fmt: fmtNum, better: 'high' },
+  { key: 'leads', labelKey: 'scenarioCompareRowLeads', fmt: fmtNum, better: 'high' },
+  { key: 'clients', labelKey: 'scenarioCompareRowClients', fmt: fmtNum, better: 'high' },
+  { key: 'installs', labelKey: 'scenarioCompareRowInstalls', fmt: fmtNum, better: 'high' },
+  { key: 'views', labelKey: 'scenarioCompareRowViews', fmt: fmtNum, better: 'high' },
+  { key: 'cpa', labelKey: 'scenarioCompareRowCpa', fmt: fmtEUR, better: 'low' },
+  { key: 'cpi', labelKey: 'scenarioCompareRowCpi', fmt: fmtEUR, better: 'low' },
+  { key: 'costPerView', labelKey: 'scenarioCompareRowCostPerView', fmt: fmtEURPrecise, better: 'low' },
+  { key: 'pipeline', labelKey: 'scenarioCompareRowPipeline', fmt: fmtEUR, better: 'high' },
+  { key: 'revenue', labelKey: 'scenarioCompareRowRevenue', fmt: fmtEUR, better: 'high' },
+  { key: 'roas', labelKey: 'scenarioCompareRowRoas', fmt: v => v.toFixed(2) + '×', better: 'high' },
+];
+
+function renderScenarioCompareTable() {
+  const table = document.getElementById('scenarioCompareTable');
+  const list = loadScenarios();
+  const chosen = Array.from(document.querySelectorAll('.scenario-compare-pick'))
+    .map(sel => list.find(s => s.id === sel.value))
+    .filter(Boolean);
+  if (chosen.length < 2) {
+    table.innerHTML = `<tbody><tr><td>${escapeHtml(t('scenarioCompareNeedTwo'))}</td></tr></tbody>`;
+    return;
+  }
+  const metrics = chosen.map(s => computeScenarioMetrics(s.state));
+  const rows = SCENARIO_COMPARE_ROWS.filter(r => r.always || metrics.some(m => m[r.key] != null));
+
+  const theadHtml = `<thead><tr><th></th>${chosen.map(s => `<th>${escapeHtml(s.name)}</th>`).join('')}</tr></thead>`;
+  const bodyHtml = rows.map(r => {
+    const values = metrics.map(m => m[r.key]);
+    let bestIdx = -1;
+    if (r.better && values.every(v => typeof v === 'number') && new Set(values).size > 1) {
+      const best = r.better === 'high' ? Math.max(...values) : Math.min(...values);
+      bestIdx = values.indexOf(best);
+    }
+    const cells = values.map((v, i) => {
+      if (v == null) return '<td>—</td>';
+      const display = r.fmt ? r.fmt(v) : v;
+      let deltaHtml = '';
+      if (i > 0 && typeof v === 'number' && typeof values[0] === 'number' && values[0] !== 0) {
+        const pct = ((v - values[0]) / Math.abs(values[0])) * 100;
+        if (Math.abs(pct) >= 0.5) {
+          const goodDelta = r.better === 'high' ? pct > 0 : pct < 0;
+          deltaHtml = `<span class="scenario-compare-delta ${goodDelta ? 'is-positive' : 'is-negative'}">${pct > 0 ? '+' : ''}${pct.toFixed(0)}%</span>`;
+        }
+      }
+      return `<td class="${i === bestIdx ? 'scenario-compare-best' : ''}">${display}${deltaHtml}</td>`;
+    }).join('');
+    return `<tr><th>${escapeHtml(t(r.labelKey))}</th>${cells}</tr>`;
+  }).join('');
+  table.innerHTML = theadHtml + `<tbody>${bodyHtml}</tbody>`;
+}
+
+function openScenarioCompareModal() {
+  const list = loadScenarios().sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+  if (list.length < 2) return;
+  const picker = document.getElementById('scenarioComparePicker');
+  const preselected = [list[0], list[1], list[2]].map(s => s ? s.id : '');
+  picker.innerHTML = ['A', 'B', 'C'].map((label, i) => `
+    <label class="scenario-compare-picker-slot">
+      <span>${label}</span>
+      <select class="scenario-compare-pick" data-slot="${i}">
+        <option value="">${escapeHtml(t('scenarioCompareNone'))}</option>
+        ${list.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === preselected[i] ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+      </select>
+    </label>
+  `).join('');
+  picker.querySelectorAll('.scenario-compare-pick').forEach(sel => sel.addEventListener('change', renderScenarioCompareTable));
+  document.getElementById('scenarioCompareModalOverlay').hidden = false;
+  renderScenarioCompareTable();
+}
+function closeScenarioCompareModal() {
+  document.getElementById('scenarioCompareModalOverlay').hidden = true;
+}
+
+function copyScenarioCompareTable() {
+  const table = document.getElementById('scenarioCompareTable');
+  const tsv = Array.from(table.querySelectorAll('tr'))
+    .map(tr => Array.from(tr.children).map(cell => cell.textContent.replace(/\s+/g, ' ').trim()).join('\t'))
+    .join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(tsv).then(() => toast(t('scenarioCompareCopied'))).catch(() => window.prompt('', tsv));
+  } else {
+    window.prompt('', tsv);
+  }
+}
+
+function exportScenarioCompare() {
+  document.body.classList.add('printing-comparison');
+  window.print();
+  const cleanup = () => { document.body.classList.remove('printing-comparison'); window.removeEventListener('afterprint', cleanup); };
+  window.addEventListener('afterprint', cleanup);
+}
+
+document.getElementById('scenarioCompareBtn').addEventListener('click', openScenarioCompareModal);
+document.getElementById('scenarioCompareCloseBtn').addEventListener('click', closeScenarioCompareModal);
+document.getElementById('scenarioCompareModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'scenarioCompareModalOverlay') closeScenarioCompareModal();
+});
+document.getElementById('scenarioCompareCopyBtn').addEventListener('click', copyScenarioCompareTable);
+document.getElementById('scenarioCompareExportBtn').addEventListener('click', exportScenarioCompare);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !document.getElementById('scenarioCompareModalOverlay').hidden) closeScenarioCompareModal();
+});
+
 /* ---------- Theme ---------- */
 function initTheme() {
   document.documentElement.setAttribute('data-theme', state.theme === 'dark' ? 'dark' : 'light');
@@ -3523,6 +4447,7 @@ function applyLangToUi() {
   presentBtn.textContent = presentationActive ? t('btnExitPresentMode') : t('btnPresentMode');
   if (state.view === 'full') ffgCompute();
   if (!document.getElementById('onboarding').hidden) renderOnboarding();
+  renderScenarioManager();
 }
 langSwitch.addEventListener('change', () => {
   state.lang = langSwitch.value;
@@ -3609,6 +4534,7 @@ function updateObjectiveFieldsVisibility() {
   document.getElementById('kpiRow').hidden = isConversion;
   document.getElementById('ffForecastPanel').hidden = !isConversion;
   document.getElementById('ffScenarioWrap').hidden = !isConversion;
+  document.getElementById('ffScenarioExplainer').hidden = !isConversion;
   if (isAwareness) updateAwarenessModeVisibility();
   else document.getElementById('budgetField').hidden = isConversion;
   const showScalingChart = !isConversion;
@@ -3751,7 +4677,32 @@ function stageBarPct(value, ref) {
   return Math.min(100, Math.max(2, pct));
 }
 
+// Ajoute `dropPct` (perte en % vs. l'étape précédente) à chaque étape après la
+// première, quand l'étape précédente a une valeur positive. Affiché directement sous
+// chaque barre pour éviter à l'agence de faire le calcul mental entre deux chiffres
+// bruts qui peuvent différer de plusieurs ordres de grandeur.
+function computeStageDropoffs(stages) {
+  return stages.map((s, i) => {
+    if (i === 0) return s;
+    const prev = stages[i - 1].value;
+    if (!(prev > 0)) return s;
+    const dropPct = ((prev - s.value) / prev) * 100;
+    if (!(dropPct > 0.05)) return s; // valeur en hausse ou quasi stable : rien à signaler
+    return Object.assign({}, s, { dropPct, dropFrom: stages[i - 1].label });
+  });
+}
+
+// Rounding a 99.7% drop (a typical CTR-driven Impressions -> Clics loss) to 0 decimals
+// would read "↓ 100 %", which looks like zero clicks rather than a tiny-but-real trickle —
+// keep one decimal any time the rounded value would otherwise hit 100 without truly being it.
+function fmtDropPct(pct) {
+  if (pct >= 99.95) return '100';
+  if (pct >= 99) return pct.toFixed(1);
+  return String(Math.round(pct));
+}
+
 function renderStageListAnimated(containerId, stages) {
+  stages = computeStageDropoffs(stages);
   const container = document.getElementById(containerId);
   const existing = container.querySelectorAll(':scope > .stage');
 
@@ -3773,6 +4724,16 @@ function renderStageListAnimated(containerId, stages) {
     if (badge && s.badgeLabel) badge.textContent = s.badgeLabel;
     const costLabel = row.querySelector('.cost-label');
     if (s.cost != null && costLabel) costLabel.textContent = `${s.costLabel} : ${fmtEUR(s.cost)}`;
+    const dropoffEl = row.querySelector('.stage-dropoff');
+    if (dropoffEl) {
+      if (s.dropPct != null) {
+        dropoffEl.hidden = false;
+        dropoffEl.textContent = '↓ ' + fmtDropPct(s.dropPct) + ' %';
+        dropoffEl.title = t('stageDropoffTitle', { pct: fmtDropPct(s.dropPct), from: s.dropFrom, to: s.label });
+      } else {
+        dropoffEl.hidden = true;
+      }
+    }
   });
 }
 
@@ -3781,15 +4742,20 @@ function renderStageListAnimated(containerId, stages) {
 // unique across the whole document — several funnels (ff/slg) can render a stage
 // with the same name (e.g. "MQLs") at the same time, just hidden, so a shared id
 // would produce invalid duplicate DOM ids.
+// s.dropPct/s.dropFrom (optional, set by computeStageDropoffs): renders a "↓ X %"
+// indicator under the bar showing the loss vs. the previous stage.
 function stageRowHtml(s) {
-  const pct = Math.max(2, (s.value / (s.ref || 1)) * 100);
+  const pct = stageBarPct(s.value, s.ref);
+  const dropoff = s.dropPct != null
+    ? `<div class="stage-dropoff" title="${escapeHtml(t('stageDropoffTitle', { pct: fmtDropPct(s.dropPct), from: s.dropFrom, to: s.label }))}">↓ ${fmtDropPct(s.dropPct)} %</div>`
+    : `<div class="stage-dropoff" hidden></div>`;
   const badge = s.badge ? `<span class="stage-badge ${s.badge}">${s.badgeLabel}</span>` : '';
   const info = s.info ? `<span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-${s.infoId}" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-${s.infoId}">${escapeHtml(s.info)}</span></span>` : '';
   if (s.cost != null || s.badge) {
     return `
       <div class="stage">
         <div class="label"><span class="label-text">${s.label}</span>${info}${badge}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>${dropoff}</div>
         <div class="figure-wrap">
           <div class="figure">${fmtNum(s.value)}</div>
           ${s.cost != null ? `<div class="cost-label">${s.costLabel} : ${fmtEUR(s.cost)}</div>` : ''}
@@ -3799,7 +4765,7 @@ function stageRowHtml(s) {
   return `
     <div class="stage">
       <div class="label"><span class="label-text">${s.label}</span>${info}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      <div class="bar-col"><div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>${dropoff}</div>
       <div class="figure">${fmtNum(s.value)}</div>
     </div>`;
 }
@@ -4283,6 +5249,26 @@ document.addEventListener('fullscreenchange', () => {
 function fmtPct(n) { return n.toFixed(1).replace('.', ',') + ' %'; }
 
 const ffScenarioMultiplier = { bear: 0.8, base: 1.0, bull: 1.2 };
+// Heuristic starting point, not a hard rule: smaller budgets carry more relative risk if the
+// optimistic case doesn't pan out, so Bear is a safer default; larger, more established budgets
+// can typically absorb — and justify testing — a more optimistic assumption. Always overridable
+// by hand via the Bear/Base/Bull tabs.
+function ffRecommendedScenario(budget) {
+  if (budget < 3000) return 'bear';
+  if (budget > 10000) return 'bull';
+  return 'base';
+}
+function ffUpdateScenarioExplainer(cfg, budget) {
+  const el = document.getElementById('ffScenarioExplainer');
+  if (!el || el.hidden) return;
+  const descKey = { bear: 'ffScenarioDescBear', base: 'ffScenarioDescBase', bull: 'ffScenarioDescBull' }[cfg.scenario] || 'ffScenarioDescBase';
+  const rec = ffRecommendedScenario(budget);
+  const recLabel = { bear: 'Bear', base: 'Base', bull: 'Bull' }[rec];
+  const badge = cfg.scenario === rec
+    ? '<span class="ff-scenario-badge ff-scenario-badge-match">✓ ' + escapeHtml(t('ffScenarioRecommendedForBudget')) + '</span>'
+    : '<span class="ff-scenario-badge ff-scenario-badge-suggest">💡 ' + escapeHtml(t('ffScenarioSuggest', { scenario: recLabel })) + '</span>';
+  el.innerHTML = t(descKey) + ' ' + badge;
+}
 // Real-world sales cycles vary: a cohort's revenue lands across a window around the
 // nominal cycle length rather than all in one month (5% early ... 5% stragglers).
 const ffRevenueDistribution = [
@@ -4584,6 +5570,7 @@ function ffCompute() {
   // Bear/Base/Bull scenario; budget itself never moves with scenario or ramp.
   const funnel = ffFunnelFromLeads(baseLeads * scenarioMult, cfg);
   const forecast = ffBuildForecast(cfg);
+  ffUpdateScenarioExplainer(cfg, budget);
   ffRenderKpis(cfg, budget, funnel, forecast);
   ffRenderFunnelStages(funnel, budget);
   ffRenderRecommendation(cfg, funnel);
@@ -5546,6 +6533,17 @@ document.getElementById('onboarding').addEventListener('input', e => {
 
 document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnboarding);
 
+/* ---------- Back-to-top (mobile) ----------
+   Only rendered visible on narrow viewports (see the [max-width:640px] rule) — on a long
+   mobile form, scrolling all the way back up to switch sector/objective is real friction. */
+const backToTopBtn = document.getElementById('backToTopBtn');
+window.addEventListener('scroll', () => {
+  backToTopBtn.classList.toggle('visible', window.scrollY > 600);
+}, { passive: true });
+backToTopBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
 /* ---------- Export CSV ----------
    Exporte un instantané du scénario actuellement affiché (secteur, objectif, budget,
    KPIs et étapes du funnel visible) — fonctionne pour les 5 objectifs puisqu'il lit
@@ -5591,8 +6589,40 @@ function preparePrint() {
   }
 }
 
-document.getElementById('exportCsv').addEventListener('click', exportCsv);
-document.getElementById('printReport').addEventListener('click', () => { preparePrint(); window.print(); });
+// Generic loading -> success micro-feedback for a button whose action has no other
+// visible confirmation (unlike Scenario Save, which already has a toast). Keeps the
+// spinner visible for at least `minLoadingMs` even when `action` runs instantly, so the
+// state isn't just an imperceptible flash; `action` may itself be blocking (e.g.
+// window.print()) — the loading class is painted first via requestAnimationFrame.
+function withButtonFeedback(btn, action, successText, { minLoadingMs = 350, successMs = 1400 } = {}) {
+  if (!btn || btn.disabled) return;
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.classList.add('btn-loading');
+  const start = Date.now();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try { action(); } finally {
+      const wait = Math.max(0, minLoadingMs - (Date.now() - start));
+      setTimeout(() => {
+        btn.classList.remove('btn-loading');
+        btn.classList.add('btn-success');
+        btn.innerHTML = `✓ ${successText}`;
+        setTimeout(() => {
+          btn.classList.remove('btn-success');
+          btn.innerHTML = originalHtml;
+          btn.disabled = false;
+        }, successMs);
+      }, wait);
+    }
+  }));
+}
+
+document.getElementById('exportCsv').addEventListener('click', function () {
+  withButtonFeedback(this, exportCsv, t('btnExportedCsv'));
+});
+document.getElementById('printReport').addEventListener('click', function () {
+  withButtonFeedback(this, () => { preparePrint(); window.print(); }, t('btnExportedPdf'));
+});
 
 /* ---------- Boot ---------- */
 function hydrateFieldsFromState() {
@@ -5649,6 +6679,8 @@ if (!hadSaved && !hadShare) {
 }
 setView(viewSwitch.value);
 saveState();
+scenarioManagerState.storageOk = localStorageAvailable();
+renderScenarioManager();
 
 if (hadShare) toast('Scénario partagé chargé');
 </script>
