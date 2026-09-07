@@ -247,6 +247,18 @@
   }
   .tabs::-webkit-scrollbar { display: none; }
   #ffScenarioWrap[hidden] { display: none; }
+  .ff-scenario-explainer { margin: -6px 0 16px; line-height: 1.5; }
+  .ff-scenario-badge {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .ff-scenario-badge-match { background: var(--moss-soft); color: var(--moss); }
+  .ff-scenario-badge-suggest { background: var(--ember-soft); color: var(--ember); }
   /* Variant for narrow sidebars where a long label (e.g. "iOS + Android (mixte)")
      shouldn't be clipped by horizontal scroll — wraps onto a second row instead. */
   .tabs.tabs-wrap { flex-wrap: wrap; overflow: visible; }
@@ -1644,17 +1656,21 @@
           </select>
           <span class="objective-chevron" aria-hidden="true">▾</span>
         </div>
-        <div class="tabs" data-target="ffScenario" role="tablist" id="ffScenarioWrap" hidden>
-          <button type="button" class="tab-btn" data-value="bear">Bear</button>
-          <button type="button" class="tab-btn" data-value="base">Base</button>
-          <button type="button" class="tab-btn" data-value="bull">Bull</button>
-        </div>
+        <span class="tab-with-info" id="ffScenarioWrap" hidden>
+          <div class="tabs" data-target="ffScenario" role="tablist">
+            <button type="button" class="tab-btn" data-value="bear">Bear</button>
+            <button type="button" class="tab-btn" data-value="base">Base</button>
+            <button type="button" class="tab-btn" data-value="bull">Bull</button>
+          </div>
+          <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-ff-scenario" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-ff-scenario" data-i18n="infoFfScenario">Bear/Base/Bull modélisent 3 niveaux d'efficacité de conversion pour le même budget mensuel.</span></span>
+        </span>
         <select id="ffScenario" class="visually-hidden-select" tabindex="-1" aria-hidden="true">
           <option value="bear">Bear</option>
           <option value="base" selected>Base</option>
           <option value="bull">Bull</option>
         </select>
       </div>
+      <p class="hint ff-scenario-explainer" id="ffScenarioExplainer" hidden></p>
       <div class="funnel-header">
         <h2 id="funnelTitle">Projection du pipeline</h2>
         <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
@@ -2026,6 +2042,12 @@ const translations = {
     infoSalesLed: "Se concentre sur la génération de leads et le suivi commercial. Idéal pour le B2B à ticket élevé (5 000 € et plus).",
     infoProductLed: "Génère des inscriptions gratuites et de l'usage en essai. La conversion se fait dans le produit. Idéal pour le SaaS.",
     infoFullFunnelLift: "Gain de conversion supplémentaire lorsque notoriété et génération de leads tournent ensemble (15 à 30 % de hausse typique).",
+    infoFfScenario: "Bear/Base/Bull modélisent 3 niveaux d'efficacité de conversion pour le même budget mensuel : Bear (-20 %) simule un scénario prudent, Base la performance de référence de ton secteur, Bull (+20 %) un scénario optimiste. Le budget engagé ne change jamais — seul son rendement varie.",
+    ffScenarioDescBear: '🐻 Bear (prudent) : -20 % d’efficacité de conversion par rapport à Base. Hypothèse conservatrice, utile pour un premier test ou en période d’incertitude.',
+    ffScenarioDescBase: '⚖️ Base : performance de référence, basée sur les taux de conversion moyens observés sur ce type de compte.',
+    ffScenarioDescBull: '🐂 Bull (optimiste) : +20 % d’efficacité de conversion par rapport à Base. Hypothèse ambitieuse, à réserver aux comptes matures avec un historique de performance solide.',
+    ffScenarioRecommendedForBudget: 'Scénario recommandé pour ce budget mensuel',
+    ffScenarioSuggest: 'Pour ce budget, {scenario} est souvent un point de départ plus réaliste.',
     scenarioMgrLabel: 'Scénario actuel',
     scenarioMgrUnsaved: 'Sans nom (non enregistré)',
     scenarioMgrNew: '+ Nouveau',
@@ -2456,6 +2478,12 @@ const translations = {
     infoSalesLed: 'Focus on lead generation & sales follow-up. Best for high-ticket B2B (€5k+).',
     infoProductLed: 'Drive free signups & trial usage. Conversion happens in-product. Best for SaaS.',
     infoFullFunnelLift: 'Bonus conversion lift when running awareness + lead gen together (15-30% lift typical).',
+    infoFfScenario: "Bear/Base/Bull model 3 levels of conversion efficiency for the same monthly budget: Bear (-20%) simulates a cautious scenario, Base your account's reference performance, Bull (+20%) an optimistic scenario. The committed budget never changes — only its yield does.",
+    ffScenarioDescBear: '🐻 Bear (cautious): -20% conversion efficiency vs. Base. A conservative assumption, useful for a first test or in uncertain periods.',
+    ffScenarioDescBase: '⚖️ Base: reference performance, based on average conversion rates observed for this type of account.',
+    ffScenarioDescBull: '🐂 Bull (optimistic): +20% conversion efficiency vs. Base. An ambitious assumption, best reserved for mature accounts with a solid performance track record.',
+    ffScenarioRecommendedForBudget: 'Recommended scenario for this monthly budget',
+    ffScenarioSuggest: 'For this budget, {scenario} is often a more realistic starting point.',
     scenarioMgrLabel: 'Current scenario',
     scenarioMgrUnsaved: 'Unsaved',
     scenarioMgrNew: '+ New',
@@ -2886,6 +2914,12 @@ const translations = {
     infoSalesLed: 'Se centra en la generación de leads y el seguimiento comercial. Ideal para B2B de ticket alto (5.000 € o más).',
     infoProductLed: 'Genera registros gratuitos y uso en prueba. La conversión ocurre dentro del producto. Ideal para SaaS.',
     infoFullFunnelLift: 'Aumento adicional de conversión al combinar notoriedad y generación de leads (entre 15 y 30% de mejora habitual).',
+    infoFfScenario: 'Bear/Base/Bull modelan 3 niveles de eficacia de conversión para el mismo presupuesto mensual: Bear (-20%) simula un escenario prudente, Base el rendimiento de referencia de tu cuenta, Bull (+20%) un escenario optimista. El presupuesto comprometido nunca cambia — solo cambia su rendimiento.',
+    ffScenarioDescBear: '🐻 Bear (prudente): -20% de eficacia de conversión respecto a Base. Hipótesis conservadora, útil para una primera prueba o en periodos de incertidumbre.',
+    ffScenarioDescBase: '⚖️ Base: rendimiento de referencia, basado en las tasas de conversión promedio observadas en este tipo de cuenta.',
+    ffScenarioDescBull: '🐂 Bull (optimista): +20% de eficacia de conversión respecto a Base. Hipótesis ambiciosa, reservada a cuentas maduras con un historial de rendimiento sólido.',
+    ffScenarioRecommendedForBudget: 'Escenario recomendado para este presupuesto mensual',
+    ffScenarioSuggest: 'Para este presupuesto, {scenario} suele ser un punto de partida más realista.',
     scenarioMgrLabel: 'Escenario actual',
     scenarioMgrUnsaved: 'Sin guardar',
     scenarioMgrNew: '+ Nuevo',
@@ -4345,6 +4379,7 @@ function updateObjectiveFieldsVisibility() {
   document.getElementById('kpiRow').hidden = isConversion;
   document.getElementById('ffForecastPanel').hidden = !isConversion;
   document.getElementById('ffScenarioWrap').hidden = !isConversion;
+  document.getElementById('ffScenarioExplainer').hidden = !isConversion;
   if (isAwareness) updateAwarenessModeVisibility();
   else document.getElementById('budgetField').hidden = isConversion;
   const showScalingChart = !isConversion;
@@ -5019,6 +5054,26 @@ document.addEventListener('fullscreenchange', () => {
 function fmtPct(n) { return n.toFixed(1).replace('.', ',') + ' %'; }
 
 const ffScenarioMultiplier = { bear: 0.8, base: 1.0, bull: 1.2 };
+// Heuristic starting point, not a hard rule: smaller budgets carry more relative risk if the
+// optimistic case doesn't pan out, so Bear is a safer default; larger, more established budgets
+// can typically absorb — and justify testing — a more optimistic assumption. Always overridable
+// by hand via the Bear/Base/Bull tabs.
+function ffRecommendedScenario(budget) {
+  if (budget < 3000) return 'bear';
+  if (budget > 10000) return 'bull';
+  return 'base';
+}
+function ffUpdateScenarioExplainer(cfg, budget) {
+  const el = document.getElementById('ffScenarioExplainer');
+  if (!el || el.hidden) return;
+  const descKey = { bear: 'ffScenarioDescBear', base: 'ffScenarioDescBase', bull: 'ffScenarioDescBull' }[cfg.scenario] || 'ffScenarioDescBase';
+  const rec = ffRecommendedScenario(budget);
+  const recLabel = { bear: 'Bear', base: 'Base', bull: 'Bull' }[rec];
+  const badge = cfg.scenario === rec
+    ? '<span class="ff-scenario-badge ff-scenario-badge-match">✓ ' + escapeHtml(t('ffScenarioRecommendedForBudget')) + '</span>'
+    : '<span class="ff-scenario-badge ff-scenario-badge-suggest">💡 ' + escapeHtml(t('ffScenarioSuggest', { scenario: recLabel })) + '</span>';
+  el.innerHTML = t(descKey) + ' ' + badge;
+}
 // Real-world sales cycles vary: a cohort's revenue lands across a window around the
 // nominal cycle length rather than all in one month (5% early ... 5% stragglers).
 const ffRevenueDistribution = [
@@ -5320,6 +5375,7 @@ function ffCompute() {
   // Bear/Base/Bull scenario; budget itself never moves with scenario or ramp.
   const funnel = ffFunnelFromLeads(baseLeads * scenarioMult, cfg);
   const forecast = ffBuildForecast(cfg);
+  ffUpdateScenarioExplainer(cfg, budget);
   ffRenderKpis(cfg, budget, funnel, forecast);
   ffRenderFunnelStages(funnel, budget);
   ffRenderRecommendation(cfg, funnel);
