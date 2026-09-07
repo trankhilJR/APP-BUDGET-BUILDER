@@ -16,6 +16,10 @@
     --line: #D8D9D1;
     --ember: #BF4E2C;
     --ember-soft: #F4E2DA;
+    /* --ember itself is only 3.86:1 on --ember-soft — fine for large text (KPI values)
+       but fails WCAG AA (4.5:1) for small badge text; this darker shade (4.6:1) is used
+       specifically where ember text sits on an ember-soft background at small sizes. */
+    --ember-strong: #AB4627;
     --moss: #3F5A47;
     --moss-soft: #E1E9E1;
     --moss-rgb: 63,90,71;
@@ -36,6 +40,7 @@
     --line: #2E3336;
     --ember: #E8734A;
     --ember-soft: #3A2620;
+    --ember-strong: #E8734A;
     --moss: #7FBE98;
     --moss-soft: #1E2A22;
     --moss-rgb: 127,190,152;
@@ -345,7 +350,7 @@
     white-space: normal;
   }
   .ff-scenario-badge-match { background: var(--moss-soft); color: var(--moss); }
-  .ff-scenario-badge-suggest { background: var(--ember-soft); color: var(--ember); }
+  .ff-scenario-badge-suggest { background: var(--ember-soft); color: var(--ember-strong); }
   /* Variant for narrow sidebars where a long label (e.g. "iOS + Android (mixte)")
      shouldn't be clipped by horizontal scroll — wraps onto a second row instead. */
   .tabs.tabs-wrap { flex-wrap: wrap; overflow: visible; }
@@ -393,7 +398,7 @@
     text-transform: uppercase;
     vertical-align: middle;
   }
-  .stage-badge.media { background: var(--ember-soft); color: var(--ember); }
+  .stage-badge.media { background: var(--ember-soft); color: var(--ember-strong); }
   .stage-badge.sales { background: var(--moss-soft); color: var(--moss); }
 
   .figure-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; min-width: 110px; }
@@ -833,6 +838,34 @@
     color: var(--ink);
   }
   button:hover { opacity: 0.85; }
+  button:disabled { cursor: default; }
+  button:disabled:hover { opacity: 1; }
+
+  /* Loading/success micro-feedback (withButtonFeedback) for actions with no other
+     visible confirmation, e.g. Export CSV/PDF — a spinner while the action runs, then a
+     brief checkmark instead of the button silently going back to idle. */
+  button.btn-loading { position: relative; color: transparent !important; opacity: 0.85; }
+  button.btn-loading::after {
+    content: "";
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 15px; height: 15px;
+    margin: -7.5px 0 0 -7.5px;
+    border: 2px solid currentColor;
+    border-color: var(--surface) var(--surface) transparent transparent;
+    border-radius: 50%;
+    animation: btnSpin 0.6s linear infinite;
+  }
+  button.secondary.btn-loading::after { border-color: var(--ink) var(--ink) transparent transparent; }
+  @keyframes btnSpin { to { transform: rotate(360deg); } }
+  button.btn-success {
+    background: var(--moss) !important;
+    border-color: var(--moss) !important;
+    color: #fff !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    button.btn-loading::after { animation-duration: 1.4s; }
+  }
 
   :root[data-theme="dark"] button:not(.secondary):not(.icon-toggle):not(.tab-btn):not(.restart-guide-btn) {
     background: var(--ember);
@@ -2495,6 +2528,8 @@ const translations = {
     kpiRoas: 'ROAS projeté',
     btnExportCsv: 'Exporter en CSV',
     btnExportPdf: 'Exporter en PDF',
+    btnExportedCsv: 'Exporté',
+    btnExportedPdf: 'Exporté',
     formatSectionTitle: 'Format recommandé',
     formatPrimary: 'Format principal',
     formatSecondary: 'Format secondaire',
@@ -2934,6 +2969,8 @@ const translations = {
     kpiRoas: 'Projected ROAS',
     btnExportCsv: 'Export as CSV',
     btnExportPdf: 'Export as PDF',
+    btnExportedCsv: 'Exported',
+    btnExportedPdf: 'Exported',
     formatSectionTitle: 'Recommended format',
     formatPrimary: 'Primary format',
     formatSecondary: 'Secondary format',
@@ -3373,6 +3410,8 @@ const translations = {
     kpiRoas: 'ROAS proyectado',
     btnExportCsv: 'Exportar a CSV',
     btnExportPdf: 'Exportar a PDF',
+    btnExportedCsv: 'Exportado',
+    btnExportedPdf: 'Exportado',
     formatSectionTitle: 'Formato recomendado',
     formatPrimary: 'Formato principal',
     formatSecondary: 'Formato secundario',
@@ -6550,8 +6589,40 @@ function preparePrint() {
   }
 }
 
-document.getElementById('exportCsv').addEventListener('click', exportCsv);
-document.getElementById('printReport').addEventListener('click', () => { preparePrint(); window.print(); });
+// Generic loading -> success micro-feedback for a button whose action has no other
+// visible confirmation (unlike Scenario Save, which already has a toast). Keeps the
+// spinner visible for at least `minLoadingMs` even when `action` runs instantly, so the
+// state isn't just an imperceptible flash; `action` may itself be blocking (e.g.
+// window.print()) — the loading class is painted first via requestAnimationFrame.
+function withButtonFeedback(btn, action, successText, { minLoadingMs = 350, successMs = 1400 } = {}) {
+  if (!btn || btn.disabled) return;
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.classList.add('btn-loading');
+  const start = Date.now();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    try { action(); } finally {
+      const wait = Math.max(0, minLoadingMs - (Date.now() - start));
+      setTimeout(() => {
+        btn.classList.remove('btn-loading');
+        btn.classList.add('btn-success');
+        btn.innerHTML = `✓ ${successText}`;
+        setTimeout(() => {
+          btn.classList.remove('btn-success');
+          btn.innerHTML = originalHtml;
+          btn.disabled = false;
+        }, successMs);
+      }, wait);
+    }
+  }));
+}
+
+document.getElementById('exportCsv').addEventListener('click', function () {
+  withButtonFeedback(this, exportCsv, t('btnExportedCsv'));
+});
+document.getElementById('printReport').addEventListener('click', function () {
+  withButtonFeedback(this, () => { preparePrint(); window.print(); }, t('btnExportedPdf'));
+});
 
 /* ---------- Boot ---------- */
 function hydrateFieldsFromState() {
