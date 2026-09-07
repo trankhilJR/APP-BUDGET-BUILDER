@@ -49,6 +49,13 @@
 
   * { box-sizing: border-box; }
 
+  /* Safety net against page-level horizontal scroll: an invisible element positioned near
+     a viewport edge (e.g. an InfoIcon tooltip, which is only clamped on-screen once it's
+     actually opened) can still extend past the edge while at rest and inflate scrollWidth.
+     Intentionally-scrollable inner regions (.tabs, .table-scroll) are unaffected — this
+     only clips overflow at the document level. */
+  html { overflow-x: hidden; }
+
   body {
     margin: 0;
     background: var(--bg);
@@ -56,18 +63,23 @@
     font-family: 'Inter', sans-serif;
     font-size: 15px;
     line-height: 1.5;
+    overflow-x: hidden;
     transition: background 0.2s ease, color 0.2s ease;
   }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 68px 28px 100px; }
 
+  /* Native <select> elements can refuse to shrink below their longest <option>'s
+     content width even with width:1px set — clip-based visually-hidden techniques
+     don't stop that box from still extending past the viewport edge and inflating
+     scrollWidth. Moving it off-canvas sidesteps the issue instead of fighting it. */
   .visually-hidden-select {
     position: absolute;
+    left: -9999px;
     width: 1px; height: 1px;
     overflow: hidden;
-    clip: rect(0,0,0,0);
     white-space: nowrap;
-    border: 0; padding: 0; margin: -1px;
+    border: 0; padding: 0; margin: 0;
   }
 
   header.masthead {
@@ -102,9 +114,9 @@
 
   header.masthead p { margin: 0; color: var(--ink-soft); font-size: 14px; }
 
-  .masthead-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+  .masthead-side { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; max-width: 100%; }
 
-  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 
   .icon-toggle {
     width: 38px; height: 38px; padding: 0;
@@ -172,10 +184,73 @@
     gap: 24px;
     align-items: start;
   }
+  /* Grid tracks default to a content-based min size: a <select> with a long option
+     (e.g. "Amérique latine") or a wide table can force its track — and the whole
+     page — wider than the viewport instead of shrinking. min-width:0 opts back into
+     the track's own width so width:100% children actually shrink to fit. */
+  .layout > .panel { min-width: 0; }
 
   @media (max-width: 860px) {
     .layout { grid-template-columns: 1fr; }
   }
+
+  /* ==================== Mobile (<=640px) ====================
+     Real bug fixed here: header-actions (lang pills + theme toggle + Copier/Mode
+     présentation buttons) had no wrap and no width bound, so on narrow viewports it
+     forced the whole page wider than the screen (horizontal scroll). Also bumps tap
+     targets to ~44px and input font-size to 16px (iOS auto-zooms on focus below 16px). */
+  @media (max-width: 640px) {
+    /* Extra top padding clears the floating "Reprendre le guidage" pill (fixed, top:12px),
+       which otherwise overlaps the title on narrow screens where it wraps to 2 lines. */
+    .wrap { padding: 68px 16px 96px; }
+    header.masthead h1 { font-size: 24px; }
+    header.masthead { flex-direction: column; align-items: stretch; }
+    .masthead-side { align-items: stretch; width: 100%; }
+    .header-actions { width: 100%; }
+    .brand-fields { width: 100%; }
+    .brand-fields > div { flex: 1 1 130px; }
+    .brand-fields input[type="text"] { width: 100%; }
+
+    button { min-height: 44px; }
+    .icon-toggle { width: 44px; height: 44px; }
+
+    /* Export actions become a persistent bottom bar instead of scrolling away at the
+       end of a long form — the two calls to action agencies actually need on a client call. */
+    .actions {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 60;
+      margin: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--line);
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.12);
+    }
+    .actions button { flex: 1 1 0; min-width: 0; }
+    body.presentation-mode .actions { position: static; box-shadow: none; padding: 0; border-top: none; }
+
+    #backToTopBtn.visible { display: flex; }
+  }
+
+  #backToTopBtn {
+    display: none;
+    position: fixed;
+    right: 16px;
+    bottom: 84px;
+    z-index: 55;
+    width: 44px; height: 44px;
+    padding: 0;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  }
+  body.onboarding-active #backToTopBtn,
+  body.presentation-mode #backToTopBtn { display: none !important; }
 
   .panel {
     background: var(--surface);
@@ -225,6 +300,16 @@
     color: var(--ink);
   }
 
+  /* iOS Safari auto-zooms the page on focus for any text-capable field under 16px —
+     bumped here (after the base rule, so it actually wins the cascade) rather than in
+     the earlier [max-width:640px] block. Range sliders (the majority of inputs in this
+     app) don't trigger that zoom and are left alone. */
+  @media (max-width: 640px) {
+    .field select,
+    .field input[type="number"] { font-size: 16px; padding: 11px 10px; }
+    .brand-fields input[type="text"] { font-size: 16px; }
+  }
+
   .field input[type="range"] {
     width: 100%;
     accent-color: var(--ember);
@@ -255,7 +340,9 @@
     border-radius: 10px;
     font-size: 11.5px;
     font-weight: 600;
-    white-space: nowrap;
+    /* Holds a full sentence, not a short label — must wrap on narrow screens instead
+       of forcing the page wider (nowrap would push it straight past the viewport). */
+    white-space: normal;
   }
   .ff-scenario-badge-match { background: var(--moss-soft); color: var(--moss); }
   .ff-scenario-badge-suggest { background: var(--ember-soft); color: var(--ember); }
@@ -1339,6 +1426,8 @@
     </button>
   </header>
 
+  <button type="button" id="backToTopBtn" data-i18n-aria-label="btnBackToTop" aria-label="Revenir en haut">↑</button>
+
   <div class="scenario-manager" id="scenarioManager">
     <div class="scenario-manager-current">
       <label class="scenario-manager-label" for="scenarioSelect" data-i18n="scenarioMgrLabel">Scénario actuel</label>
@@ -2208,6 +2297,7 @@ const translations = {
     btnPresentMode: 'Mode présentation',
     btnExitPresentMode: 'Quitter la présentation',
     btnRestartGuide: 'Reprendre le guidage',
+    btnBackToTop: 'Revenir en haut',
     lblAgency: 'Ton agence',
     lblClient: 'Client',
     lblLogo: 'Logo agence',
@@ -2646,6 +2736,7 @@ const translations = {
     btnPresentMode: 'Presentation mode',
     btnExitPresentMode: 'Exit presentation',
     btnRestartGuide: 'Resume the guide',
+    btnBackToTop: 'Back to top',
     lblAgency: 'Your agency',
     lblClient: 'Client',
     lblLogo: 'Agency logo',
@@ -3084,6 +3175,7 @@ const translations = {
     btnPresentMode: 'Modo presentación',
     btnExitPresentMode: 'Salir de la presentación',
     btnRestartGuide: 'Retomar la guía',
+    btnBackToTop: 'Volver arriba',
     lblAgency: 'Tu agencia',
     lblClient: 'Cliente',
     lblLogo: 'Logo de la agencia',
@@ -6401,6 +6493,17 @@ document.getElementById('onboarding').addEventListener('input', e => {
 });
 
 document.getElementById('reopenOnboardingBtn').addEventListener('click', showOnboarding);
+
+/* ---------- Back-to-top (mobile) ----------
+   Only rendered visible on narrow viewports (see the [max-width:640px] rule) — on a long
+   mobile form, scrolling all the way back up to switch sector/objective is real friction. */
+const backToTopBtn = document.getElementById('backToTopBtn');
+window.addEventListener('scroll', () => {
+  backToTopBtn.classList.toggle('visible', window.scrollY > 600);
+}, { passive: true });
+backToTopBtn.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 /* ---------- Export CSV ----------
    Exporte un instantané du scénario actuellement affiché (secteur, objectif, budget,
