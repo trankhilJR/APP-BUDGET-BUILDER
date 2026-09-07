@@ -397,6 +397,57 @@
   .scenario-save-input:focus { outline: none; border-color: var(--ember); }
   .scenario-save-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
 
+  .scenario-compare-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .scenario-compare-modal-overlay[hidden] { display: none; }
+  .scenario-compare-modal {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  .scenario-compare-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .scenario-compare-modal-header h3 { margin: 0; font-family: 'Fraunces', serif; font-size: 19px; font-weight: 500; color: var(--ink); }
+  .scenario-compare-picker { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+  .scenario-compare-picker-slot { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); flex: 1 1 180px; }
+  .scenario-compare-picker-slot select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 13px; text-transform: none; letter-spacing: normal; }
+  table.scenario-compare-table th:first-child { text-align: left; font-variant-numeric: initial; }
+  table.scenario-compare-table td { text-align: center; position: relative; }
+  table.scenario-compare-table td.scenario-compare-best { background: var(--moss-soft); font-weight: 600; }
+  .scenario-compare-delta { display: block; font-size: 10.5px; font-weight: 600; margin-top: 1px; }
+  .scenario-compare-delta.is-positive { color: var(--moss); }
+  .scenario-compare-delta.is-negative { color: var(--ember); }
+  .scenario-compare-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 8px; }
+  .scenario-compare-actions button { font-size: 12.5px; padding: 8px 14px; }
+
+  @media print {
+    body.printing-comparison .cover-page { display: none !important; }
+    body.printing-comparison .wrap > *:not(#scenarioCompareModalOverlay) { display: none !important; }
+    body.printing-comparison #scenarioCompareModalOverlay {
+      position: static !important;
+      background: none !important;
+      padding: 0 !important;
+      display: block !important;
+      inset: auto !important;
+    }
+    body.printing-comparison .scenario-compare-modal { box-shadow: none !important; max-width: 100% !important; max-height: none !important; overflow: visible !important; }
+    body.printing-comparison .scenario-compare-picker,
+    body.printing-comparison .scenario-compare-actions,
+    body.printing-comparison #scenarioCompareCloseBtn { display: none !important; }
+  }
+
   /* InfoIcon: small "?" tooltip icon for annotating labels/metrics */
   .info-icon-wrap { position: relative; display: inline-flex; align-items: center; vertical-align: middle; line-height: 0; }
   .info-icon {
@@ -1280,9 +1331,10 @@
       <button type="button" id="scenarioSaveBtn" data-i18n="scenarioMgrSave">💾 Enregistrer</button>
       <button type="button" class="secondary" id="scenarioRenameBtn" data-i18n="scenarioMgrRename" hidden>Renommer</button>
       <button type="button" class="secondary danger" id="scenarioDeleteBtn" data-i18n="scenarioMgrDelete" hidden>🗑 Supprimer</button>
+      <button type="button" class="secondary" id="scenarioCompareBtn" data-i18n="scenarioMgrCompare" hidden>📊 Comparer</button>
       <button type="button" class="secondary danger" id="scenarioClearAllBtn" data-i18n="scenarioMgrClearAll" hidden>Tout effacer</button>
     </div>
-    <p class="hint scenario-manager-hint" id="scenarioManagerHint" data-i18n="scenarioMgrHint">Enregistre des scénarios nommés pour les retrouver plus tard, ou les comparer entre eux.</p>
+    <p class="hint scenario-manager-hint" id="scenarioManagerHint" data-i18n="scenarioMgrHint">Enregistre des scénarios nommés pour les retrouver plus tard.</p>
   </div>
 
   <div class="scenario-save-modal-overlay" id="scenarioSaveModalOverlay" hidden>
@@ -1293,6 +1345,24 @@
         <button type="button" class="secondary" id="scenarioSaveCancelBtn" data-i18n="scenarioMgrCancel">Annuler</button>
         <button type="button" id="scenarioSaveConfirmBtn" data-i18n="scenarioMgrSaveConfirm">Enregistrer</button>
       </div>
+    </div>
+  </div>
+
+  <div class="scenario-compare-modal-overlay" id="scenarioCompareModalOverlay" hidden>
+    <div class="scenario-compare-modal" role="dialog" aria-modal="true" aria-labelledby="scenarioCompareModalTitle">
+      <div class="scenario-compare-modal-header">
+        <h3 id="scenarioCompareModalTitle" data-i18n="scenarioCompareTitle">Comparer des scénarios</h3>
+        <button type="button" class="icon-toggle" id="scenarioCompareCloseBtn" aria-label="Fermer">✕</button>
+      </div>
+      <div class="scenario-compare-picker" id="scenarioComparePicker"></div>
+      <div class="table-scroll">
+        <table class="scenario-table scenario-compare-table" id="scenarioCompareTable"></table>
+      </div>
+      <div class="scenario-compare-actions">
+        <button type="button" class="secondary" id="scenarioCompareCopyBtn" data-i18n="scenarioCompareCopy">📋 Copier le tableau</button>
+        <button type="button" class="secondary" id="scenarioCompareExportBtn" data-i18n="scenarioCompareExport">📊 Exporter en PDF</button>
+      </div>
+      <p class="hint" data-i18n="scenarioCompareHint">Estimation simplifiée à partir des hypothèses enregistrées de chaque scénario (sans les modes de planification avancés du tableau de bord).</p>
     </div>
   </div>
 
@@ -1980,6 +2050,28 @@ const translations = {
     scenarioMgrStorageError: "Impossible d'enregistrer : le stockage local est indisponible dans ce navigateur (navigation privée ?).",
     scenarioMgrUnavailable: "Le stockage local est indisponible dans ce navigateur : les scénarios enregistrés ne persisteront pas après fermeture.",
     scenarioMgrHint: 'Enregistre des scénarios nommés pour les retrouver plus tard.',
+    scenarioMgrCompare: '📊 Comparer',
+    scenarioCompareTitle: 'Comparer des scénarios',
+    scenarioCompareCopy: '📋 Copier le tableau',
+    scenarioCompareExport: '📊 Exporter en PDF',
+    scenarioCompareHint: 'Estimation simplifiée à partir des hypothèses enregistrées de chaque scénario (sans les modes de planification avancés du tableau de bord).',
+    scenarioCompareNone: '— Aucun —',
+    scenarioCompareNeedTwo: 'Choisis au moins 2 scénarios ci-dessus pour les comparer.',
+    scenarioCompareCopied: 'Tableau copié dans le presse-papiers.',
+    scenarioCompareRowObjective: 'Objectif',
+    scenarioCompareRowBudget: 'Budget mensuel',
+    scenarioCompareRowImpressions: 'Impressions',
+    scenarioCompareRowReach: 'Reach',
+    scenarioCompareRowLeads: 'Leads / mois',
+    scenarioCompareRowClients: 'Clients / mois',
+    scenarioCompareRowInstalls: 'Installations / mois',
+    scenarioCompareRowViews: 'Vues / mois',
+    scenarioCompareRowCpa: 'CPA',
+    scenarioCompareRowCpi: 'CPI',
+    scenarioCompareRowCostPerView: 'Coût par vue',
+    scenarioCompareRowPipeline: 'Pipeline généré',
+    scenarioCompareRowRevenue: 'Revenu estimé / mois',
+    scenarioCompareRowRoas: 'ROAS',
     ob_landing_title: 'Simulateur de budget Reddit Ads',
     ob_landing_sub: "Traduis ton investissement Reddit Ads en pipeline, revenu et portée.",
     ob_choose_objective: 'Choisis ton objectif',
@@ -2388,6 +2480,28 @@ const translations = {
     scenarioMgrStorageError: "Couldn't save: local storage is unavailable in this browser (private browsing?).",
     scenarioMgrUnavailable: "Local storage is unavailable in this browser: saved scenarios won't persist after you close it.",
     scenarioMgrHint: 'Save named scenarios to come back to later.',
+    scenarioMgrCompare: '📊 Compare',
+    scenarioCompareTitle: 'Compare scenarios',
+    scenarioCompareCopy: '📋 Copy as table',
+    scenarioCompareExport: '📊 Export as PDF',
+    scenarioCompareHint: "Simplified estimate from each scenario's saved assumptions (without the dashboard's advanced planning modes).",
+    scenarioCompareNone: '— None —',
+    scenarioCompareNeedTwo: 'Pick at least 2 scenarios above to compare them.',
+    scenarioCompareCopied: 'Table copied to clipboard.',
+    scenarioCompareRowObjective: 'Objective',
+    scenarioCompareRowBudget: 'Monthly budget',
+    scenarioCompareRowImpressions: 'Impressions',
+    scenarioCompareRowReach: 'Reach',
+    scenarioCompareRowLeads: 'Leads / month',
+    scenarioCompareRowClients: 'Customers / month',
+    scenarioCompareRowInstalls: 'Installs / month',
+    scenarioCompareRowViews: 'Views / month',
+    scenarioCompareRowCpa: 'CPA',
+    scenarioCompareRowCpi: 'CPI',
+    scenarioCompareRowCostPerView: 'Cost per view',
+    scenarioCompareRowPipeline: 'Pipeline generated',
+    scenarioCompareRowRevenue: 'Estimated revenue / month',
+    scenarioCompareRowRoas: 'ROAS',
     ob_landing_title: 'Reddit Ads Budget Simulator',
     ob_landing_sub: 'Translate your Reddit Ads investment into pipeline, revenue and reach.',
     ob_choose_objective: 'Choose your objective',
@@ -2796,6 +2910,28 @@ const translations = {
     scenarioMgrStorageError: 'No se pudo guardar: el almacenamiento local no está disponible en este navegador (¿navegación privada?).',
     scenarioMgrUnavailable: 'El almacenamiento local no está disponible en este navegador: los escenarios guardados no persistirán al cerrarlo.',
     scenarioMgrHint: 'Guarda escenarios con nombre para volver a ellos más tarde.',
+    scenarioMgrCompare: '📊 Comparar',
+    scenarioCompareTitle: 'Comparar escenarios',
+    scenarioCompareCopy: '📋 Copiar como tabla',
+    scenarioCompareExport: '📊 Exportar a PDF',
+    scenarioCompareHint: 'Estimación simplificada a partir de las hipótesis guardadas de cada escenario (sin los modos de planificación avanzados del panel).',
+    scenarioCompareNone: '— Ninguno —',
+    scenarioCompareNeedTwo: 'Elige al menos 2 escenarios arriba para compararlos.',
+    scenarioCompareCopied: 'Tabla copiada al portapapeles.',
+    scenarioCompareRowObjective: 'Objetivo',
+    scenarioCompareRowBudget: 'Presupuesto mensual',
+    scenarioCompareRowImpressions: 'Impresiones',
+    scenarioCompareRowReach: 'Alcance',
+    scenarioCompareRowLeads: 'Leads / mes',
+    scenarioCompareRowClients: 'Clientes / mes',
+    scenarioCompareRowInstalls: 'Instalaciones / mes',
+    scenarioCompareRowViews: 'Vistas / mes',
+    scenarioCompareRowCpa: 'CPA',
+    scenarioCompareRowCpi: 'CPI',
+    scenarioCompareRowCostPerView: 'Coste por vista',
+    scenarioCompareRowPipeline: 'Pipeline generado',
+    scenarioCompareRowRevenue: 'Ingreso estimado / mes',
+    scenarioCompareRowRoas: 'ROAS',
     ob_landing_title: 'Simulador de presupuesto de Reddit Ads',
     ob_landing_sub: 'Traduce tu inversión en Reddit Ads en pipeline, ingresos y alcance.',
     ob_choose_objective: 'Elige tu objetivo',
@@ -3717,7 +3853,13 @@ function saveScenarios(list) {
 }
 
 function snapshotCurrentState() {
+  // Mirrors the boot-time read order: the generic fields plus the three nested
+  // sub-states (state.fullFunnel / state.slg / state.plg) each have their own sync
+  // function and aren't covered by syncStateFromFields() alone.
   syncStateFromFields();
+  ffSyncStateFromFields();
+  slgSyncStateFromFields();
+  plgSyncStateFromFields();
   return JSON.parse(JSON.stringify(state));
 }
 
@@ -3754,6 +3896,7 @@ function renderScenarioManager() {
   document.getElementById('scenarioRenameBtn').hidden = !hasCurrent;
   document.getElementById('scenarioDeleteBtn').hidden = !hasCurrent;
   document.getElementById('scenarioClearAllBtn').hidden = list.length === 0;
+  document.getElementById('scenarioCompareBtn').hidden = list.length < 2;
   document.getElementById('scenarioUnsavedDot').hidden = !scenarioManagerState.dirty;
 
   const hint = document.getElementById('scenarioManagerHint');
@@ -3912,6 +4055,183 @@ document.getElementById('scenarioClearAllBtn').addEventListener('click', () => {
 // Any real user input anywhere in the form marks the loaded scenario dirty.
 document.addEventListener('input', markScenarioDirty, true);
 document.addEventListener('change', markScenarioDirty, true);
+
+/* ---------- Scenario comparison ----------
+   Computes a lightweight, self-contained estimate for each saved scenario directly
+   from its stored field values — it does NOT reuse currentFunnel()/ffCompute()/etc.,
+   because those all read live values straight out of the on-screen form fields
+   (els.*), and writing a scenario's data into those fields just to read it back out
+   would make "compare" destructive to whatever the user currently has open. The
+   conversion branch does reuse the app's own ffFunnelFromLeads() for the MQL → SQL →
+   Opportunity → Won math, since that's already a pure function of (leads, cfg). This
+   is deliberately a simplified estimate (no budget-first/target-based planning modes,
+   no audience diminishing-returns curve) — good enough for a side-by-side comparison,
+   not a replacement for opening the scenario in the dashboard. */
+const SCENARIO_COMPARE_OBJECTIVE_LABEL_KEY = {
+  awareness: 'ob_obj_awareness_title', traffic: 'ob_obj_traffic_title', conversion: 'ob_obj_conversion_title',
+  appInstall: 'objAppInstall', videoViews: 'objVideoViews',
+};
+
+function computeScenarioMetrics(snap) {
+  const cpm = (+snap.cpm || 0) * formatCountMultiplier(snap.formatCount || '1');
+  const ff = snap.fullFunnel || {};
+  // Conversion's own engine (CPL → funnel) bypasses impressions/CPM entirely and reads
+  // its budget from a dedicated nested state (state.fullFunnel), not the shared
+  // top-level budget field used by the other 4 objectives — so it needs its own
+  // budget/impressions resolution rather than the generic one below.
+  let budget, impressions;
+  if (snap.objective === 'conversion') {
+    const cplForBudget = +ff.cpl || 0;
+    budget = ff.planningMode === 'budgetfirst' ? (+ff.budget || 0) : (+ff.targetLeads || 0) * cplForBudget;
+    impressions = null;
+  } else {
+    budget = +snap.budget || 0;
+    impressions = cpm > 0 ? (budget / cpm) * 1000 : 0;
+  }
+  const m = { objective: snap.objective, budget, impressions, cpm: snap.objective === 'conversion' ? null : cpm };
+  if (snap.objective === 'awareness') {
+    const frequency = +snap.frequency || 1;
+    m.reach = frequency > 0 ? impressions / frequency : impressions;
+  } else if (snap.objective === 'appInstall') {
+    const ctr = (+snap.ctr || 0) / 100;
+    const c2i = (+snap.c2i || 0) / 100;
+    const platformMult = platformC2iMultipliers[snap.platform] ?? 1;
+    const clicks = impressions * ctr;
+    m.installs = clicks * c2i * platformMult;
+    m.cpi = m.installs > 0 ? budget / m.installs : 0;
+  } else if (snap.objective === 'videoViews') {
+    const viewRate = (+snap.viewRate || 0) / 100;
+    m.views = impressions * viewRate;
+    m.costPerView = m.views > 0 ? budget / m.views : 0;
+  } else if (snap.objective === 'conversion') {
+    const cpl = +ff.cpl || 0;
+    const leads = cpl > 0 ? budget / cpl : 0;
+    const f = ffFunnelFromLeads(leads, { l2m: +ff.l2m || 0, m2s: +ff.m2s || 0, s2o: +ff.s2o || 0, o2w: +ff.o2w || 0, deal: +ff.deal || 0 });
+    m.leads = f.leads; m.clients = f.closedWon; m.revenue = f.revenue; m.pipeline = f.pipelineValue;
+    m.cpa = f.closedWon > 0 ? budget / f.closedWon : 0;
+    m.roas = budget > 0 ? f.revenue / budget : 0;
+  } else {
+    const ctr = (+snap.ctr || 0) / 100;
+    const c2l = (+snap.c2l || 0) / 100;
+    const l2c = (+snap.l2c || 0) / 100;
+    const ltv = +snap.ltv || 0;
+    const clicks = impressions * ctr;
+    const leads = clicks * c2l;
+    const clients = leads * l2c;
+    m.leads = leads; m.clients = clients; m.revenue = clients * ltv;
+    m.cpa = clients > 0 ? budget / clients : 0;
+    m.roas = budget > 0 ? m.revenue / budget : 0;
+  }
+  return m;
+}
+
+const SCENARIO_COMPARE_ROWS = [
+  { key: 'objective', labelKey: 'scenarioCompareRowObjective', fmt: v => t(SCENARIO_COMPARE_OBJECTIVE_LABEL_KEY[v] || v), always: true },
+  { key: 'budget', labelKey: 'scenarioCompareRowBudget', fmt: fmtEUR, always: true },
+  { key: 'impressions', labelKey: 'scenarioCompareRowImpressions', fmt: fmtNum, always: true, better: 'high' },
+  { key: 'reach', labelKey: 'scenarioCompareRowReach', fmt: fmtNum, better: 'high' },
+  { key: 'leads', labelKey: 'scenarioCompareRowLeads', fmt: fmtNum, better: 'high' },
+  { key: 'clients', labelKey: 'scenarioCompareRowClients', fmt: fmtNum, better: 'high' },
+  { key: 'installs', labelKey: 'scenarioCompareRowInstalls', fmt: fmtNum, better: 'high' },
+  { key: 'views', labelKey: 'scenarioCompareRowViews', fmt: fmtNum, better: 'high' },
+  { key: 'cpa', labelKey: 'scenarioCompareRowCpa', fmt: fmtEUR, better: 'low' },
+  { key: 'cpi', labelKey: 'scenarioCompareRowCpi', fmt: fmtEUR, better: 'low' },
+  { key: 'costPerView', labelKey: 'scenarioCompareRowCostPerView', fmt: fmtEURPrecise, better: 'low' },
+  { key: 'pipeline', labelKey: 'scenarioCompareRowPipeline', fmt: fmtEUR, better: 'high' },
+  { key: 'revenue', labelKey: 'scenarioCompareRowRevenue', fmt: fmtEUR, better: 'high' },
+  { key: 'roas', labelKey: 'scenarioCompareRowRoas', fmt: v => v.toFixed(2) + '×', better: 'high' },
+];
+
+function renderScenarioCompareTable() {
+  const table = document.getElementById('scenarioCompareTable');
+  const list = loadScenarios();
+  const chosen = Array.from(document.querySelectorAll('.scenario-compare-pick'))
+    .map(sel => list.find(s => s.id === sel.value))
+    .filter(Boolean);
+  if (chosen.length < 2) {
+    table.innerHTML = `<tbody><tr><td>${escapeHtml(t('scenarioCompareNeedTwo'))}</td></tr></tbody>`;
+    return;
+  }
+  const metrics = chosen.map(s => computeScenarioMetrics(s.state));
+  const rows = SCENARIO_COMPARE_ROWS.filter(r => r.always || metrics.some(m => m[r.key] != null));
+
+  const theadHtml = `<thead><tr><th></th>${chosen.map(s => `<th>${escapeHtml(s.name)}</th>`).join('')}</tr></thead>`;
+  const bodyHtml = rows.map(r => {
+    const values = metrics.map(m => m[r.key]);
+    let bestIdx = -1;
+    if (r.better && values.every(v => typeof v === 'number') && new Set(values).size > 1) {
+      const best = r.better === 'high' ? Math.max(...values) : Math.min(...values);
+      bestIdx = values.indexOf(best);
+    }
+    const cells = values.map((v, i) => {
+      if (v == null) return '<td>—</td>';
+      const display = r.fmt ? r.fmt(v) : v;
+      let deltaHtml = '';
+      if (i > 0 && typeof v === 'number' && typeof values[0] === 'number' && values[0] !== 0) {
+        const pct = ((v - values[0]) / Math.abs(values[0])) * 100;
+        if (Math.abs(pct) >= 0.5) {
+          const goodDelta = r.better === 'high' ? pct > 0 : pct < 0;
+          deltaHtml = `<span class="scenario-compare-delta ${goodDelta ? 'is-positive' : 'is-negative'}">${pct > 0 ? '+' : ''}${pct.toFixed(0)}%</span>`;
+        }
+      }
+      return `<td class="${i === bestIdx ? 'scenario-compare-best' : ''}">${display}${deltaHtml}</td>`;
+    }).join('');
+    return `<tr><th>${escapeHtml(t(r.labelKey))}</th>${cells}</tr>`;
+  }).join('');
+  table.innerHTML = theadHtml + `<tbody>${bodyHtml}</tbody>`;
+}
+
+function openScenarioCompareModal() {
+  const list = loadScenarios().sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
+  if (list.length < 2) return;
+  const picker = document.getElementById('scenarioComparePicker');
+  const preselected = [list[0], list[1], list[2]].map(s => s ? s.id : '');
+  picker.innerHTML = ['A', 'B', 'C'].map((label, i) => `
+    <label class="scenario-compare-picker-slot">
+      <span>${label}</span>
+      <select class="scenario-compare-pick" data-slot="${i}">
+        <option value="">${escapeHtml(t('scenarioCompareNone'))}</option>
+        ${list.map(s => `<option value="${escapeHtml(s.id)}" ${s.id === preselected[i] ? 'selected' : ''}>${escapeHtml(s.name)}</option>`).join('')}
+      </select>
+    </label>
+  `).join('');
+  picker.querySelectorAll('.scenario-compare-pick').forEach(sel => sel.addEventListener('change', renderScenarioCompareTable));
+  document.getElementById('scenarioCompareModalOverlay').hidden = false;
+  renderScenarioCompareTable();
+}
+function closeScenarioCompareModal() {
+  document.getElementById('scenarioCompareModalOverlay').hidden = true;
+}
+
+function copyScenarioCompareTable() {
+  const table = document.getElementById('scenarioCompareTable');
+  const tsv = Array.from(table.querySelectorAll('tr'))
+    .map(tr => Array.from(tr.children).map(cell => cell.textContent.replace(/\s+/g, ' ').trim()).join('\t'))
+    .join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(tsv).then(() => toast(t('scenarioCompareCopied'))).catch(() => window.prompt('', tsv));
+  } else {
+    window.prompt('', tsv);
+  }
+}
+
+function exportScenarioCompare() {
+  document.body.classList.add('printing-comparison');
+  window.print();
+  const cleanup = () => { document.body.classList.remove('printing-comparison'); window.removeEventListener('afterprint', cleanup); };
+  window.addEventListener('afterprint', cleanup);
+}
+
+document.getElementById('scenarioCompareBtn').addEventListener('click', openScenarioCompareModal);
+document.getElementById('scenarioCompareCloseBtn').addEventListener('click', closeScenarioCompareModal);
+document.getElementById('scenarioCompareModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'scenarioCompareModalOverlay') closeScenarioCompareModal();
+});
+document.getElementById('scenarioCompareCopyBtn').addEventListener('click', copyScenarioCompareTable);
+document.getElementById('scenarioCompareExportBtn').addEventListener('click', exportScenarioCompare);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !document.getElementById('scenarioCompareModalOverlay').hidden) closeScenarioCompareModal();
+});
 
 /* ---------- Theme ---------- */
 function initTheme() {
