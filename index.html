@@ -270,6 +270,11 @@
     font-size: 17px;
     margin: 0 0 4px;
   }
+  /* Icon sits as a sibling of the h2 (not a child) so applyDataI18n()'s textContent sweep
+     on the h2's data-i18n attribute can't wipe it out on boot or language switch. */
+  .section-heading { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+  .section-heading h2 { margin: 0; }
+  .section-icon { font-size: 15px; line-height: 1; flex: none; }
 
   .panel .hint {
     color: var(--ink-soft);
@@ -303,7 +308,18 @@
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     color: var(--ink);
+    transition: border-color 0.12s ease;
   }
+  .field select:hover,
+  .field input[type="number"]:hover { border-color: var(--ink-soft); }
+  .field select:focus-visible,
+  .field input[type="number"]:focus-visible {
+    outline: none;
+    border-color: var(--ember);
+    box-shadow: 0 0 0 3px rgba(var(--ember-rgb), 0.18);
+  }
+  .field input[type="range"]:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 3px; }
+  .brand-fields input[type="text"]:focus-visible { outline: none; border-color: var(--ember); }
 
   /* iOS Safari auto-zooms the page on focus for any text-capable field under 16px —
      bumped here (after the base rule, so it actually wins the cascade) rather than in
@@ -527,6 +543,21 @@
   .scenario-compare-picker { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
   .scenario-compare-picker-slot { display: flex; flex-direction: column; gap: 4px; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); flex: 1 1 180px; }
   .scenario-compare-picker-slot select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 13px; text-transform: none; letter-spacing: normal; }
+
+  /* Grouped-bar mini-charts, one per metric shared by every selected scenario — a visual
+     companion to the table rather than a replacement (mixed-objective comparisons can
+     have metrics that don't apply to every scenario, so a single combined chart across
+     all rows would mix incompatible units; each mini-chart stays single-metric instead). */
+  .scenario-compare-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 14px; margin: 0 0 20px; }
+  .scenario-compare-charts:empty { margin: 0; }
+  .compare-chart { border: 1px solid var(--line); border-radius: 6px; padding: 12px 8px 10px; }
+  .compare-chart-title { font-size: 11px; color: var(--ink-soft); text-align: center; margin-bottom: 10px; }
+  .compare-chart-bars { display: flex; align-items: flex-end; justify-content: center; gap: 8px; height: 84px; }
+  .compare-chart-bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; flex: 1 1 0; max-width: 46px; }
+  .compare-chart-value { font-size: 10px; font-variant-numeric: tabular-nums; color: var(--ink); margin-bottom: 4px; white-space: nowrap; }
+  .compare-chart-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; transition: height 0.35s ease; }
+  .compare-chart-name { font-size: 9.5px; color: var(--ink-soft); margin-top: 6px; text-align: center; max-width: 58px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media print { .scenario-compare-charts { break-inside: avoid; } }
   table.scenario-compare-table th:first-child { text-align: left; font-variant-numeric: initial; }
   table.scenario-compare-table td { text-align: center; position: relative; }
   table.scenario-compare-table td.scenario-compare-best { background: var(--moss-soft); font-weight: 600; }
@@ -658,6 +689,12 @@
   .phase-split-dot.tofu, .phase-split-dot.gen { background: var(--ember); }
   .phase-split-dot.mofu, .phase-split-dot.capture { background: var(--moss); }
   .phase-split-dot.bofu { background: var(--chart-neutral); }
+
+  .phase-split-donut-row { display: flex; align-items: center; gap: 20px; margin: 2px 0 18px; flex-wrap: wrap; }
+  .phase-split-donut { width: 92px; height: 92px; flex: none; }
+  .phase-split-donut circle { transition: stroke-dasharray 0.35s ease, stroke-dashoffset 0.35s ease; }
+  .phase-split-donut-track { stroke: var(--line); }
+  .phase-split-donut-row .phase-split-legend { margin: 0; flex: 1 1 160px; flex-direction: column; align-items: flex-start; gap: 6px; }
   .presets-editor { margin-top: 10px; }
   .preset-row {
     display: grid;
@@ -1498,6 +1535,7 @@
         <button type="button" class="icon-toggle" id="scenarioCompareCloseBtn" aria-label="Fermer">✕</button>
       </div>
       <div class="scenario-compare-picker" id="scenarioComparePicker"></div>
+      <div class="scenario-compare-charts" id="scenarioCompareCharts"></div>
       <div class="table-scroll">
         <table class="scenario-table scenario-compare-table" id="scenarioCompareTable"></table>
       </div>
@@ -1523,7 +1561,7 @@
 
     <!-- INPUT PANEL -->
     <div class="panel" id="inputPanel">
-      <h2 data-i18n="panelAssumptionsTitle">Hypothèses de campagne</h2>
+      <div class="section-heading"><span class="section-icon" aria-hidden="true">⚙️</span><h2 data-i18n="panelAssumptionsTitle">Hypothèses de campagne</h2></div>
       <p class="hint" data-i18n="hintAssumptions">Ajuste les valeurs par défaut selon ce que tu sais du client.</p>
 
       <div class="field">
@@ -1846,7 +1884,7 @@
   <!-- FULL FUNNEL FORECAST (objectif Conversion uniquement) -->
   <div class="panel ff-forecast-panel" id="ffForecastPanel" hidden>
     <div class="funnel-header">
-      <h2 data-i18n="ffForecastTitle">Prévision mensuelle</h2>
+      <div class="section-heading"><span class="section-icon" aria-hidden="true">📅</span><h2 data-i18n="ffForecastTitle">Prévision mensuelle</h2></div>
       <span id="ffForecastSummary"></span>
     </div>
     <div class="table-scroll">
@@ -1856,7 +1894,7 @@
 
   <!-- FORMAT RECOMMENDATION -->
   <div class="panel format-panel" id="formatPanel">
-    <h2 data-i18n="formatSectionTitle">Format recommandé</h2>
+    <div class="section-heading"><span class="section-icon" aria-hidden="true">🖼️</span><h2 data-i18n="formatSectionTitle">Format recommandé</h2></div>
     <div class="format-cards" id="formatCards">
       <div class="format-card primary">
         <span class="format-card-label" data-i18n="formatPrimary">Format principal</span>
@@ -1891,7 +1929,7 @@
 
   <!-- TARGETING RECOMMENDATION -->
   <div class="panel targeting-panel" id="targetingPanel">
-    <h2 data-i18n="targetingSectionTitle">Ciblage recommandé</h2>
+    <div class="section-heading"><span class="section-icon" aria-hidden="true">🎯</span><h2 data-i18n="targetingSectionTitle">Ciblage recommandé</h2></div>
     <p class="hint" id="targetingSectionHint"></p>
 
     <h3 class="targeting-subhead" data-i18n="targetingSubredditsTitle">Top communautés par secteur</h3>
@@ -1931,7 +1969,7 @@
     <div id="slgView">
       <div class="layout">
         <div class="panel" id="slgInputPanel">
-          <h2 data-i18n="slgInputTitle">Répartition du budget par phase</h2>
+          <div class="section-heading"><span class="section-icon" aria-hidden="true">💰</span><h2 data-i18n="slgInputTitle">Répartition du budget par phase</h2></div>
           <p class="hint" data-i18n="slgInputHint">Sensibilisation (TOFU) → génération de leads (MOFU) → accélération commerciale (BOFU).</p>
 
           <div class="field">
@@ -1947,15 +1985,13 @@
             <input type="range" id="slgMofuPct" min="0" max="100" step="1" value="53">
           </div>
           <p class="hint" id="slgBofuPctNote" style="margin:-8px 0 10px;"></p>
-          <div class="phase-split-bar" id="slgSplitBar">
-            <div class="phase-split-seg tofu" id="slgSplitTofu"></div>
-            <div class="phase-split-seg mofu" id="slgSplitMofu"></div>
-            <div class="phase-split-seg bofu" id="slgSplitBofu"></div>
-          </div>
-          <div class="phase-split-legend">
-            <span class="phase-split-legend-item"><span class="phase-split-dot tofu"></span><span data-i18n="slgPhaseTofu">TOFU — Notoriété</span> — <span id="slgSplitTofuLabel"></span></span>
-            <span class="phase-split-legend-item"><span class="phase-split-dot mofu"></span><span data-i18n="slgPhaseMofu">MOFU — Génération de leads</span> — <span id="slgSplitMofuLabel"></span></span>
-            <span class="phase-split-legend-item"><span class="phase-split-dot bofu"></span><span data-i18n="slgPhaseBofu">BOFU — Accélération commerciale</span> — <span id="slgSplitBofuLabel"></span></span>
+          <div class="phase-split-donut-row">
+            <svg class="phase-split-donut" id="slgSplitDonut" viewBox="0 0 42 42" role="img" aria-label="Répartition du budget TOFU / MOFU / BOFU"></svg>
+            <div class="phase-split-legend">
+              <span class="phase-split-legend-item"><span class="phase-split-dot tofu"></span><span data-i18n="slgPhaseTofu">TOFU — Notoriété</span> — <span id="slgSplitTofuLabel"></span></span>
+              <span class="phase-split-legend-item"><span class="phase-split-dot mofu"></span><span data-i18n="slgPhaseMofu">MOFU — Génération de leads</span> — <span id="slgSplitMofuLabel"></span></span>
+              <span class="phase-split-legend-item"><span class="phase-split-dot bofu"></span><span data-i18n="slgPhaseBofu">BOFU — Accélération commerciale</span> — <span id="slgSplitBofuLabel"></span></span>
+            </div>
           </div>
 
           <details class="advanced-settings">
@@ -2025,7 +2061,7 @@
 
         <div class="panel" id="slgOutputPanel">
           <div class="funnel-header">
-            <h2 data-i18n="slgFunnelTitle">Funnel Sales-Led chaîné</h2>
+            <div class="section-heading"><span class="section-icon" aria-hidden="true">📊</span><h2 data-i18n="slgFunnelTitle">Funnel Sales-Led chaîné</h2></div>
             <span class="log-scale-badge-wrap">
               <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
               <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-slg" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-slg" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
@@ -2038,7 +2074,7 @@
 
       <div class="panel" id="slgCampaignPlanPanel">
         <div class="funnel-header">
-          <h2 data-i18n="slgCampaignPlanTitle">Plan de campagnes</h2>
+          <div class="section-heading"><span class="section-icon" aria-hidden="true">🗓️</span><h2 data-i18n="slgCampaignPlanTitle">Plan de campagnes</h2></div>
         </div>
         <div class="table-scroll">
           <table class="scenario-table" id="slgCampaignPlanTable"></table>
@@ -2050,7 +2086,7 @@
     <div id="plgView" hidden>
       <div class="layout">
         <div class="panel" id="plgInputPanel">
-          <h2 data-i18n="plgInputTitle">Répartition du budget par phase</h2>
+          <div class="section-heading"><span class="section-icon" aria-hidden="true">💰</span><h2 data-i18n="plgInputTitle">Répartition du budget par phase</h2></div>
           <p class="hint" data-i18n="plgInputHint">Génération de la demande (Demand Gen) → capture de la demande (Demand Capture) → activation produit.</p>
 
           <div class="field">
@@ -2062,13 +2098,12 @@
             <input type="range" id="plgGenPct" min="0" max="100" step="1" value="67">
           </div>
           <p class="hint" id="plgCapturePctNote" style="margin:-8px 0 10px;"></p>
-          <div class="phase-split-bar" id="plgSplitBar">
-            <div class="phase-split-seg gen" id="plgSplitGen"></div>
-            <div class="phase-split-seg capture" id="plgSplitCapture"></div>
-          </div>
-          <div class="phase-split-legend">
-            <span class="phase-split-legend-item"><span class="phase-split-dot gen"></span><span data-i18n="plgPhaseGen">Demand Generation</span> — <span id="plgSplitGenLabel"></span></span>
-            <span class="phase-split-legend-item"><span class="phase-split-dot capture"></span><span data-i18n="plgPhaseCapture">Demand Capture</span> — <span id="plgSplitCaptureLabel"></span></span>
+          <div class="phase-split-donut-row">
+            <svg class="phase-split-donut" id="plgSplitDonut" viewBox="0 0 42 42" role="img" aria-label="Répartition du budget Demand Generation / Demand Capture"></svg>
+            <div class="phase-split-legend">
+              <span class="phase-split-legend-item"><span class="phase-split-dot gen"></span><span data-i18n="plgPhaseGen">Demand Generation</span> — <span id="plgSplitGenLabel"></span></span>
+              <span class="phase-split-legend-item"><span class="phase-split-dot capture"></span><span data-i18n="plgPhaseCapture">Demand Capture</span> — <span id="plgSplitCaptureLabel"></span></span>
+            </div>
           </div>
 
           <details class="advanced-settings">
@@ -2123,7 +2158,7 @@
 
         <div class="panel" id="plgOutputPanel">
           <div class="funnel-header">
-            <h2 data-i18n="plgFunnelTitle">Funnel Product-Led chaîné</h2>
+            <div class="section-heading"><span class="section-icon" aria-hidden="true">📊</span><h2 data-i18n="plgFunnelTitle">Funnel Product-Led chaîné</h2></div>
             <span class="log-scale-badge-wrap">
               <span class="log-scale-badge" data-i18n="logScaleLabel">Échelle logarithmique</span>
               <span class="info-icon-wrap"><button type="button" class="info-icon" aria-describedby="info-tip-logscale-plg" aria-expanded="false" data-i18n-aria-label="infoIconLabel" aria-label="Plus d'informations"></button><span class="info-icon-tooltip" role="tooltip" id="info-tip-logscale-plg" data-i18n="infoLogScale">Les barres utilisent une échelle logarithmique.</span></span>
@@ -2136,7 +2171,7 @@
 
       <div class="panel" id="plgCampaignPlanPanel">
         <div class="funnel-header">
-          <h2 data-i18n="slgCampaignPlanTitle">Plan de campagnes</h2>
+          <div class="section-heading"><span class="section-icon" aria-hidden="true">🗓️</span><h2 data-i18n="slgCampaignPlanTitle">Plan de campagnes</h2></div>
         </div>
         <div class="table-scroll">
           <table class="scenario-table" id="plgCampaignPlanTable"></table>
@@ -4331,6 +4366,35 @@ const SCENARIO_COMPARE_ROWS = [
   { key: 'roas', labelKey: 'scenarioCompareRowRoas', fmt: v => v.toFixed(2) + '×', better: 'high' },
 ];
 
+// Matches the ember/moss/chart-neutral triple already used for TOFU/MOFU/BOFU — one
+// consistent color language for "up to 3 things side by side" across the app.
+const SCENARIO_COMPARE_COLORS = ['var(--ember)', 'var(--moss)', 'var(--chart-neutral)'];
+
+// One mini grouped-bar chart per metric that every chosen scenario actually has a numeric
+// value for (mixed-objective comparisons can have metrics that only apply to some
+// scenarios — those stay table-only, per-row, rather than forcing incompatible units
+// into a single combined chart).
+function renderScenarioCompareCharts(chosen, metrics, rows) {
+  const container = document.getElementById('scenarioCompareCharts');
+  if (!container) return;
+  if (chosen.length < 2) { container.innerHTML = ''; return; }
+  const chartable = rows.filter(r => r.key !== 'objective' && metrics.every(m => typeof m[r.key] === 'number'));
+  container.innerHTML = chartable.map(r => {
+    const values = metrics.map(m => m[r.key]);
+    const max = Math.max(...values.map(v => Math.abs(v)), 0.0001);
+    const bars = values.map((v, i) => {
+      const pct = Math.max(4, (Math.abs(v) / max) * 100);
+      return `
+        <div class="compare-chart-bar-col">
+          <div class="compare-chart-value">${r.fmt ? r.fmt(v) : v}</div>
+          <div class="compare-chart-bar" style="height:${pct}%; background:${SCENARIO_COMPARE_COLORS[i] || 'var(--ink-soft)'}"></div>
+          <div class="compare-chart-name" title="${escapeHtml(chosen[i].name)}">${escapeHtml(chosen[i].name)}</div>
+        </div>`;
+    }).join('');
+    return `<div class="compare-chart"><div class="compare-chart-title">${escapeHtml(t(r.labelKey))}</div><div class="compare-chart-bars">${bars}</div></div>`;
+  }).join('');
+}
+
 function renderScenarioCompareTable() {
   const table = document.getElementById('scenarioCompareTable');
   const list = loadScenarios();
@@ -4339,10 +4403,12 @@ function renderScenarioCompareTable() {
     .filter(Boolean);
   if (chosen.length < 2) {
     table.innerHTML = `<tbody><tr><td>${escapeHtml(t('scenarioCompareNeedTwo'))}</td></tr></tbody>`;
+    renderScenarioCompareCharts(chosen, [], []);
     return;
   }
   const metrics = chosen.map(s => computeScenarioMetrics(s.state));
   const rows = SCENARIO_COMPARE_ROWS.filter(r => r.always || metrics.some(m => m[r.key] != null));
+  renderScenarioCompareCharts(chosen, metrics, rows);
 
   const theadHtml = `<thead><tr><th></th>${chosen.map(s => `<th>${escapeHtml(s.name)}</th>`).join('')}</tr></thead>`;
   const bodyHtml = rows.map(r => {
@@ -4671,6 +4737,28 @@ function syncLabels() {
 // Plancher à 2 % (une barre à 0 % serait invisible/illisible) et plafond à 100 % :
 // sans ce plafond, une étape qui dépasse sa référence (ex. impressions > audience à
 // fréquence élevée) produirait une barre plus large que son propre track.
+// Renders a multi-segment donut chart into an inline SVG (viewBox 0 0 42 42), using the
+// classic stroke-dasharray/stroke-dashoffset technique: circumference is normalized to
+// 100 (r ≈ 15.915, 2πr = 100) so each segment's dasharray can be its percentage directly.
+// segments: [{ pct, color }] — pct values need not sum to exactly 100 (rounding), any
+// remainder is simply left as background track.
+function renderDonutChart(svgId, segments) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  const R = 15.91549430918952;
+  let cumulative = 0;
+  const rings = segments.filter(s => s.pct > 0.05).map(s => {
+    const pct = Math.min(100, s.pct);
+    const dashoffset = 25 - cumulative; // 25 = quarter turn, rotates the start from 3 o'clock to 12 o'clock
+    cumulative += pct;
+    // stroke set via inline style (not the stroke="" attribute) so CSS custom properties
+    // (var(--ember) etc.) resolve correctly — plain SVG presentation attributes don't
+    // reliably support var() the way inline style does.
+    return `<circle class="donut-segment" cx="21" cy="21" r="${R}" fill="transparent" style="stroke:${s.color}" stroke-width="7" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${dashoffset}"></circle>`;
+  }).join('');
+  svg.innerHTML = `<circle class="phase-split-donut-track" cx="21" cy="21" r="${R}" fill="transparent" stroke-width="7"></circle>${rings}`;
+}
+
 function stageBarPct(value, ref) {
   if (value <= 0 || ref <= 0) return 2;
   const pct = (Math.log10(value + 1) / Math.log10(ref + 1)) * 100;
@@ -5656,9 +5744,11 @@ function slgSyncLabels() {
   document.getElementById('slgTofuPctVal').textContent = tofuPct + ' %';
   document.getElementById('slgMofuPctVal').textContent = mofuPct + ' %';
   document.getElementById('slgBofuPctNote').textContent = t('slgBofuPctNote', { pct: bofuPct });
-  document.getElementById('slgSplitTofu').style.width = tofuPct + '%';
-  document.getElementById('slgSplitMofu').style.width = mofuPct + '%';
-  document.getElementById('slgSplitBofu').style.width = bofuPct + '%';
+  renderDonutChart('slgSplitDonut', [
+    { pct: tofuPct, color: 'var(--ember)' },
+    { pct: mofuPct, color: 'var(--moss)' },
+    { pct: bofuPct, color: 'var(--chart-neutral)' },
+  ]);
   document.getElementById('slgSplitTofuLabel').textContent = `${tofuPct}% · ${fmtEUR(totalBudget * tofuPct / 100)}`;
   document.getElementById('slgSplitMofuLabel').textContent = `${mofuPct}% · ${fmtEUR(totalBudget * mofuPct / 100)}`;
   document.getElementById('slgSplitBofuLabel').textContent = `${bofuPct}% · ${fmtEUR(totalBudget * bofuPct / 100)}`;
@@ -5843,8 +5933,10 @@ function plgSyncLabels() {
   document.getElementById('plgTotalBudgetVal').textContent = fmtEUR(totalBudget);
   document.getElementById('plgGenPctVal').textContent = genPct + ' %';
   document.getElementById('plgCapturePctNote').textContent = t('plgCapturePctNote', { pct: capturePct });
-  document.getElementById('plgSplitGen').style.width = genPct + '%';
-  document.getElementById('plgSplitCapture').style.width = capturePct + '%';
+  renderDonutChart('plgSplitDonut', [
+    { pct: genPct, color: 'var(--ember)' },
+    { pct: capturePct, color: 'var(--moss)' },
+  ]);
   document.getElementById('plgSplitGenLabel').textContent = `${genPct}% · ${fmtEUR(totalBudget * genPct / 100)}`;
   document.getElementById('plgSplitCaptureLabel').textContent = `${capturePct}% · ${fmtEUR(totalBudget * capturePct / 100)}`;
   document.getElementById('plgVideoPctVal').textContent = plgEls.videoPct.value + ' %';
