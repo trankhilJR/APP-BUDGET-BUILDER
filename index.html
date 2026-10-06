@@ -567,6 +567,52 @@
   .scenario-compare-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 8px; }
   .scenario-compare-actions button { font-size: 12.5px; padding: 8px 14px; }
 
+  /* CPM benchmark popup — manually refreshed from Reddit's weekly eCPM email, see the
+     cpmBenchmarkData comment in the script for the update procedure. */
+  .benchmark-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .benchmark-modal-overlay[hidden] { display: none; }
+  .benchmark-modal {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 24px;
+    max-width: 980px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+  .benchmark-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+  .benchmark-modal-header h3 { margin: 0 0 4px; font-family: 'Fraunces', serif; font-size: 19px; font-weight: 500; color: var(--ink); }
+  .benchmark-modal-subtitle { margin: 0; }
+  table.benchmark-table th:first-child,
+  table.benchmark-table td:first-child { text-align: left; font-variant-numeric: initial; }
+  table.benchmark-table td { text-align: center; }
+  table.benchmark-table .benchmark-current { font-family: 'Fraunces', serif; font-size: 15px; font-variant-numeric: tabular-nums; }
+  table.benchmark-table .benchmark-last { display: block; font-size: 10.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  table.benchmark-table .benchmark-delta { display: block; font-size: 10.5px; font-weight: 600; margin-top: 1px; font-variant-numeric: tabular-nums; }
+  .benchmark-up .benchmark-delta, .benchmark-up .benchmark-current { color: var(--ember); }
+  .benchmark-down .benchmark-delta, .benchmark-down .benchmark-current { color: var(--moss); }
+  .benchmark-flat .benchmark-delta { color: var(--ink-soft); }
+  table.benchmark-table tr.benchmark-row-current th,
+  table.benchmark-table tr.benchmark-row-current td { background: var(--ember-soft); }
+  table.benchmark-table th.benchmark-col-current,
+  table.benchmark-table td.benchmark-col-current { box-shadow: inset 0 0 0 2px var(--ember); }
+  .benchmark-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 16px 0 6px; font-size: 12px; color: var(--ink-soft); }
+  .benchmark-legend-item { display: flex; align-items: center; gap: 6px; }
+  .benchmark-legend-swatch { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .benchmark-legend-swatch.benchmark-up { background: var(--ember); }
+  .benchmark-legend-swatch.benchmark-down { background: var(--moss); }
+  .benchmark-legend-swatch.benchmark-flat { background: var(--ink-soft); }
+
   @media print {
     body.printing-comparison .cover-page { display: none !important; }
     body.printing-comparison .wrap > *:not(#scenarioCompareModalOverlay) { display: none !important; }
@@ -1467,6 +1513,7 @@
           <option value="es">ES</option>
         </select>
         <button type="button" class="icon-toggle" id="themeToggle" aria-label="Basculer le mode sombre">🌙</button>
+        <button type="button" class="secondary" id="benchmarkBtn" data-i18n="btnBenchmarks">📊 Benchmarks CPM</button>
         <button type="button" class="secondary" id="shareBtn" data-i18n="btnCopyLink">Copier le lien</button>
         <button type="button" class="secondary" id="presentBtn" data-i18n="btnPresentMode">Mode présentation</button>
       </div>
@@ -1544,6 +1591,29 @@
         <button type="button" class="secondary" id="scenarioCompareExportBtn" data-i18n="scenarioCompareExport">📊 Exporter en PDF</button>
       </div>
       <p class="hint" data-i18n="scenarioCompareHint">Estimation simplifiée à partir des hypothèses enregistrées de chaque scénario (sans les modes de planification avancés du tableau de bord).</p>
+    </div>
+  </div>
+
+  <div class="benchmark-modal-overlay" id="benchmarkModalOverlay" hidden>
+    <div class="benchmark-modal" role="dialog" aria-modal="true" aria-labelledby="benchmarkModalTitle">
+      <div class="benchmark-modal-header">
+        <div>
+          <h3 id="benchmarkModalTitle" data-i18n="benchmarkModalTitle">Benchmarks eCPM Reddit</h3>
+          <p class="hint benchmark-modal-subtitle" id="benchmarkWeekLabel"></p>
+        </div>
+        <button type="button" class="icon-toggle" id="benchmarkCloseBtn" aria-label="Fermer">✕</button>
+      </div>
+      <div class="table-scroll">
+        <table class="scenario-table benchmark-table" id="benchmarkTable"></table>
+      </div>
+      <div class="benchmark-legend">
+        <span class="benchmark-legend-item"><span class="benchmark-legend-swatch benchmark-up"></span><span data-i18n="benchmarkLegendUp">CPM plus élevé</span></span>
+        <span class="benchmark-legend-item"><span class="benchmark-legend-swatch benchmark-down"></span><span data-i18n="benchmarkLegendDown">CPM plus bas</span></span>
+        <span class="benchmark-legend-item"><span class="benchmark-legend-swatch benchmark-flat"></span><span data-i18n="benchmarkLegendFlat">Mouvement faible</span></span>
+      </div>
+      <p class="hint" data-i18n="benchmarkThresholdNote">Une variation n'est mise en couleur que si elle dépasse à la fois 0,25 $ et 10 % — en dessous, le mouvement est considéré comme faible.</p>
+      <p class="hint" id="benchmarkUpdatedAt"></p>
+      <p class="hint" data-i18n="benchmarkSourceNote">Données transmises manuellement par l'agence depuis le reporting hebdomadaire Reddit — à rafraîchir à chaque nouvel envoi.</p>
     </div>
   </div>
 
@@ -2254,6 +2324,18 @@ const translations = {
     scenarioCompareCopy: '📋 Copier le tableau',
     scenarioCompareExport: '📊 Exporter en PDF',
     scenarioCompareHint: 'Estimation simplifiée à partir des hypothèses enregistrées de chaque scénario (sans les modes de planification avancés du tableau de bord).',
+    btnBenchmarks: '📊 Benchmarks CPM',
+    benchmarkModalTitle: 'Benchmarks eCPM Reddit',
+    benchmarkColObjective: 'Objectif',
+    benchmarkLastLabel: 'Préc.',
+    benchmarkLegendUp: 'CPM plus élevé',
+    benchmarkLegendDown: 'CPM plus bas',
+    benchmarkLegendFlat: 'Mouvement faible',
+    benchmarkThresholdNote: "Une variation n'est mise en couleur que si elle dépasse à la fois 0,25 $ et 10 % — en dessous, le mouvement est considéré comme faible.",
+    benchmarkSourceNote: 'Données transmises manuellement par l’agence depuis le reporting hebdomadaire Reddit — à rafraîchir à chaque nouvel envoi.',
+    benchmarkUpdatedAt: 'Dernière mise à jour des données : {date}',
+    benchmarkMetric_CATALOG_SALES: 'Ventes catalogue (DPA)',
+    benchmarkMetric_LEAD_GENERATION: 'Génération de leads (formulaire natif)',
     scenarioCompareNone: '— Aucun —',
     scenarioCompareNeedTwo: 'Choisis au moins 2 scénarios ci-dessus pour les comparer.',
     scenarioCompareCopied: 'Tableau copié dans le presse-papiers.',
@@ -2695,6 +2777,18 @@ const translations = {
     scenarioCompareCopy: '📋 Copy as table',
     scenarioCompareExport: '📊 Export as PDF',
     scenarioCompareHint: "Simplified estimate from each scenario's saved assumptions (without the dashboard's advanced planning modes).",
+    btnBenchmarks: '📊 CPM Benchmarks',
+    benchmarkModalTitle: 'Reddit eCPM Benchmarks',
+    benchmarkColObjective: 'Objective',
+    benchmarkLastLabel: 'Last',
+    benchmarkLegendUp: 'Higher CPM',
+    benchmarkLegendDown: 'Lower CPM',
+    benchmarkLegendFlat: 'Small movement',
+    benchmarkThresholdNote: "A change is only colored if it's both ≥$0.25 and ≥10% — below that, the movement is considered small.",
+    benchmarkSourceNote: "Data shared manually by the agency from Reddit's weekly reporting — refresh it with each new email.",
+    benchmarkUpdatedAt: 'Data last updated: {date}',
+    benchmarkMetric_CATALOG_SALES: 'Catalog sales (DPA)',
+    benchmarkMetric_LEAD_GENERATION: 'Lead generation (native form)',
     scenarioCompareNone: '— None —',
     scenarioCompareNeedTwo: 'Pick at least 2 scenarios above to compare them.',
     scenarioCompareCopied: 'Table copied to clipboard.',
@@ -3136,6 +3230,18 @@ const translations = {
     scenarioCompareCopy: '📋 Copiar como tabla',
     scenarioCompareExport: '📊 Exportar a PDF',
     scenarioCompareHint: 'Estimación simplificada a partir de las hipótesis guardadas de cada escenario (sin los modos de planificación avanzados del panel).',
+    btnBenchmarks: '📊 Benchmarks de CPM',
+    benchmarkModalTitle: 'Benchmarks de eCPM de Reddit',
+    benchmarkColObjective: 'Objetivo',
+    benchmarkLastLabel: 'Ant.',
+    benchmarkLegendUp: 'CPM más alto',
+    benchmarkLegendDown: 'CPM más bajo',
+    benchmarkLegendFlat: 'Movimiento pequeño',
+    benchmarkThresholdNote: 'Un cambio solo se colorea si supera a la vez 0,25 $ y el 10% — por debajo, el movimiento se considera pequeño.',
+    benchmarkSourceNote: 'Datos compartidos manualmente por la agencia desde el informe semanal de Reddit — actualízalos con cada nuevo envío.',
+    benchmarkUpdatedAt: 'Última actualización de los datos: {date}',
+    benchmarkMetric_CATALOG_SALES: 'Ventas de catálogo (DPA)',
+    benchmarkMetric_LEAD_GENERATION: 'Generación de leads (formulario nativo)',
     scenarioCompareNone: '— Ninguno —',
     scenarioCompareNeedTwo: 'Elige al menos 2 escenarios arriba para compararlos.',
     scenarioCompareCopied: 'Tabla copiada al portapapeles.',
@@ -3867,6 +3973,9 @@ const fmtEUR = n => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EU
 // Pour les coûts unitaires très faibles (ex. coût par personne touchée en awareness, souvent
 // < 1 €) : arrondir à 0 décimale afficherait "0 €" pour tout, donc plus de décimales sous 10 €.
 const fmtEURPrecise = n => n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: n < 10 ? 3 : 0 });
+// Reddit's eCPM benchmark email reports in USD regardless of market — kept as-is rather
+// than converted, since a conversion rate would be another number to keep fresh.
+const fmtUSDPrecise = n => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
 const fmtNum = n => Math.round(n).toLocaleString('fr-FR');
 
 function escapeHtml(str) {
@@ -4490,6 +4599,87 @@ document.getElementById('scenarioCompareCopyBtn').addEventListener('click', copy
 document.getElementById('scenarioCompareExportBtn').addEventListener('click', exportScenarioCompare);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && !document.getElementById('scenarioCompareModalOverlay').hidden) closeScenarioCompareModal();
+});
+
+/* ==================== CPM Benchmarks (manually updated) ====================
+   HOW TO UPDATE: each time a new weekly eCPM email comes in, replace the values below —
+   weekLabel/compareLabel/updatedAt are free text; countries is the fixed column order;
+   each row's `values` maps a country code to [currentWeek, lastWeek] eCPM. Rows with
+   `objective: null` (Catalog Sales, Lead Generation) don't correspond to a Budget Builder
+   objective and are shown for reference only; the others highlight automatically when that
+   objective is selected in the app. Colors are computed from the data (≥$0.25 AND ≥10%
+   change = "strong", matching Reddit's own report), never hardcoded per cell. */
+const cpmBenchmarkData = {
+  updatedAt: '2026-10-05',
+  weekLabel: 'Semaine du 28/09 au 04/10',
+  compareLabel: 'vs. semaine du 21/09 au 27/09',
+  countries: ['US', 'CA', 'GB', 'AU', 'FR', 'DE', 'NL'],
+  rows: [
+    { metric: 'APP_INSTALLS', objective: 'appInstall', values: { US: [15.34, 16.90], CA: [14.23, 19.05], GB: [6.90, 8.56], AU: [4.09, 4.92], FR: [3.69, 4.85], DE: [5.20, 6.47], NL: [3.15, 4.02] } },
+    { metric: 'CATALOG_SALES', objective: null, values: { US: [14.73, 17.10], CA: [8.15, 9.41], GB: [9.07, 11.14], AU: [5.41, 6.06], FR: [8.07, 14.56], DE: [6.16, 8.06], NL: [5.29, 5.75] } },
+    { metric: 'CLICKS', objective: 'traffic', values: { US: [15.58, 16.63], CA: [8.32, 9.59], GB: [9.00, 10.83], AU: [5.76, 6.50], FR: [4.05, 4.86], DE: [6.64, 7.78], NL: [3.69, 4.54] } },
+    { metric: 'CONVERSIONS', objective: 'conversion', values: { US: [15.78, 16.79], CA: [8.05, 8.97], GB: [8.81, 10.29], AU: [5.52, 5.85], FR: [4.51, 5.48], DE: [5.92, 6.83], NL: [3.44, 4.07] } },
+    { metric: 'IMPRESSIONS', objective: 'awareness', values: { US: [8.23, 8.91], CA: [3.80, 4.34], GB: [4.91, 5.73], AU: [2.82, 3.15], FR: [2.36, 2.65], DE: [3.49, 4.25], NL: [2.26, 2.45] } },
+    { metric: 'LEAD_GENERATION', objective: null, values: { US: [12.63, 12.29], CA: [6.04, 5.66], GB: [0, 0], AU: [2.69, 4.35], FR: [0, 0], DE: [0, 5.68], NL: [0, 1.92] } },
+    { metric: 'VIDEO_VIEWS', objective: 'videoViews', values: { US: [15.94, 17.18], CA: [6.53, 7.48], GB: [11.30, 10.73], AU: [5.18, 5.89], FR: [4.06, 9.01], DE: [8.14, 9.05], NL: [4.18, 5.30] } },
+  ],
+};
+// Our "Marché géographique" field uses broader regions than the benchmark's per-country
+// columns; only map the ones that correspond to an actual country in the data.
+const benchmarkMarketToCountry = { fr: 'FR', us: 'US', uk: 'GB' };
+
+function benchmarkMovement(current, last) {
+  const delta = current - last;
+  const pct = last !== 0 ? (delta / last) * 100 : (current !== 0 ? 100 : 0);
+  const strong = Math.abs(delta) >= 0.25 && Math.abs(pct) >= 10;
+  const cls = !strong ? 'benchmark-flat' : (delta > 0 ? 'benchmark-up' : 'benchmark-down');
+  return { delta, pct, cls };
+}
+
+function renderBenchmarkTable() {
+  const table = document.getElementById('benchmarkTable');
+  const currentObjective = els.objective ? els.objective.value : null;
+  const currentCountry = benchmarkMarketToCountry[els.market ? els.market.value : ''] || null;
+
+  const theadHtml = `<thead><tr><th>${escapeHtml(t('benchmarkColObjective'))}</th>${cpmBenchmarkData.countries.map(c => `<th class="${c === currentCountry ? 'benchmark-col-current' : ''}">${c}</th>`).join('')}</tr></thead>`;
+  const bodyHtml = cpmBenchmarkData.rows.map(r => {
+    const isCurrentRow = r.objective && r.objective === currentObjective;
+    const label = r.objective ? t(SCENARIO_COMPARE_OBJECTIVE_LABEL_KEY[r.objective] || r.objective) : t('benchmarkMetric_' + r.metric);
+    const cells = cpmBenchmarkData.countries.map(c => {
+      const pair = r.values[c];
+      if (!pair) return '<td>—</td>';
+      const [current, last] = pair;
+      const { delta, pct, cls } = benchmarkMovement(current, last);
+      const deltaSign = delta > 0 ? '+' : '';
+      const colClass = c === currentCountry ? ' benchmark-col-current' : '';
+      return `<td class="${cls}${colClass}">
+        <span class="benchmark-current">${fmtUSDPrecise(current)}</span>
+        <span class="benchmark-last">${t('benchmarkLastLabel')}: ${fmtUSDPrecise(last)}</span>
+        <span class="benchmark-delta">${deltaSign}${delta.toFixed(2)} (${deltaSign}${pct.toFixed(1)}%)</span>
+      </td>`;
+    }).join('');
+    return `<tr class="${isCurrentRow ? 'benchmark-row-current' : ''}"><th>${escapeHtml(label)}</th>${cells}</tr>`;
+  }).join('');
+  table.innerHTML = theadHtml + `<tbody>${bodyHtml}</tbody>`;
+
+  document.getElementById('benchmarkWeekLabel').textContent = `${cpmBenchmarkData.weekLabel} (${cpmBenchmarkData.compareLabel})`;
+  document.getElementById('benchmarkUpdatedAt').textContent = t('benchmarkUpdatedAt', { date: cpmBenchmarkData.updatedAt });
+}
+
+function openBenchmarkModal() {
+  document.getElementById('benchmarkModalOverlay').hidden = false;
+  renderBenchmarkTable();
+}
+function closeBenchmarkModal() {
+  document.getElementById('benchmarkModalOverlay').hidden = true;
+}
+document.getElementById('benchmarkBtn').addEventListener('click', openBenchmarkModal);
+document.getElementById('benchmarkCloseBtn').addEventListener('click', closeBenchmarkModal);
+document.getElementById('benchmarkModalOverlay').addEventListener('click', e => {
+  if (e.target.id === 'benchmarkModalOverlay') closeBenchmarkModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !document.getElementById('benchmarkModalOverlay').hidden) closeBenchmarkModal();
 });
 
 /* ---------- Theme ---------- */
