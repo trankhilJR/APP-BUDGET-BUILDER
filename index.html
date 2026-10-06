@@ -596,22 +596,11 @@
   table.benchmark-table th:first-child,
   table.benchmark-table td:first-child { text-align: left; font-variant-numeric: initial; }
   table.benchmark-table td { text-align: center; }
-  table.benchmark-table .benchmark-current { font-family: 'Fraunces', serif; font-size: 15px; font-variant-numeric: tabular-nums; }
-  table.benchmark-table .benchmark-last { display: block; font-size: 10.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-  table.benchmark-table .benchmark-delta { display: block; font-size: 10.5px; font-weight: 600; margin-top: 1px; font-variant-numeric: tabular-nums; }
-  .benchmark-up .benchmark-delta, .benchmark-up .benchmark-current { color: var(--ember); }
-  .benchmark-down .benchmark-delta, .benchmark-down .benchmark-current { color: var(--moss); }
-  .benchmark-flat .benchmark-delta { color: var(--ink-soft); }
+  table.benchmark-table .benchmark-current { font-family: 'Fraunces', serif; font-size: 16px; font-variant-numeric: tabular-nums; }
   table.benchmark-table tr.benchmark-row-current th,
   table.benchmark-table tr.benchmark-row-current td { background: var(--ember-soft); }
   table.benchmark-table th.benchmark-col-current,
   table.benchmark-table td.benchmark-col-current { box-shadow: inset 0 0 0 2px var(--ember); }
-  .benchmark-legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 16px 0 6px; font-size: 12px; color: var(--ink-soft); }
-  .benchmark-legend-item { display: flex; align-items: center; gap: 6px; }
-  .benchmark-legend-swatch { width: 10px; height: 10px; border-radius: 50%; flex: none; }
-  .benchmark-legend-swatch.benchmark-up { background: var(--ember); }
-  .benchmark-legend-swatch.benchmark-down { background: var(--moss); }
-  .benchmark-legend-swatch.benchmark-flat { background: var(--ink-soft); }
 
   @media print {
     body.printing-comparison .cover-page { display: none !important; }
@@ -1606,12 +1595,7 @@
       <div class="table-scroll">
         <table class="scenario-table benchmark-table" id="benchmarkTable"></table>
       </div>
-      <div class="benchmark-legend">
-        <span class="benchmark-legend-item"><span class="benchmark-legend-swatch benchmark-up"></span><span data-i18n="benchmarkLegendUp">CPM plus élevé</span></span>
-        <span class="benchmark-legend-item"><span class="benchmark-legend-swatch benchmark-down"></span><span data-i18n="benchmarkLegendDown">CPM plus bas</span></span>
-        <span class="benchmark-legend-item"><span class="benchmark-legend-swatch benchmark-flat"></span><span data-i18n="benchmarkLegendFlat">Mouvement faible</span></span>
-      </div>
-      <p class="hint" data-i18n="benchmarkThresholdNote">Une variation n'est mise en couleur que si elle dépasse à la fois 0,25 $ et 10 % — en dessous, le mouvement est considéré comme faible.</p>
+      <p class="hint" data-i18n="benchmarkEstimateNote">Valeurs arrondies, à titre d'estimation indicative.</p>
       <p class="hint" id="benchmarkUpdatedAt"></p>
       <p class="hint" data-i18n="benchmarkSourceNote">Données transmises manuellement par l'agence depuis le reporting hebdomadaire Reddit — à rafraîchir à chaque nouvel envoi.</p>
     </div>
@@ -2327,11 +2311,7 @@ const translations = {
     btnBenchmarks: '📊 Benchmarks CPM',
     benchmarkModalTitle: 'Benchmarks eCPM Reddit',
     benchmarkColObjective: 'Objectif',
-    benchmarkLastLabel: 'Préc.',
-    benchmarkLegendUp: 'CPM plus élevé',
-    benchmarkLegendDown: 'CPM plus bas',
-    benchmarkLegendFlat: 'Mouvement faible',
-    benchmarkThresholdNote: "Une variation n'est mise en couleur que si elle dépasse à la fois 0,25 $ et 10 % — en dessous, le mouvement est considéré comme faible.",
+    benchmarkEstimateNote: "Valeurs arrondies au dollar près, à titre d'estimation indicative.",
     benchmarkSourceNote: 'Données transmises manuellement par l’agence depuis le reporting hebdomadaire Reddit — à rafraîchir à chaque nouvel envoi.',
     benchmarkUpdatedAt: 'Dernière mise à jour des données : {date}',
     benchmarkMetric_CATALOG_SALES: 'Ventes catalogue (DPA)',
@@ -2780,11 +2760,7 @@ const translations = {
     btnBenchmarks: '📊 CPM Benchmarks',
     benchmarkModalTitle: 'Reddit eCPM Benchmarks',
     benchmarkColObjective: 'Objective',
-    benchmarkLastLabel: 'Last',
-    benchmarkLegendUp: 'Higher CPM',
-    benchmarkLegendDown: 'Lower CPM',
-    benchmarkLegendFlat: 'Small movement',
-    benchmarkThresholdNote: "A change is only colored if it's both ≥$0.25 and ≥10% — below that, the movement is considered small.",
+    benchmarkEstimateNote: 'Values rounded to the nearest dollar, as an indicative estimate.',
     benchmarkSourceNote: "Data shared manually by the agency from Reddit's weekly reporting — refresh it with each new email.",
     benchmarkUpdatedAt: 'Data last updated: {date}',
     benchmarkMetric_CATALOG_SALES: 'Catalog sales (DPA)',
@@ -3233,11 +3209,7 @@ const translations = {
     btnBenchmarks: '📊 Benchmarks de CPM',
     benchmarkModalTitle: 'Benchmarks de eCPM de Reddit',
     benchmarkColObjective: 'Objetivo',
-    benchmarkLastLabel: 'Ant.',
-    benchmarkLegendUp: 'CPM más alto',
-    benchmarkLegendDown: 'CPM más bajo',
-    benchmarkLegendFlat: 'Movimiento pequeño',
-    benchmarkThresholdNote: 'Un cambio solo se colorea si supera a la vez 0,25 $ y el 10% — por debajo, el movimiento se considera pequeño.',
+    benchmarkEstimateNote: 'Valores redondeados al dólar más cercano, como estimación indicativa.',
     benchmarkSourceNote: 'Datos compartidos manualmente por la agencia desde el informe semanal de Reddit — actualízalos con cada nuevo envío.',
     benchmarkUpdatedAt: 'Última actualización de los datos: {date}',
     benchmarkMetric_CATALOG_SALES: 'Ventas de catálogo (DPA)',
@@ -4628,13 +4600,9 @@ const cpmBenchmarkData = {
 // columns; only map the ones that correspond to an actual country in the data.
 const benchmarkMarketToCountry = { fr: 'FR', us: 'US', uk: 'GB' };
 
-function benchmarkMovement(current, last) {
-  const delta = current - last;
-  const pct = last !== 0 ? (delta / last) * 100 : (current !== 0 ? 100 : 0);
-  const strong = Math.abs(delta) >= 0.25 && Math.abs(pct) >= 10;
-  const cls = !strong ? 'benchmark-flat' : (delta > 0 ? 'benchmark-up' : 'benchmark-down');
-  return { delta, pct, cls };
-}
+// Rounds to the nearest whole currency unit — the popup shows a simplified estimate, not
+// the email's precise spot value, so cents would be false precision here.
+function fmtUSDEstimate(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
 
 function renderBenchmarkTable() {
   const table = document.getElementById('benchmarkTable');
@@ -4648,21 +4616,15 @@ function renderBenchmarkTable() {
     const cells = cpmBenchmarkData.countries.map(c => {
       const pair = r.values[c];
       if (!pair) return '<td>—</td>';
-      const [current, last] = pair;
-      const { delta, pct, cls } = benchmarkMovement(current, last);
-      const deltaSign = delta > 0 ? '+' : '';
+      const [current] = pair;
       const colClass = c === currentCountry ? ' benchmark-col-current' : '';
-      return `<td class="${cls}${colClass}">
-        <span class="benchmark-current">${fmtUSDPrecise(current)}</span>
-        <span class="benchmark-last">${t('benchmarkLastLabel')}: ${fmtUSDPrecise(last)}</span>
-        <span class="benchmark-delta">${deltaSign}${delta.toFixed(2)} (${deltaSign}${pct.toFixed(1)}%)</span>
-      </td>`;
+      return `<td class="${colClass}"><span class="benchmark-current">${fmtUSDEstimate(current)}</span></td>`;
     }).join('');
     return `<tr class="${isCurrentRow ? 'benchmark-row-current' : ''}"><th>${escapeHtml(label)}</th>${cells}</tr>`;
   }).join('');
   table.innerHTML = theadHtml + `<tbody>${bodyHtml}</tbody>`;
 
-  document.getElementById('benchmarkWeekLabel').textContent = `${cpmBenchmarkData.weekLabel} (${cpmBenchmarkData.compareLabel})`;
+  document.getElementById('benchmarkWeekLabel').textContent = cpmBenchmarkData.weekLabel;
   document.getElementById('benchmarkUpdatedAt').textContent = t('benchmarkUpdatedAt', { date: cpmBenchmarkData.updatedAt });
 }
 
